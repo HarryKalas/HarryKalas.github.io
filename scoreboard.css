@@ -1,0 +1,157 @@
+TABLE {
+	border: solid;
+	border-width: 1px;
+	border-color: black;
+}
+TD, TH {
+	border: solid;
+	border-width: 1px;
+	border-color: black;
+	padding-right: 1px;
+	padding-left: 1px;
+}
+TD.Number {
+	text-align: center;
+}
+TD.Player {
+	PADDING-RIGHT: 10px; 
+	PADDING-LEFT: 10px
+}
+TD.Bottom {
+	BORDER-TOP: medium none; 
+}
+TD.PlayBox {
+	font-family: Arial;
+	font-weight: bold;
+	color: blue;
+	text-align: center;
+}
+DIV {
+	font-size: 6pt; 
+	font-family: Small Fonts; 
+	font-weight: normal;
+	color: Blue;
+	position: absolute; 
+	width: 30px;
+}
+.B1 {
+		top: 48px;
+		left: 30px;
+		text-align: right;
+}
+.B2 {
+		top: 2px;
+		left: 30px;
+		text-align: right;
+}
+.B3 {
+		top: 2px;
+		left: 2px;
+		text-align: left;
+}
+.Home {
+		top: 48px;
+		left: 2px;
+		text-align: left;
+}
+.Main {
+	border: transparent;
+	font-family: Arial;
+	font-weight: bold;
+	text-align: center;
+	color: #4444FF;
+	z-index: -1;
+}
+.None {
+	border: transparent;
+}
+.Out {
+	font-family: WingDings;
+	font-size: 12pt;
+	font-weight: normal;
+	color: Red;
+	text-align: left;
+	position: absolute;
+	left: 47px;
+	top: 44px;
+}
+
+DIV.BoxScore {
+	font-size: 9pt;
+	font-family: Arial;
+	font-weight: normal;
+	color: Black;
+	position: relative;
+	width: 90%;
+	border-style: none;
+	border-width: 0px;		
+	left: 10px;
+	text-align: left;
+}
+
+.BoxScoreHead {
+	font-family: Arial;
+	font-size: 10pt;
+	background-color: #0000A0;
+	color: #FFFFFF;
+	text-align: center;
+}
+.BoxScore {
+	font-family: Arial;
+	font-size: 10pt;
+	text-align: center;
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #C0C0C0;
+}
+.BoxScoreRuns {
+	font-family: Arial;
+	font-size: 10pt;
+	font-weight: bold;
+	background-color: #E0E0E0;
+	text-align: center;
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #C0C0C0;
+}
+
+.Pitching {
+	font-family: Arial;
+	font-size: 10pt;
+	text-align: center;
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #C0C0C0;
+}
+.PitchingHead {
+	font-family: Arial;
+	font-size: 10pt;
+	background-color: #00A000;
+	color: #FFFFFF;
+	text-align: center;
+}
+
+#BatterDiv {
+	left: 700px;
+	width: 255px; 
+	font-family: Arial;
+	font-size: 10pt;
+	font-weight: bold;
+	color: black;
+	z-index: 1000;
+	background-color: #EEEEEE;
+}
+
+#MessageDiv {
+	position: fixed;
+	top: 30%;
+	left: 30%;
+	width: 300px; 
+	font-family: Arial;
+	font-size: 12pt;
+	font-weight: bold;
+	color: black;
+	z-index: 1000;
+	background-color: #FFFF00;
+	padding: 20px;
+}
