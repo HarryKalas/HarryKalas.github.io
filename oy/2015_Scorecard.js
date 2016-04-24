@@ -445,11 +445,11 @@ function showPlay(playText) {
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("strikes out") >=0 ) {
 		if ((playDes.indexOf("Passed ball") >= 0) && (playDes.indexOf("to 1st") >= 0)) { 
-			Box.background = "1B.gif";
+			Box.background = "1b.gif";
 			thePlay = "K, PB";
 			getSound(thePlay);
 		} else if ((playDes.indexOf("Wild pitch") >= 0) && (playDes.indexOf("to 1st") >= 0)) { 
-			Box.background = "1B.gif";
+			Box.background = "1b.gif";
 			thePlay = "K, WP";
 			getSound(thePlay);
 		} else if (playDes.indexOf("foul") >=0) {
@@ -487,7 +487,7 @@ function showPlay(playText) {
 			}
 		}
 		if (playDes.indexOf(" to 1st") >=0) {	//batter makes it to first and the outs are at 2nd and 3rd
-			Box.background = "1B.gif";
+			Box.background = "1b.gif";
 		} else {
 			Box.background = "1out.gif";
 			theOut(Box, thePlay);
@@ -506,7 +506,7 @@ function showPlay(playText) {
 alert(["DP", playDes]);
 		if (playDes.indexOf("to 1st") >=0) {
 			alert("Weird DP: " + playDes);
-			Box.background = "1B.gif";
+			Box.background = "1b.gif";
 		} else {
 			Box.background = "1out.gif";
 			theOut(Box);
@@ -584,7 +584,7 @@ alert(["DP", playDes]);
 		} else if (Plays[0].indexOf(" reaches ") == -1) {
 			//do nothing if nobody reaches? not sure if that's right
 		} else {
-			Box.background = "1B.gif";
+			Box.background = "1b.gif";
 			thePlay = "E" + playerNumber(Plays[0]);
 			getSound(thePlay);
 		}
@@ -595,7 +595,7 @@ alert(["DP", playDes]);
 	} else if (Plays[0].indexOf("ground-rule double") >= 0) {
 		Hits += 1; //**
 		thePlay = "GRD";
-		Box.background = "2B.gif";
+		Box.background = "2b.gif";
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("triples") >= 0) {
 		Hits += 1; //**
@@ -822,7 +822,7 @@ function SecondaryPlay(Play, Prefix) {
 		newDiv.className = "B2"
 		theOut(SecondBox);
 	} else if (Play.indexOf(" 2nd") >= 0) {
-		SecondBox.background = "2B.gif";
+		SecondBox.background = "2b.gif";
 		newDiv.className = "B2"
 	} else if (Play.indexOf("out at 3rd") >= 0) {
 		SecondBox.background = "3out.gif";
@@ -834,7 +834,7 @@ function SecondaryPlay(Play, Prefix) {
 		newDiv.className = "B3"
 		theOut(SecondBox);
 	} else if (Play.indexOf(" 3rd") >= 0) {
-		SecondBox.background = "3B.gif";
+		SecondBox.background = "3b.gif";
 		newDiv.className = "B3"
 	} else if (Play.indexOf("out at home") >= 0) {
 		SecondBox.background = "hout.gif";
