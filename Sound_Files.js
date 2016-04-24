@@ -1,4 +1,3 @@
-alert("Sound_Files.js");
 SoundFiles = new Array;
 SoundFiles[SoundFiles.length] = new Array('1-3', 4);
 SoundFiles[SoundFiles.length] = new Array('1-4-3', 1);

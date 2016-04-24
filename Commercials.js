@@ -1,4 +1,3 @@
-alert("Commercials.js");
 Commercials = new Array;
 Commercials[Commercials.length] = 'Mr 80 SPF Sunblock Wearer';
 Commercials[Commercials.length] = 'Mr Baseball Designated Hitter';
