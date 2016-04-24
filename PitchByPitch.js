@@ -6,7 +6,7 @@
 //KC = KNUCKLE CURVE
 //SI = SINKER
 //SL = SLIDER
-
+alert("PitchByPitch.js");
 
 function LoadPitch() {
 Temp = new Date;
