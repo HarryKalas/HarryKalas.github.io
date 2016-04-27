@@ -1344,7 +1344,6 @@ function InsertPlayer(Ord, gamePos, TmID, PlyrXML) {
 }
 
 function getSound(SoundToGet) {
-alert(SoundToGet);
    SoundArray = SoundToGet.split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
@@ -1353,7 +1352,6 @@ alert(SoundToGet);
             FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
             AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
-alert(document.all.Debug.innerHTML);
             return;
          }
       }
@@ -1366,6 +1364,7 @@ function playSound() {
       //play the first sound in the queue
       //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
       thisSound = AudioQueue.shift();
+alert(thisSound);
       document.getElementById("Audio").setAttribute('src', "Audio/" + thisSound + ".mp3");
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
    } else {
