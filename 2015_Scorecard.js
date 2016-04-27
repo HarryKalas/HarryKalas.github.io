@@ -1344,6 +1344,7 @@ function InsertPlayer(Ord, gamePos, TmID, PlyrXML) {
 }
 
 function getSound(SoundToGet) {
+alert(SoundToGet);
    SoundArray = SoundToGet.split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
@@ -1352,6 +1353,7 @@ function getSound(SoundToGet) {
             FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
             AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+alert(document.all.Debug.innerHTML);
             return;
          }
       }
