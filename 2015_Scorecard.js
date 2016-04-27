@@ -1,5 +1,5 @@
 //CODE FOR DEBUGGING LOG: document.getElementById("DEBUG").value += "TEXT HERE\n";
-
+//not reflecting changes...
 //KNOWN ISSUES: 
 //Can't handle non-standard text, like:
 //	If the plays are split by "and" instead of period
