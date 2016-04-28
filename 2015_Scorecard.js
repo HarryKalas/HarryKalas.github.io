@@ -720,23 +720,26 @@ alert(Plays[0]);
 
 	RunsScored = playDes.split("scores").length - 1;
 	if (RunsScored == 0) {
-		if (playDes.indexOf("homers") >= 0) { getSound("Runs/R1 HR"); }
+		if (playDes.indexOf("homers") >= 0) { getSound("Runs/R1 HR"); getScore(); }
 	} else if (RunsScored == 1) {
 		if (playDes.indexOf("homers") >= 0) { getSound("Runs/R2 HR"); 
 		} else if (playDes.indexOf("walks") >= 0) { getSound("Runs/R1 BB"); 
 		} else if (playDes.indexOf("doubles") >= 0) { getSound("Runs/R1 2B"); 
 		} else if (playDes.indexOf("triples") >= 0) { getSound("Runs/R1 3B"); 
 		} else { getSound("Runs/R1"); }
+		getScore();
 	} else if (RunsScored == 2) {
 		if (playDes.indexOf("homers") >= 0) { getSound("Runs/R3 HR"); 
 		} else if (playDes.indexOf("doubles") >= 0) { getSound("Runs/R2 2B"); 
 		} else if (playDes.indexOf("triples") >= 0) { getSound("Runs/R2 3B"); 
 		} else { getSound("Runs/R2"); }
+		getScore();
 	} else if (RunsScored == 3) {
 		if (playDes.indexOf("homers") >= 0) { getSound("Runs/R4"); 
 		} else if (playDes.indexOf("doubles") >= 0) { getSound("Runs/R3 2B"); 
 		} else if (playDes.indexOf("triples") >= 0) { getSound("Runs/R3 3B"); 
 		} else { getSound("Runs/R3"); }
+		getScore();
 	}
 
 	
@@ -1445,3 +1448,26 @@ function clearMessage(Msg) {
 	}
 }
 
+
+function getScore() {
+	awayScore = document.getElementById("away").Runs;
+	awayTeam = document.getElementById("away").innerHTML;
+	homeScore = document.getElementById("home").Runs;
+	homeTeam = document.getElementById("home").innerHTML;
+
+	if (homeScore > awayScore) {
+		Score = homeScore + "-" + awayScore;
+		ScoreTeam = Score  + " " + homeTeam + " " + awayTeam
+		ScoreTeam2 = Score  + " Other Team " + awayTeam
+	} else if (homeScore == awayScore) {
+		Score = awayScore + "-" + homeScore;
+		ScoreTeam =  Score + " " + awayTeam + " " + homeTeam;
+		ScoreTeam2 = "";
+	} else {
+		Score = awayScore + "-" + homeScore;
+		ScoreTeam =  Score + " " + awayTeam + " " + homeTeam;
+		ScoreTeam2 =  Score + " Other Team " + homeTeam;
+	}
+	getSound("Score/" + ScoreTeam);
+	getSound("Score/" + ScoreTeam2);
+}
