@@ -1367,7 +1367,7 @@ function playSound() {
       //play the first sound in the queue
       //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
       thisSound = AudioQueue.shift();
-alert("Audio/" + thisSound + ".mp3");
+//alert("Audio/" + thisSound + ".mp3");
       document.getElementById("Audio").setAttribute('src', "Audio/" + thisSound + ".mp3");
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
    } else {
