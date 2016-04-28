@@ -1369,7 +1369,7 @@ alert(thisSound);
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
    } else {
       //if nothing in the queue, wait a second and try again
-     setTimeout("playSound()", 1000);
+     setTimeout("alert('sfsg');playSound()", 10000);
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
    }
 }
