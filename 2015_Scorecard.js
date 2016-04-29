@@ -1,5 +1,5 @@
 //CODE FOR DEBUGGING LOG: document.getElementById("DEBUG").value += "TEXT HERE\n";
-//not reflecting changes...
+
 //KNOWN ISSUES: 
 //Can't handle non-standard text, like:
 //	If the plays are split by "and" instead of period
@@ -30,6 +30,9 @@ var PitchTimer;
 var PlayTimer;
 var AudioTimer;
 LastAction = "";
+var Review = 0;
+var Overturned = 1;
+var Upheld = 2;
 
 //Arrays
 //all are 2-dimensional, with first index being 0 (away) or 1 (home)
@@ -425,8 +428,17 @@ function showPlay(playText) {
 		alert(playEvent + "\n" + playText.xml);
 	}
 
-
+	Review = 0;
 	playDes = playText.selectSingleNode("@des").text;
+	if(playDes.indexOf("overturned: ") > 0) {
+		playDes = playDes.split("overturned: ")[1];
+		Review = Overturned;
+	}
+	if(playDes.indexOf("upheld: ") > 0) {
+		playDes = playDes.split("upheld: ")[1];
+		Review = Upheld;
+	}
+
 	playDes = playDes.replace(" and ", ". ");
 	if (playDes.split(". ").length > 1) {
 		playDes = playDes.replace(/[A-Z]\./g, ""); //I think this is supposed to get rid of periods in names, but may be getting too much
@@ -766,6 +778,12 @@ function SecondaryPlay(Play, Prefix) {
 			}
 		}
 		return; 
+	}
+	if (Review == Upheld) { //upheld -- mark with green
+		SecondBox.style.backgroundColor = "#C0FFC0";
+	}
+	if (Review == Overturned) { //overturned -- mark with red
+		SecondBox.style.backgroundColor = "#FFC0C0";
 	}
 	if (ErrorHolder >"") { Prefix = ErrorHolder + Prefix; }
 	newDiv = document.createElement('div');
@@ -1367,7 +1385,6 @@ function playSound() {
       //play the first sound in the queue
       //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
       thisSound = AudioQueue.shift();
-//alert("Audio/" + thisSound + ".mp3");
       document.getElementById("Audio").setAttribute('src', "Audio/" + thisSound + ".mp3");
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
    } else {
@@ -1447,7 +1464,6 @@ function clearMessage(Msg) {
 		alert(document.getElementById("MessageDiv").innerHTML);
 	}
 }
-
 
 function getScore() {
 	awayScore = document.getElementById("away").Runs;
