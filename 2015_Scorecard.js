@@ -1484,6 +1484,10 @@ function getScore() {
 		ScoreTeam =  Score + " " + awayTeam + " " + homeTeam;
 		ScoreTeam2 =  Score + " Other Team " + homeTeam;
 	}
-	getSound("Score/" + ScoreTeam);
-	getSound("Score/" + ScoreTeam2);
+	if(AudioQueue.length==0 || AudioQueue[AudioQueue.length-1].indexOf('-') == -1) { 
+		getSound("Score/" + ScoreTeam);
+	}
+	if(AudioQueue.length==0 || AudioQueue[AudioQueue.length-1].indexOf('-') == -1) { 
+		getSound("Score/" + ScoreTeam2);
+	}
 }
