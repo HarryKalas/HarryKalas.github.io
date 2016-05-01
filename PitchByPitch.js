@@ -31,7 +31,7 @@ document.getElementById("PitchTime").innerHTML = Temp;
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (source.selectSingleNode("game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
+	if (source.selectNodes("game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
 		ABPlay = source.selectSingleNode("game/atbat/@des").text;
 		if (LastAction != ABPlay) { Mark('E-' + LastAction);
 			GetPlay(LastPlay);	//get the next play
