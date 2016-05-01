@@ -368,7 +368,6 @@ function showPlay(playText) {
 		break;
 	case "Single" :
 	case "Walk" :
-	case "Balk" :
 	case "Hit By Pitch" :
 	case "Intent Walk" :
 	case "Fielders Choice" :
@@ -396,6 +395,7 @@ function showPlay(playText) {
 		break;
 	case "Passed Ball" :
 	case "Wild Pitch" :
+	case "Balk" :
 	case "Stolen Base 2B" :
 	case "Stolen Base 3B" :
 	case "Picked off stealing 2B" :

@@ -107,7 +107,7 @@ function AfterLoad() {
 		playSound();
 		source = xdLoad(gameFolder + "/plays.xml");
 		if (source) {
-			batterNode = selectNodes(source, "game/players/batter")
+			batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
 			ShowBatter(batterNode);
 		} 
 	}
@@ -152,7 +152,7 @@ function LoadGame(DateURL) {
 		game = games.snapshotItem(0);
 		break
 	default :
-		for (Idx = 0; Idx < games.length; Idx++) {
+		for (Idx = 0; Idx < games.snapshotLength; Idx++) {
 			gameDetail = games[Idx].selectSingleNode("@home_team_name").text;
 			gameDetail += " v. " + games[Idx].selectSingleNode("@away_team_name").text;
 			gameDetail += " at " + games[Idx].selectSingleNode("@time").text;
@@ -160,7 +160,7 @@ function LoadGame(DateURL) {
 			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);
 			if (Ans) { break; }
 		}
-		if (Idx == games.length) {
+		if (Idx == games.snapshotLength) {
 			alert("Those are the only games today.");
 			return false;
 		} else {
@@ -317,11 +317,12 @@ document.getElementById("PlayTime").innerHTML = Temp;
 		return -1;
 	}
 
-	return gamePlays.length;
+	return gamePlays.snapshotLength;
 }
 
 
 function showPlay(playText) {
+	document.getElementById("InPlay").innerHTML = ""; //clear Ball In Play notation;
 
 	if (selectNodes(source, "..", playText).snapshotItem(0).nodeName == "top") {
 		TeamInfo = document.getElementById("away");
@@ -372,7 +373,6 @@ function showPlay(playText) {
 		break;
 	case "Single" :
 	case "Walk" :
-	case "Balk" :
 	case "Hit By Pitch" :
 	case "Intent Walk" :
 	case "Fielders Choice" :
@@ -400,12 +400,14 @@ function showPlay(playText) {
 		break;
 	case "Passed Ball" :
 	case "Wild Pitch" :
+	case "Balk" :
 	case "Stolen Base 2B" :
 	case "Stolen Base 3B" :
 	case "Picked off stealing 2B" :
 	case "Picked off stealing 3B" :
 	case "Caught Stealing 2B" :
 	case "Caught Stealing 3B" :
+	case "Caught Stealing Home" :
 	case "Pickoff 1B" :
 	case "Pickoff 2B" :
 	case "Pickoff 3B" :
@@ -866,7 +868,7 @@ function SecondaryPlay(Play, Prefix) {
 		newDiv.className = "Home"
 		theOut(SecondBox, "HomeOut");
 	} else if (Play.indexOf("caught stealing home") >= 0) {
-alert("caught h");
+//alert("caught h");
 		SecondBox.setAttribute("background", "hout.gif");
 		newDiv.className = "Home"
 		theOut(SecondBox);
@@ -1536,7 +1538,11 @@ function BoxScore() {
 	result += topLevel.snapshotItem(0).getAttribute("home_sname");
 	result += '&#xa0;</b></td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
-		result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("home") + ' </td>';
+		if (inningScores.snapshotItem(Idx).getAttribute("home") > "") {
+			result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("home") + ' </td>';
+		} else {
+			result += '<td class="BoxScore"> &#xa0; </td>';
+		} 
 	}
 	result += '<th class="BoxScore">&#xa0;</th>';
 	result += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
