@@ -9,20 +9,20 @@
 
 
 function LoadPitch() {
-Temp = new Date;
-document.getElementById("PitchTime").innerHTML = Temp;
+	Temp = new Date;
+	document.getElementById("PitchTime").innerHTML = Temp;
 	theSound = "";
-	source.loadXML(xdLoad(gameFolder + "/plays.xml"));
+	source = xdLoad(gameFolder + "/plays.xml");
 
 	//if the game is over, exit
-	if(source.selectNodes("game[@status_ind='O']").length > 0) { Mark('A');
+	if (selectNodes(source, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
 		GetPlay(LastPlay);	//get the next play
 		//*****CHECK FOR A WIN HERE
 		return; 
 	}
 
 	//if there is a game action other than a pitch, get the call
-	if (source.selectNodes("game/action[@des != '']").length > 0) { Mark('B');
+	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
 		ABPlay = source.selectSingleNode("game/action/@des").text;
 		if (LastAction != ABPlay) { Mark('C');
 			GetPlay(LastPlay);	//get the next play
@@ -31,7 +31,7 @@ document.getElementById("PitchTime").innerHTML = Temp;
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
+	if (source.selectNodes("game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
 		ABPlay = source.selectSingleNode("game/atbat/@des").text;
 		if (LastAction != ABPlay) { Mark('E-' + LastAction);
 			GetPlay(LastPlay);	//get the next play
@@ -45,7 +45,7 @@ document.getElementById("PitchTime").innerHTML = Temp;
 	if (batterNode.selectSingleNode("@boxname").text != document.getElementById("BatterName").innerHTML) { Mark('F'); 
 		GetPlay(LastPlay);	//catch any uncalled plays
 		LastPitch = 0; //reset the pitch count
-		source.loadXML(xdLoad(gameFolder + "/plays.xml")); //reload the plays because GetPlay replaces source
+			source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
 
 		//set the sides
 		if(source.selectSingleNode("//game/@inning_state").text == 'Top') { Mark('J1'); //if it's the top of the inning
@@ -292,7 +292,7 @@ function GetPlay(After) {
 
 	// if plays haven't been updated yet, see if there is anything new 
 	//	and keep checking until there is
-	source.loadXML(xdLoad(gameFolder + "/game_events.xml"));
+	source = xdLoad(gameFolder + "/game_events.xml");
 	gamePlays = source.selectNodes("//game/inning/*/*");
 	if (gamePlays.length > LastPlay) { // if there is a new call, get it
 		UpdateIt();
