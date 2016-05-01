@@ -31,7 +31,7 @@ document.getElementById("PitchTime").innerHTML = Temp;
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
+	if (selectNodes(source, "game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
 		ABPlay = source.selectSingleNode("game/atbat/@des").text;
 		if (LastAction != ABPlay) { Mark('E-' + LastAction);
 			GetPlay(LastPlay);	//get the next play
@@ -265,7 +265,7 @@ function ShowBatter(batterNode) {
 	document.getElementById("B").innerHTML = "0";
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
-	getSound("Batters/_" + batterName + LeadOff);
+	getSound("Batters/2016" + batterName + LeadOff);
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
 

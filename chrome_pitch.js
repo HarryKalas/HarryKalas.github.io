@@ -255,13 +255,13 @@ function Mark(Text) {
 }
 
 function ShowBatter(batterNode) {
-	batterPic = batterNode.selectSingleNode("@pid").text;
-	batterName = batterNode.selectSingleNode("@boxname").text;
-	batterAvg = batterNode.selectSingleNode("@avg").text;
+	batterPic = batterNode.snapshotItem(0).getAttribute("pid");
+	batterName = batterNode.snapshotItem(0).getAttribute("boxname");
+	batterAvg = batterNode.snapshotItem(0).getAttribute("avg");
 
 	document.getElementById("BatterPic").src = "http://mlb.mlb.com/images/players/mugshot/ph_" + batterPic + ".jpg";
 	document.getElementById("BatterName").innerHTML = batterName;
-	document.getElementById("BatterAvg").innerHTML = batterNode.selectSingleNode("@avg").text;
+	document.getElementById("BatterAvg").innerHTML = batterAvg;
 	document.getElementById("B").innerHTML = "0";
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
