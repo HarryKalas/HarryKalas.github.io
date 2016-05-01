@@ -23,7 +23,7 @@ function LoadPitch() {
 
 	//if there is a game action other than a pitch, get the call
 	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
-		ABPlay = source.selectSingleNode("game/action/@des").text;
+		ABPlay = selectNodes(source, "game/action/@des").snapshotItem(0).nodeValue;
 		if (LastAction != ABPlay) { Mark('C');
 			GetPlay(LastPlay);	//get the next play
 			return;
@@ -31,8 +31,8 @@ function LoadPitch() {
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (source.selectNodes("game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
-		ABPlay = source.selectSingleNode("game/atbat/@des").text;
+	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").nodeValue);
+		ABPlay = selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue;
 		if (LastAction != ABPlay) { Mark('E-' + LastAction);
 			GetPlay(LastPlay);	//get the next play
 			return;
@@ -40,7 +40,7 @@ function LoadPitch() {
 	}
 
 	//check for a change of batter	
-	batterNode = source.selectSingleNode("game/players/batter");
+	batterNode = selectNodes(source, ("game/players/batter").snapshotItem(0);
 	//if there is a different batter
 	if (batterNode.selectSingleNode("@boxname").text != document.getElementById("BatterName").innerHTML) { Mark('F'); 
 		GetPlay(LastPlay);	//catch any uncalled plays
@@ -48,7 +48,7 @@ function LoadPitch() {
 			source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
 
 		//set the sides
-		if(source.selectSingleNode("//game/@inning_state").text == 'Top') { Mark('J1'); //if it's the top of the inning
+		if(selectNodes(source, ("//game/@inning_state").snapshotItem(0).nodeValue == 'Top') { Mark('J1'); //if it's the top of the inning
 			TeamInfo = document.getElementById("away"); //the current team is the Away team
 		} else { Mark('J2'); //otherwise
 			TeamInfo = document.getElementById("home"); //the current team is the Home team
@@ -75,12 +75,12 @@ function LoadPitch() {
 	if (Pitches.length > LastPitch) { Mark('K'); //if there are more pitches than last time
 		//get the number of balls and strikes
 		if (source.selectNodes("game/@b").length > 0) { Mark('L1');
-			Balls = source.selectSingleNode("game/@b").text;
+			Balls = selectNodes(source, ("game/@b").snapshotItem(0).nodeValue;
 		} else { Mark('L2');
 			Balls = "0";
 		}
 		if (source.selectNodes("game/@s").length > 0) { Mark('M1');
-			Strikes = source.selectSingleNode("game/@s").text;
+			Strikes = selectNodes(source, ("game/@s").snapshotItem(0).nodeValue;
 		} else { Mark ('M2');
 			Strikes = "0";
 		}
@@ -89,10 +89,10 @@ function LoadPitch() {
 		document.getElementById("S").innerHTML = Strikes;
 
 		//update the pitcher's pitch count
-		PitchCounter = source.selectSingleNode("game/players/pitcher");
+		PitchCounter = selectNodes(source, "game/players/pitcher").snapshotItem(0);
 		PitchTable = "";
 		if (PitchCounter) { Mark('N');
-			PitchSide = source.selectSingleNode("game/@top_inning").text;
+			PitchSide = selectNodes(source, "game/@top_inning").snapshotItem(0).nodeValue;
 			if (PitchSide == "T") { Mark('O1');
 				PitchTable = document.getElementById("homePitching");
 			} else {  Mark('O2');
