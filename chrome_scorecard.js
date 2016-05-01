@@ -487,7 +487,9 @@ function showPlay(playText) {
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("pops out") >= 0) {
 		thePlay = "P" + playerNumber(Plays[0]);
+alert("0");
 		theOut(Box, thePlay);
+alert("1");
 	} else if (Plays[0].indexOf("out on a sacrifice bunt") >=0) {
 		thePlay = "SAC B " + Fielding(Plays[0]);
 		theOut(Box, thePlay);
@@ -725,9 +727,11 @@ alert(Plays[0]);
 		Continue = confirm("Undocumented PRIMARY play: " + Plays[0] + "\n\nContinue?");
 		if (!Continue) { END; }	//"END" is not valid javascript, but it throws an error that stops the code
 	}
+alert("2");
 	Box.innerHTML = thePlay + Box.innerHTML;
+alert("3");
 	Box.className = "PlayBox";
-
+alert("4");
 	//ADDITIONAL PLAYS
 	for (Ptr = 1; Ptr < Plays.length; Ptr++) {
 		if (Plays[Ptr].trim() > "") {
