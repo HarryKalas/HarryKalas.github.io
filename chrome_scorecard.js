@@ -1161,6 +1161,8 @@ function Substitution(Text) {
 	case (Text.indexOf("Pitcher Change: ") > -1) :			//if it's a pitching change
 		TeamIdx = (TeamInfo.Index + 1) % 2;			//use the team that is NOT at bat
 		//add a row to the Pitching div
+		tbl = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0];
+		tbl.innerHTML += "<tr><td>&#xa0;</td></tr>";die;
 		newRow = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0].insertRow(); //insert a row before the next batting order position or footer
 		newRow.className = "BoxScore";
 		firstcell = newRow.insertCell();
