@@ -1162,15 +1162,7 @@ function Substitution(Text) {
 		TeamIdx = (TeamInfo.Index + 1) % 2;			//use the team that is NOT at bat
 		//add a row to the Pitching div
 		tbl = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0];
-		tbl.innerHTML += "<tr><td>&#xa0;</td></tr>";die;
-		newRow = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0].insertRow(); //insert a row before the next batting order position or footer
-		newRow.className = "BoxScore";
-		firstcell = newRow.insertCell();
-		newRow.insertCell();
-		newRow.insertCell();
-		newRow.insertCell();
-		newRow.insertCell();
-		newRow.insertCell();
+		tbl.innerHTML += "<tr class='BoxScore'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
 
 		//get pitcher's stats in case you are loading during or after the game
 		//get pitcher's stats in case you are loading during or after the game
@@ -1188,8 +1180,8 @@ function Substitution(Text) {
 		Pitcher = Players[0].replace("Pitching Change:", "");
 		Pitcher = Pitcher.replace("Pitcher Change:", "");
 		InningText = TeamInfo.Inning + "." + TeamInfo.Outs;
-		firstcell.innerHTML = Pitcher + " (" + InningText + ")";
-		firstcell.style.textAlign = "left";
+		PitchTable.rows[r].cells[0].innerHTML = Pitcher + " (" + InningText + ")";
+		PitchTable.rows[r].cells[0].style.textAlign = "left";
 		break;
 	case (Text.indexOf("Defensive Substitution: ") > -1) :		//if it's a defensive substitution
 	case (Text.indexOf("Defensive switch") > -1) :			//it's a change of position
