@@ -282,6 +282,7 @@ document.getElementById("PlayTime").innerHTML = Temp;
 	source = xdLoad(gameFolder + "/game_events.xml");
 	gamePlays = selectNodes(source, "//game/inning/*/*");
 	for (pIdx = StartPlay; pIdx < gamePlays.snapshotLength; pIdx++) {
+		document.getElementById("InPlay").innerHTML = "";
 		ErrorHolder = "";
 		LastAction = gamePlays.snapshotItem(pIdx).getAttribute("des");
 		showPlay(gamePlays.snapshotItem(pIdx));
@@ -439,11 +440,11 @@ function showPlay(playText) {
 
 	if(playDes.indexOf("overturned: ") > 0) {
 		playDes = playDes.split("overturned: ")[1];
-		Review = Overturned;
+		Box.style.backgroundColor = "#FFC0C0";
 	}
 	if(playDes.indexOf("upheld: ") > 0) {
 		playDes = playDes.split("upheld: ")[1];
-		Review = Upheld;
+		Box.style.backgroundColor = "#C0FFC0";
 	}
 
 	playDes = playDes.replace(" and ", ". ");
@@ -785,12 +786,7 @@ function SecondaryPlay(Play, Prefix) {
 		}
 		return; 
 	}
-	if (Review == Upheld) { //upheld -- mark with green
-		SecondBox.style.backgroundColor = "#C0FFC0";
-	}
-	if (Review == Overturned) { //overturned -- mark with red
-		SecondBox.style.backgroundColor = "#FFC0C0";
-	}
+
 	if (ErrorHolder >"") { Prefix = ErrorHolder + Prefix; }
 	newDiv = document.createElement('div');
 	newDiv.innerHTML = Prefix + PlayerOrd[TeamInfo.Index][TeamInfo.AB];
@@ -1165,7 +1161,7 @@ function Substitution(Text) {
 	case (Text.indexOf("Pitcher Change: ") > -1) :			//if it's a pitching change
 		TeamIdx = (TeamInfo.Index + 1) % 2;			//use the team that is NOT at bat
 		//add a row to the Pitching div
-		newRow = document.getElementById(TeamType[TeamIdx] + "Pitching").insertRow(); //insert a row before the next batting order position or footer
+		newRow = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0].insertRow(); //insert a row before the next batting order position or footer
 		newRow.className = "BoxScore";
 		firstcell = newRow.insertCell();
 		newRow.insertCell();

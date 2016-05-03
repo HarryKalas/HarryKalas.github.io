@@ -27,8 +27,8 @@ TD.PlayBox {
 	text-align: center;
 }
 DIV {
-	font-size: 6pt; 
-	font-family: Small Fonts; 
+	font-size: 8px; 
+	font-family: Arial; 
 	font-weight: normal;
 	color: Blue;
 	position: absolute; 
@@ -133,7 +133,7 @@ DIV.BoxScore {
 
 #BatterDiv {
 	left: 700px;
-	width: 255px; 
+	width: 200px; 
 	font-family: Arial;
 	font-size: 10pt;
 	font-weight: bold;

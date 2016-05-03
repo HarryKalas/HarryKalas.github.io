@@ -713,3 +713,4 @@ SoundFiles[SoundFiles.length] = new Array('Stretch', 1);
 SoundFiles[SoundFiles.length] = new Array('Stretch Harry', 1);
 SoundFiles[SoundFiles.length] = new Array('Stretch pre-tune', 1);
 SoundFiles[SoundFiles.length] = new Array('WP', 1);
+SoundFiles[SoundFiles.length] = new Array('InPlay', 1);

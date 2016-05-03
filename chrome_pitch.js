@@ -208,6 +208,7 @@ function LoadPitch() {
 			//ball in play; let the action routine handle it
 			theSound = "";
 			document.getElementById("InPlay").innerHTML = "Ball in play...";
+			theSound = "InPlay";
 			break;
 		default :
 			alert("Unknown pitch type: " + play + " " + detail);
@@ -268,6 +269,7 @@ function ShowBatter(batterNode) {
 	document.getElementById("B").innerHTML = "0";
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
+	document.getElementById("InPlay").innerHTML = "";
 	getSound("Batters/_" + batterName + LeadOff);
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
@@ -275,10 +277,15 @@ function ShowBatter(batterNode) {
 	Box = document.getElementById(TeamInfo.id + TeamInfo.AB).cells[TeamInfo.Column];
 	batterPos = getPos(Box);
 	if (batterPos[0] > 0) {	//deal with when there is not a batter -- probably end of game
-		window.scrollTo(1,batterPos[1] - 100); //scroll to the player
+		//position the picture box first
 		document.getElementById("BatterDiv").style.left = batterPos[0] + 64 + "px";
 		document.getElementById("BatterDiv").style.top = batterPos[1] + 1 + "px";
 		BatterDiv.style.visibility = "visible";
+
+		//then scroll to the player
+//		window.scrollTo(batterPos[0] - 275 - document.documentElement.clientWidth
+//			      , batterPos[1] - 175 - document.documentElement.clientHeight);
+		window.scrollTo(1, batterPos[1]);
 	}
 }
 
