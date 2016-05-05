@@ -718,7 +718,7 @@ alert(Plays[0]);
 	} else if (Plays[0].indexOf("Dropped foul pop") >=0 ) {
 		//do nothing
 alert(Plays[0]);
-	} else if (Plays[0].indexOf("challenged") >= 0) {
+	} else if (Plays[0].indexOf("challenge") >= 0) {
 		//instant replay that may change the call -- does not change anything
 		//example: Rangers challenged (tag play), call on the field was overturned: Pickoff attempt at 2nd. 
 alert(Plays[0]);
@@ -761,8 +761,15 @@ alert(Plays[0]);
 		} else { getSound("Runs/R3"); }
 		getScore();
 	}
-	
-	nextBatter(Plays[0]);
+//	nextBatter(Plays[0]);
+	if (playText.nodeName == "atbat") {
+		//if it's an at-bat, go to next batter
+		TeamInfo.AB = TeamInfo.AB + 1;
+		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
+		LOB += 1; //**
+	} else {
+		//if it's not an at-bat, don't go to the next batter
+	}
 }
 
 function SecondaryPlay(Play, Prefix) {
@@ -908,6 +915,7 @@ function playerNumber(Text) {
 }
 
 function nextBatter(Text) {
+if (Text.indexOf("challenge") >= 0 ) {alert(TeamInfo.AB) }
 	if (Text.indexOf("Pitcher Change: ") >= 0 || Text.indexOf("Pitching Change: ") >= 0) { //no advance
 	} else if (Text.indexOf("Coaching visit") >= 0) { //no advance
 	} else if (Text.indexOf("Injury Delay") >= 0) { //no advance

@@ -270,7 +270,7 @@ function ShowBatter(batterNode) {
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
 	document.getElementById("InPlay").innerHTML = "";
-	getSound("Batters/_" + batterName + LeadOff);
+	getSound("Batters/2016" + batterName + LeadOff);
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
 
