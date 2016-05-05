@@ -153,10 +153,10 @@ function LoadGame(DateURL) {
 		break
 	default :
 		for (Idx = 0; Idx < games.snapshotLength; Idx++) {
-			gameDetail = games[Idx].selectSingleNode("@home_team_name").text;
-			gameDetail += " v. " + games[Idx].selectSingleNode("@away_team_name").text;
-			gameDetail += " at " + games[Idx].selectSingleNode("@time").text;
-			gameDetail += " " + games[Idx].selectSingleNode("@time_zone").text;
+			gameDetail = games.snapshotItem(Idx).getAttribute("home_team_name");
+			gameDetail += " v. " + games.snapshotItem(Idx).getAttribute("@away_team_name");
+			gameDetail += " at " + games.snapshotItem(Idx).getAttribute("@time");
+			gameDetail += " " + games.snapshotItem(Idx).getAttribute("@time_zone");
 			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);
 			if (Ans) { break; }
 		}
@@ -195,10 +195,10 @@ function LoadGame(DateURL) {
 
 		TimeOffset = GameTime.split(":")[0]*3600000;
 		TimeOffset += GameTime.split(":")[1].split(" ")[0] * 60000;
-		if (game.getAttribute("ampm").text == "PM") { TimeOffset += 43200000 }
+		if (game.getAttribute("ampm") == "PM") { TimeOffset += 43200000 }
 		GameDate = new Date(GameDate.getTime() + TimeOffset);
-		//retry 15 minutes before game time
-		setTimeout("window.history.back()", GameDate - Today - 900000);
+		//retry halfway from now to game
+		setTimeout("location.reload()", (GameDate - Today) / 2);
 		return;
 		break;
 	default :

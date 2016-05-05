@@ -285,7 +285,7 @@ function ShowBatter(batterNode) {
 		//then scroll to the player
 //		window.scrollTo(batterPos[0] - 275 - document.documentElement.clientWidth
 //			      , batterPos[1] - 175 - document.documentElement.clientHeight);
-		window.scrollTo(1, batterPos[1]);
+		window.scrollTo(1, batterPos[1]-150);
 	}
 }
 
