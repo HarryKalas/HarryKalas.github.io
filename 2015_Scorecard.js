@@ -395,7 +395,6 @@ function showPlay(playText) {
 		break;
 	case "Passed Ball" :
 	case "Wild Pitch" :
-	case "Balk" :
 	case "Stolen Base 2B" :
 	case "Stolen Base 3B" :
 	case "Picked off stealing 2B" :

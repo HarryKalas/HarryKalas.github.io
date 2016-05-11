@@ -47,12 +47,6 @@ PlayerFull = new Array;		//full name as it appears in the play-by-play (second i
 
 AudioQueue = new Array; 		// holds the list of audio files to play at the end of the play
 
-//XSLT stylesheet for scoreboard
-//style=new ActiveXObject("MSXML2.FreeThreadedDOMDocument");
-//style.async=false; 
-//style.validateOnParse="true"; 
-//style.load("BoxScore.xslt"); 
-
 //NEW XML cross-domain load
 //revised to return the responseXML for Chrome
 function xdLoad(FileName) {
@@ -133,10 +127,6 @@ function selectNodes(Doc, XPath, context) {
 	}
 }
 
-function selectSingleNode(Doc, XPath) {
-	return Doc.evaluate(XPath, Doc, null, XPathResult.ANY_UNORDERED_NODE_TYPE);
-}
-
 function LoadGame(DateURL) {
 	//determines whether there is a game for the selected day and builds the folder URL text for Phillies' game that day
 	gameFolder="http://gd2.mlb.com/components/game/mlb";
@@ -154,9 +144,9 @@ function LoadGame(DateURL) {
 	default :
 		for (Idx = 0; Idx < games.snapshotLength; Idx++) {
 			gameDetail = games.snapshotItem(Idx).getAttribute("home_team_name");
-			gameDetail += " v. " + games.snapshotItem(Idx).getAttribute("@away_team_name");
-			gameDetail += " at " + games.snapshotItem(Idx).getAttribute("@time");
-			gameDetail += " " + games.snapshotItem(Idx).getAttribute("@time_zone");
+			gameDetail += " v. " + games.snapshotItem(Idx).getAttribute("away_team_name");
+			gameDetail += " at " + games.snapshotItem(Idx).getAttribute("time");
+			gameDetail += " " + games.snapshotItem(Idx).getAttribute("time_zone");
 			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);
 			if (Ans) { break; }
 		}
@@ -249,23 +239,23 @@ function LoadPlayers() {
 			PlayerOrd[TeamIdx][Ctr] = Player.getAttribute("num");
 			PlayerFull[TeamIdx][Ctr] = BuildName(Player);
 		}
+
+		//pitcher
 		Player = selectNodes(plyrSource, "player[@game_position='P']", Team).snapshotItem(0).getAttribute("boxname");
-		PitchTable = document.getElementById(TeamType[TeamIdx] + 'Pitching');
-		PitchRow = PitchTable.rows[PitchTable.rows.length-1];
+		PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
+		r = PitchTable.rows.length-1;
+		PitchRow = PitchTable.rows[r];
 		PitchRow.cells[0].innerHTML = Player;
 		PitchRow.className = "BoxScore";
 
 		//get pitcher's stats in case you are loading during or after the game
-		PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
-		r = PitchTable.rows.length-1;
-		PitchRow = PitchTable.rows[r];
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
 		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
 		pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchTable.rows[r].cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
-		PitchTable.rows[r].cells[3].innerHTML = pBalls;
-		PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+		PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
+		PitchRow.cells[3].innerHTML = pBalls;
+		PitchRow.cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
+		PitchRow.cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
 	}
 	return true;
 }
@@ -761,7 +751,7 @@ alert(Plays[0]);
 		} else { getSound("Runs/R3"); }
 		getScore();
 	}
-//	nextBatter(Plays[0]);
+
 	if (playText.nodeName == "atbat") {
 		//if it's an at-bat, go to next batter
 		TeamInfo.AB = TeamInfo.AB + 1;
@@ -912,35 +902,6 @@ function playerNumber(Text) {
 		result = "2";
 	}
 	return result;
-}
-
-function nextBatter(Text) {
-if (Text.indexOf("challenge") >= 0 ) {alert(TeamInfo.AB) }
-	if (Text.indexOf("Pitcher Change: ") >= 0 || Text.indexOf("Pitching Change: ") >= 0) { //no advance
-	} else if (Text.indexOf("Coaching visit") >= 0) { //no advance
-	} else if (Text.indexOf("Injury Delay") >= 0) { //no advance
-	} else if (Text.indexOf("Offensive Substitution: ") >= 0) { //no advance
-	} else if (Text.indexOf("Defensive Substitution: ") >= 0) { //no advance
-	} else if (Text.indexOf("Defensive switch") >= 0) { //no advance
-	} else if (Text.indexOf("On-field Delay") >= 0) { //no advance
-	} else if (Text.indexOf(" caught stealing ") >= 0) { //no advance
-	} else if (Text.indexOf(" picks off ") >= 0) { //no advance
-	} else if (Text.indexOf(" pickoff attempt") >= 0) { //no advance
-	} else if (Text.indexOf(" steals ") >= 0) { //no advance
-	} else if (Text.indexOf("defensive indifference") >= 0) { //no advance
-	} else if (Text.indexOf(" wild pitch ") >= 0) { //no advance
-	} else if (Text.indexOf("passed ball") >= 0) { //no advance
-	} else if (Text.indexOf("balk") >= 0) { //no advance
-	} else if (Text.indexOf(" remains in the game ") >= 0) { //no advance
-	} else if (Text.indexOf("left the game") >= 0) { //no advance
-	} else if (Text.indexOf("turns around") >= 0) { //no advance
-	} else if (Text.indexOf("ejected") >= 0) { //no advance
-	} else if (Text.indexOf("foul pop error") >= 0) { //no advance
-	} else {
-		TeamInfo.AB = TeamInfo.AB + 1;
-		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
-		LOB += 1; //**
-	}
 }
 
 function Fielding(playText) {
@@ -1172,7 +1133,6 @@ function Substitution(Text) {
 		tbl = document.getElementById(TeamType[TeamIdx] + "Pitching").getElementsByTagName("tbody")[0];
 		tbl.innerHTML += "<tr class='BoxScore'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
 
-		//get pitcher's stats in case you are loading during or after the game
 		//get pitcher's stats in case you are loading during or after the game
 		PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
 		r = PitchTable.rows.length-1;
