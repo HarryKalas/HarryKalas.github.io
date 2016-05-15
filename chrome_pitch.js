@@ -207,7 +207,8 @@ function LoadPitch() {
 		case "X" : Mark('a4');
 			//ball in play; let the action routine handle it
 			theSound = "";
-			document.getElementById("InPlay").innerHTML = "Ball in play...";
+//			document.getElementById("InPlay").innerHTML = "Ball in play...";
+			document.getElementById("InPlay").innerHTML = detail;
 			theSound = "InPlay";
 			break;
 		default :
@@ -283,9 +284,7 @@ function ShowBatter(batterNode) {
 		BatterDiv.style.visibility = "visible";
 
 		//then scroll to the player
-//		window.scrollTo(batterPos[0] - 275 - document.documentElement.clientWidth
-//			      , batterPos[1] - 175 - document.documentElement.clientHeight);
-		window.scrollTo(1, batterPos[1]-150);
+		window.scrollTo(1, batterPos[1] - 150);
 	}
 }
 

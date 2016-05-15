@@ -171,6 +171,9 @@ function LoadGame(DateURL) {
 		document.getElementById("Broadcast").innerHTML = "<B>Broadcast: </B> " + selectNodes(source, "tv", Node).snapshotItem(0).innerHTML + "; " + selectNodes(source, "radio", Node).snapshotItem(0).innerHTML;
 	}
 
+	document.getElementById("awayRecord").innerHTML = "(" + game.getAttribute("away_win") + "-" + game.getAttribute("away_loss") + ")";
+	document.getElementById("homeRecord").innerHTML = "(" + game.getAttribute("home_win") + "-" + game.getAttribute("home_loss") + ")";
+
 	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
 	//Final, In Progress, Warmup, Pre-Game (35 min? 2:20?), Preview (5:20?), 
 	switch (gameStatus) {

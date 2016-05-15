@@ -110,7 +110,6 @@ function AfterLoad() {
 
 		UpdateIt();
 		AudioQueue.length = 0;
-//for (tmp = 1; tmp < 10; tmp++) { AudioQueue.shift(); }
 		playSound();
 		source.loadXML(xdLoad(gameFolder + "/plays.xml"));
 		if (source) {
@@ -188,8 +187,8 @@ function LoadGame(DateURL) {
 		TimeOffset += GameTime.split(":")[1].split(" ")[0] * 60000;
 		if (game.selectSingleNode("@ampm").text == "PM") { TimeOffset += 43200000 }
 		GameDate = new Date(GameDate.getTime() + TimeOffset);
-		//retry 15 minutes before game time
-		setTimeout("window.history.back()", GameDate - Today - 900000);
+		//retry halfway from now to game time
+		setTimeout("location.reload()", (GameDate - Today) / 2);
 		return;
 		break;
 	default :
@@ -395,12 +394,14 @@ function showPlay(playText) {
 		break;
 	case "Passed Ball" :
 	case "Wild Pitch" :
+	case "Balk" :
 	case "Stolen Base 2B" :
 	case "Stolen Base 3B" :
 	case "Picked off stealing 2B" :
 	case "Picked off stealing 3B" :
 	case "Caught Stealing 2B" :
 	case "Caught Stealing 3B" :
+	case "Caught Stealing Home" :
 	case "Pickoff 1B" :
 	case "Pickoff 2B" :
 	case "Pickoff 3B" :
