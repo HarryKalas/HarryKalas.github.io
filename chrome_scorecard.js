@@ -88,6 +88,11 @@ function AfterLoad() {
 	DateURL = "/year_" + theYear + "/month_" + theMonth + "/day_" + theDate;
 	GameDate = new Date(theYear-0, theMonth - 1, theDate-0);
 
+	if(location.search.indexOf("myTeam=")>0) {
+		myTeam = location.search.substring(8);
+		myTeam = myTeam.replace("%20", " ");
+	}
+
 	game = LoadGame(DateURL); //true if there is a game on the date; false if there is not
 
 	if (game) {
@@ -197,6 +202,23 @@ function LoadGame(DateURL) {
 	default :
 		// there may be other options
 	}
+
+	otherGames = selectNodes(source, "//games/game[@home_team_name != '" + myTeam + "' and @away_team_name != '" + myTeam + "']");
+	OGText = "";
+	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
+		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + '">';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_city") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> at ";
+		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + '">';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_city") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time_zone") + "<br/>";
+	}
+	document.getElementById("OtherGames").innerHTML = OGText;
 
 	return game;
 }
@@ -413,6 +435,7 @@ function showPlay(playText) {
 	case "Double Play" :
 	case "Fan interference" :
 	case "Manager Review" :
+	case "Umpire Review" :
 		// will be handled later
 		break;
 	case "Game Advisory" : 

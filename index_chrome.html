@@ -9,7 +9,7 @@
 	theMonth = "";	//if blank, it calculates the current date
 	theDate = "";	//if blank, it calculates the current date
 	myTeam = "Phillies";
-	LastPlay = 0;		//that's actually the starting point: the last play already shown
+	LastPlay = 0;			//that's actually the starting point: the last play already shown
 	MaxPlay = 0;			//if 0, whole game; otherwise, nothing higher than MaxPlay -- for testing
 </script>
 <script type="text/javascript" src="Sound_Files.js"></script>
@@ -538,5 +538,10 @@ O: <span id="O"></span><br/>
 </div>
 <audio id="Audio" autoplay onended="playSound();" controls></audio>
 <div id="Plays" class="BoxScore"></div>
+<p>
+<b>All Games Today:</b>
+</p>
+<div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
+</div>
 </body>
 </html>

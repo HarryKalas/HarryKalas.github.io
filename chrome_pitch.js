@@ -101,7 +101,7 @@ function LoadPitch() {
 				PitchTable = document.getElementById("awayPitching");
 			}
 			PitchRow = PitchTable.rows[PitchTable.rows.length-1];
-			PitchRow.cells[0].innerHTML = PitchCounter.getAttribute("boxname");
+			//PitchRow.cells[0].innerHTML = PitchCounter.getAttribute("boxname");
 			PitchRow.cells[1].innerHTML = PitchCounter.getAttribute("p_throws") + 'HP';
 			PitchRow.cells[2].innerHTML = PitchCounter.getAttribute("era");
 			PitchRow.cells[3].innerHTML = PitchCounter.getAttribute("balls");

@@ -30,12 +30,18 @@ document.getElementById("PitchTime").innerHTML = Temp;
 		}
 	}
 
-	//occurs when: wild pitch, a ball in play
+	//occurs when: wild pitch, a ball in play, umpire review, manager review
 	if (source.selectNodes("game/atbat[@des != '']").length > 0) { Mark('D-' +  source.selectSingleNode("game/atbat/@des").text);
 		ABPlay = source.selectSingleNode("game/atbat/@des").text;
 		if (LastAction != ABPlay) { Mark('E-' + LastAction);
-			GetPlay(LastPlay);	//get the next play
-			return;
+			if (source.selectSingleNode("game/atbat/@event").text == 'Umpire Review') {
+				alert("Umpire Review")
+			} elseif (source.selectSingleNode("game/atbat/@event").text == 'Manager Review') {
+				alert("Manager Review")
+			} else {
+				GetPlay(LastPlay);	//get the next play
+				return;
+			}
 		}
 	}
 

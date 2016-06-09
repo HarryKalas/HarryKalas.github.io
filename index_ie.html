@@ -9,16 +9,17 @@
 	theMonth = "";	//if blank, it calculates the current date
 	theDate = "";	//if blank, it calculates the current date
 	myTeam = "Phillies";
-	LastPlay = 0;			//that's actually the starting point: the last play already shown
+	LastPlay = 0;		//that's actually the starting point: the last play already shown
 	MaxPlay = 0;			//if 0, whole game; otherwise, nothing higher than MaxPlay -- for testing
 </script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script type="text/javascript" src="Commercials.js"></script>
-<script type="text/javascript" src="chrome_scorecard.js"></script>
-<script type="text/javascript" src="chrome_pitch.js"></script>
+<script type="text/javascript" src="2015_Scorecard.js"></script>
+<script type="text/javascript" src="PitchByPitch.js"></script>
+
 </head>
 <body onload="AfterLoad();">
-<h3>Away Team: <a id="away"></a> <a id="awayRecord"></a></h3>
+<h3>Away Team: <a id="away"></a></h3>
 <table cellpadding="0" cellspacing="0" id="awayTable" width="850">
 <tr id="awayHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
 <tr id="away1">
@@ -276,7 +277,7 @@
 <div id="PlayTime" class="BoxScore"></div>
 <div id="Debug" class="BoxScore"></div>
 <p></p>
-<h3>Home Team: <a id="home" Runs="0" Outs="0" Inning="1" Column="4" AB="1" Index="1"></a> <a id="homeRecord"></a></h3>
+<h3>Home Team: <a id="home" Runs="0" Outs="0" Inning="1" Column="4" AB="1" Index="1"></a></h3>
 <table cellpadding="0" cellspacing="0" id="homeTable" width=850>
 <tr id="homeHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
 <tr id="home1">
@@ -536,12 +537,7 @@ O: <span id="O"></span><br/>
 </div>
 <div id="MessageDiv" style="visibility: hidden;">
 </div>
-<audio id="Audio" autoplay onended="playSound();" controls></audio>
+<audio id="Audio" autoplay onended="playSound();"></audio>
 <div id="Plays" class="BoxScore"></div>
-<p>
-<b>All Games Today:</b>
-</p>
-<div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
-</div>
 </body>
 </html>
