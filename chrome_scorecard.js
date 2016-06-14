@@ -137,6 +137,23 @@ function LoadGame(DateURL) {
 	gameFolder="http://gd2.mlb.com/components/game/mlb";
 	gameFolder += DateURL;
 	source = xdLoad(gameFolder + "/master_scoreboard.xml");
+
+	otherGames = selectNodes(source, "//games/game[@home_team_name != '" + myTeam + "' and @away_team_name != '" + myTeam + "']");
+	OGText = "";
+	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
+		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + '">';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_city") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> at ";
+		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + '">';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_city") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + "</a> ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time_zone") + "<br/>";
+	}
+	document.getElementById("OtherGames").innerHTML = OGText;
+
 	games = selectNodes(source, "//games/game[@home_team_name = '" + myTeam + "' or @away_team_name = '" + myTeam + "']");
 
 	switch (games.snapshotLength) {
@@ -202,23 +219,6 @@ function LoadGame(DateURL) {
 	default :
 		// there may be other options
 	}
-
-	otherGames = selectNodes(source, "//games/game[@home_team_name != '" + myTeam + "' and @away_team_name != '" + myTeam + "']");
-	OGText = "";
-	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
-		OGText += '<a href="index_chrome.html?myTeam=';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + '">';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_city") + " ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> at ";
-		OGText += '<a href="index_chrome.html?myTeam=';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + '">';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_city") + " ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + " ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("time") + " ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("time_zone") + "<br/>";
-	}
-	document.getElementById("OtherGames").innerHTML = OGText;
 
 	return game;
 }
@@ -702,7 +702,7 @@ alert("picked off");
 			thePlay = "&nbsp;";
 		}
 	} else if (Plays[0].indexOf(" out at ") >= 0) {
-		TeamInfo.AB = TeamInfo.AB - 1;
+		TeamInfo.AB = TeamInfo.AB - 1; 
 		if (TeamInfo.AB == 0) { TeamInfo.AB = 9; }
 		SecondaryPlay(Plays[0], "");
 		thePlay = "&nbsp;";
@@ -779,10 +779,13 @@ alert(Plays[0]);
 	}
 
 	if (playText.nodeName == "atbat") {
-		//if it's an at-bat, go to next batter
-		TeamInfo.AB = TeamInfo.AB + 1;
-		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
-		LOB += 1; //**
+		//if it's an at-bat, usually go to next batter
+		if (playDes.indexOf("caught stealing") >= 0) { //don't go to the next batter
+		} else {
+			TeamInfo.AB = TeamInfo.AB + 1; 
+			if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
+			LOB += 1; //**
+		}
 	} else {
 		//if it's not an at-bat, don't go to the next batter
 	}
