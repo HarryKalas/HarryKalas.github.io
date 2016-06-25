@@ -778,17 +778,7 @@ alert(Plays[0]);
 		getScore();
 	}
 
-	if (playText.nodeName == "atbat") {
-		//if it's an at-bat, usually go to next batter
-		if (playDes.indexOf("caught stealing") >= 0) { //don't go to the next batter
-		} else {
-			TeamInfo.AB = TeamInfo.AB + 1; 
-			if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
-			LOB += 1; //**
-		}
-	} else {
-		//if it's not an at-bat, don't go to the next batter
-	}
+	nextBatter(Plays[0]);
 }
 
 function SecondaryPlay(Play, Prefix) {
@@ -931,6 +921,34 @@ function playerNumber(Text) {
 		result = "2";
 	}
 	return result;
+}
+
+function nextBatter(Text) {
+	if (Text.indexOf("Pitcher Change: ") >= 0 || Text.indexOf("Pitching Change: ") >= 0) { //no advance
+	} else if (Text.indexOf("Coaching visit") >= 0) { //no advance
+	} else if (Text.indexOf("Injury Delay") >= 0) { //no advance
+	} else if (Text.indexOf("Offensive Substitution: ") >= 0) { //no advance
+	} else if (Text.indexOf("Defensive Substitution: ") >= 0) { //no advance
+	} else if (Text.indexOf("Defensive switch") >= 0) { //no advance
+	} else if (Text.indexOf("On-field Delay") >= 0) { //no advance
+	} else if (Text.indexOf(" caught stealing ") >= 0) { //no advance
+	} else if (Text.indexOf(" picks off ") >= 0) { //no advance
+	} else if (Text.indexOf(" pickoff attempt") >= 0) { //no advance
+	} else if (Text.indexOf(" steals ") >= 0) { //no advance
+	} else if (Text.indexOf("defensive indifference") >= 0) { //no advance
+	} else if (Text.indexOf(" wild pitch ") >= 0) { //no advance
+	} else if (Text.indexOf("passed ball") >= 0) { //no advance
+	} else if (Text.indexOf("balk") >= 0) { //no advance
+	} else if (Text.indexOf(" remains in the game ") >= 0) { //no advance
+	} else if (Text.indexOf("left the game") >= 0) { //no advance
+	} else if (Text.indexOf("turns around") >= 0) { //no advance
+	} else if (Text.indexOf("ejected") >= 0) { //no advance
+	} else if (Text.indexOf("foul pop error") >= 0) { //no advance
+	} else {
+		TeamInfo.AB = TeamInfo.AB + 1;
+		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
+		LOB += 1; //**
+	}
 }
 
 function Fielding(playText) {
