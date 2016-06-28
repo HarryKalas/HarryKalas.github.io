@@ -363,6 +363,7 @@ function showPlay(playText) {
 		getSound("BA");
 	}
 
+
 	theTeam = "";
 	if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { theTeam = " MYTEAM" } 	// more excitement if a hit is by my team
 
@@ -433,6 +434,7 @@ function showPlay(playText) {
 	case "Defensive Indiff" :
 	case "Runner Out" : 
 	case "Double Play" :
+	case "Error" :
 	case "Fan interference" :
 	case "Manager Review" :
 	case "Umpire Review" :
@@ -538,8 +540,10 @@ function showPlay(playText) {
 			}
 		}
 		theOut(Box, thePlay);
+//	} else if (Plays[0].indexOf("lines into a double play") >=0) {
+		//handle this; it happens a lot
 	} else if (Plays[0].indexOf("double play") >=0) {
-alert(["DP", playDes]);
+//alert(["DP", playDes]);
 		if (playDes.indexOf("to 1st") >=0) {
 			alert("Weird DP: " + playDes);
 			Box.setAttribute("background", "1b.gif");
@@ -1138,14 +1142,13 @@ function AddColumn() {
 
 	newCell = document.getElementById(TeamInfo.id + "Header").insertCell(TeamInfo.Column);
 	newCell.style.textAlign = "center";
-	newCell.innerHTML = "<B>" + TeamInfo.Inning + "</B>";
-
+	newCell.innerHTML = "<b>" + TeamInfo.Inning + "</b>";
 	for (Idx = 1; Idx <= 9; Idx++) {
 		Row = document.getElementById(TeamInfo.id + Idx);
 		newCell = Row.insertCell(TeamInfo.Column);
 		newCell.rowSpan = 3;
 		newCell.style.position = "relative";
-		newCell.background="0b.gif"
+		newCell.setAttribute("background","0b.gif");
 		newCell.width=60;
 		newCell.height=60;
 		newCell.innerHTML = "&nbsp;";
