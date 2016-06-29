@@ -189,7 +189,7 @@ document.getElementById("PitchTime").innerHTML = Temp;
 				case "Foul (Runner Going)" : Mark('b2');
 					theSound += " Foul " + Pitch.selectSingleNode("@pitch_type").text;
 					pitchCount = source.selectNodes("game/atbat/p");
-					if (pitchCount.length > (Balls + Strikes)) {
+					if (pitchCount.length > (parseInt(Balls) + parseInt(Strikes))) {
 						theSound += " X " + Pitch.selectSingleNode("@pitch_type").text;
 					}
 					break;
