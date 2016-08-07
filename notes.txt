@@ -1,0 +1,19 @@
+make a different sound for  when the p/@type="X" and:
+* p/@des="In play, out(s)"
+* p/@des="In play, no out"
+* p/@des="In play, run(s)"
+
+game/@inning_state=Top when the top starts
+game/@inning_state=Middle  between top and bottom
+game/@inning_state=Bottom when the bottom starts
+game/@inning_state=End between bottom and top of next
+
+Challenge
+status_ind="MF" status="Manager Challenge" reason="Close play at 1st"
+status_ind="MO" status="Manager Challenge" reason="Fair/foul in outfield"
+
+need calls for Joseph (Joseph, T), Rupp, Asche, Nola... everybody on the roster we can get
+
+Is there a call for action/@des="Offensive Substitution
+
+2009-03-15 4b
