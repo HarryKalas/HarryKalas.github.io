@@ -18,7 +18,21 @@
 <script type="text/javascript" src="chrome_pitch.js"></script>
 </head>
 <body onload="AfterLoad();">
-<h3>Away Team: <a id="away"></a> <a id="awayRecord"></a></h3>
+<table style="border-style: none;"><tr><td id="AwayLogo" style="text-align: center; border-style: none;">
+</td><td style="width: 400px; border-style: none;">
+<div id="Broadcast" class="BoxScore"><b>Broadcast: </b></div>
+<div id="GameStatus" class="BoxScore"></div>
+<div id="GameAlert" class="BoxScore"></div>
+<div id="BoxScore" class="BoxScore"></div>
+<div id="PitchCountT" class="BoxScore"></div>
+<div id="PitchCountF" class="BoxScore"></div>
+<div id="PitchTime" class="BoxScore"></div>
+<div id="PlayTime" class="BoxScore"></div>
+<div id="Debug" class="BoxScore"></div>
+</td><td id="HomeLogo" style="text-align: center; border-style: none; padding-left: 10px;">
+</td></tr></table>
+<p></p>
+<h3>Away Team: <a id="away"></a></h3>
 <table cellpadding="0" cellspacing="0" id="awayTable" width="850">
 <tr id="awayHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
 <tr id="away1">
@@ -268,15 +282,7 @@
 <tr><td style="text-align: left; width: 150px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
 </table>
 <p></p>
-<div id="Broadcast" class="BoxScore"><b>Broadcast: </b></div>
-<div id="BoxScore" class="BoxScore"></div>
-<div id="PitchCountT" class="BoxScore"></div>
-<div id="PitchCountF" class="BoxScore"></div>
-<div id="PitchTime" class="BoxScore"></div>
-<div id="PlayTime" class="BoxScore"></div>
-<div id="Debug" class="BoxScore"></div>
-<p></p>
-<h3>Home Team: <a id="home" Runs="0" Outs="0" Inning="1" Column="4" AB="1" Index="1"></a> <a id="homeRecord"></a></h3>
+<h3>Home Team: <a id="home" Runs="0" Outs="0" Inning="1" Column="4" AB="1" Index="1"></a></h3>
 <table cellpadding="0" cellspacing="0" id="homeTable" width=850>
 <tr id="homeHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
 <tr id="home1">

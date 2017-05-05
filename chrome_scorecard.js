@@ -16,6 +16,7 @@ TeamType[0] = "away";
 TeamType[1] = "home";
 
 //Global Variables
+PitchFrequency = 5000;
 TeamInfo = new Object;	//this will hold the A tag for team at-bat, global because I'm tired of passing it
 var homeTeam = ""		//loaded in LoadPlayers
 var awayTeam = ""		//loaded in LoadPlayers
@@ -72,6 +73,7 @@ var plyrSource;
 var ptchSource;
 
 gameFolder="http://gd2.mlb.com/components/game/mlb";
+gameFolder="http://mlb.mlb.com/gdcross/components/game/mlb";
 
 function AfterLoad() {
 	//build the date URL, which gives the folder of the gameday
@@ -120,7 +122,7 @@ function UpdateIt() {
 	if (LastPlay == -1) { return; }
 
 	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", 1000);
+	PitchTimer = setTimeout("LoadPitch()", PitchFrequency);
 }
 
 function selectNodes(Doc, XPath, context) {
@@ -134,18 +136,17 @@ function selectNodes(Doc, XPath, context) {
 
 function LoadGame(DateURL) {
 	//determines whether there is a game for the selected day and builds the folder URL text for Phillies' game that day
-	gameFolder="http://gd2.mlb.com/components/game/mlb";
 	gameFolder += DateURL;
 	source = xdLoad(gameFolder + "/master_scoreboard.xml");
 
 	otherGames = selectNodes(source, "//games/game[@home_team_name != '" + myTeam + "' and @away_team_name != '" + myTeam + "']");
 	OGText = "";
 	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
-		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += '<a href="index.html?myTeam=';
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + '">';
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_city") + " ";
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_name") + "</a> at ";
-		OGText += '<a href="index_chrome.html?myTeam=';
+		OGText += '<a href="index.html?myTeam=';
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + '">';
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_city") + " ";
 		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_name") + "</a> ";
@@ -182,6 +183,16 @@ function LoadGame(DateURL) {
 
 	gameFolder += "/gid_" + game.getAttribute("gameday");
 
+	awayLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
+	awayLogo += game.getAttribute("away_file_code");
+	awayLogo += '@2x.png" /><br/>(' + game.getAttribute("away_win") + "-" + game.getAttribute("away_loss") + ")";
+	document.getElementById("AwayLogo").innerHTML = awayLogo;
+
+	homeLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
+	homeLogo += game.getAttribute("home_file_code");
+	homeLogo += '@2x.png" /><br/>(' + game.getAttribute("home_win") + "-" + game.getAttribute("home_loss") + ")";
+	document.getElementById("HomeLogo").innerHTML = homeLogo;
+
 	var Node;
 	if (game.getAttribute("home_team_name") == myTeam) {
 		Node = selectNodes(source, "broadcast/home", game).snapshotItem(0);
@@ -193,10 +204,11 @@ function LoadGame(DateURL) {
 		document.getElementById("Broadcast").innerHTML = "<B>Broadcast: </B> " + selectNodes(source, "tv", Node).snapshotItem(0).innerHTML + "; " + selectNodes(source, "radio", Node).snapshotItem(0).innerHTML;
 	}
 
-	document.getElementById("awayRecord").innerHTML = "(" + game.getAttribute("away_win") + "-" + game.getAttribute("away_loss") + ")";
-	document.getElementById("homeRecord").innerHTML = "(" + game.getAttribute("home_win") + "-" + game.getAttribute("home_loss") + ")";
-
 	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
+	document.getElementById("GameStatus").innerHTML = "<B>Status: </B> " + gameStatus;
+
+	document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
+
 	//Final, In Progress, Warmup, Pre-Game (35 min? 2:20?), Preview (5:20?), 
 	switch (gameStatus) {
 	case "Preview" :
@@ -304,6 +316,12 @@ document.getElementById("PlayTime").innerHTML = Temp;
 	}
 
 	//update scoreboard
+	source = xdLoad(gameFolder + "/../master_scoreboard.xml");
+	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
+	document.getElementById("GameStatus").innerHTML = "<B>Status: </B> " + gameStatus;
+	document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
+//alert(selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text"));
+
 	source = xdLoad(gameFolder + "/boxscore.xml");
 	document.getElementById("BoxScore").innerHTML = BoxScore();
 
@@ -450,6 +468,7 @@ function showPlay(playText) {
 		//nothing to handle
 		break;
 	default :
+		window.open(gameFolder + "/game_events.xml");
 		alert(playEvent + "\n" + playText.xml);
 	}
 
@@ -545,6 +564,7 @@ function showPlay(playText) {
 	} else if (Plays[0].indexOf("double play") >=0) {
 //alert(["DP", playDes]);
 		if (playDes.indexOf("to 1st") >=0) {
+			window.open(gameFolder + "/game_events.xml");
 			alert("Weird DP: " + playDes);
 			Box.setAttribute("background", "1b.gif");
 		} else {
@@ -695,6 +715,7 @@ function showPlay(playText) {
 			thePlay = "&nbsp;";
 		}
 	} else if (Plays[0].indexOf("picked off") >= 0) {
+window.open(gameFolder + "/game_events.xml");
 alert("picked off");
 		Parts = Plays[0].split(", ");
 		SecondaryPlay(Parts[1], "PO ");
@@ -725,6 +746,7 @@ alert("picked off");
 		getSound("PC " + FieldingTeam);
 		Substitution(Plays[0]);
 	} else if (Plays[0].indexOf(" turns around ") >= 0) {
+window.open(gameFolder + "/game_events.xml");
 alert(Plays[0]);
 	} else if (Plays[0].indexOf("remains in the game") >= 0) {
 		//fix the postion of the person who remains in the game
@@ -734,13 +756,16 @@ alert(Plays[0]);
 		document.getElementById("MessageDiv").visibility = "visible";
 		MessageTimer = setTimeout("clearMessage('" + Plays[0] + "<br>')", 5000);
 	} else if (Plays[0].indexOf("ejected") >= 0) {
+window.open(gameFolder + "/game_events.xml");
 alert(Plays[0]);
 	} else if (Plays[0].indexOf("Dropped foul pop") >=0 ) {
 		//do nothing
+window.open(gameFolder + "/game_events.xml");
 alert(Plays[0]);
 	} else if (Plays[0].indexOf("challenge") >= 0) {
 		//instant replay that may change the call -- does not change anything
 		//example: Rangers challenged (tag play), call on the field was overturned: Pickoff attempt at 2nd. 
+window.open(gameFolder + "/game_events.xml");
 alert(Plays[0]);
 	} else if (Plays[0].indexOf('Coaching visit' >= 0)) {
 		getSound("Coach");
@@ -799,6 +824,7 @@ function SecondaryPlay(Play, Prefix) {
 		} else {
 			ans = confirm("Second Box Not Found" + Play); 
 			if (!ans) { die; }
+			window.open(gameFolder + "/game_events.xml");
 			alert(TeamInfo.Index);
 			for (Idx = 1; Idx <=9; Idx++) {  
 				alert(PlayerFull[TeamInfo.Index][Idx]);
@@ -891,6 +917,7 @@ function SecondaryPlay(Play, Prefix) {
 	} else if (Play.indexOf("Wild pitch")) {
 		//do nothing
 	} else {
+		window.open(gameFolder + "/game_events.xml");
 		alert("Undocumented SECONDARY Play: " + Play);
 	}
 	if (Play.indexOf("error") >= 0) {
@@ -988,6 +1015,7 @@ function HitDetail(playText) {
 		Result = "P";
 	} else {
 		//this shouldn't matter
+		window.open(gameFolder + "/game_events.xml");
 		alert("Unknown hit type: " + playText);
 	}
 	Result += playerNumber(playText);
@@ -1034,6 +1062,7 @@ function theOut(Box, thePlay) {
 		TeamCall = " " + TeamInfo.innerHTML;			// 3rd out call includes the team name
 		break;
 	default:
+		window.open(gameFolder + "/game_events.xml");
 		alert("Don't know the outs " + TeamInfo.Outs);		// error
 		return;
 	}
@@ -1212,6 +1241,7 @@ function Substitution(Text) {
 		TeamIdx = (TeamInfo.Index + 1) % 2;			//use the team that is NOT at bat
 		break;
 	default: 
+		window.open(gameFolder + "/game_events.xml");
 		alert("Substitution Type Not Handled: " + Text);
 		alert(TeamInfo.id);
 	}
@@ -1318,6 +1348,7 @@ function Substitution(Text) {
 	} else if (Players[1].indexOf("right field") > -1) {
 		gamePos = "RF";
 	} else {
+		window.open(gameFolder + "/game_events.xml");
 		alert("Unknown Position Substitution: " + Text);
 	}
 	

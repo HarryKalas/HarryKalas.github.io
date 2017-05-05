@@ -165,6 +165,7 @@ function LoadPitch() {
 					GetPlay(LastPlay);	//get the next play
 					break;
 				} else { Mark('T6');
+					window.open(gameFolder + "/game_events.xml");
 					alert("Unknown Ball: " + detail);
 				}
 			}
@@ -200,6 +201,7 @@ function LoadPitch() {
 					theSound += " Swinging " + Pitch.getAttribute("pitch_type");
 					break;
 				default :Mark('b6');
+					window.open(gameFolder + "/game_events.xml");
 					alert("Unknown Strike: " + detail);
 				}
 			}
@@ -212,6 +214,7 @@ function LoadPitch() {
 			theSound = "InPlay";
 			break;
 		default :
+			window.open(gameFolder + "/game_events.xml");
 			alert("Unknown pitch type: " + play + " " + detail);
 		}
 		if (theSound > "") { Mark('V');
@@ -220,7 +223,7 @@ function LoadPitch() {
 		LastPitch = Pitches.snapshotLength;
 	}
 	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", 1000);
+	PitchTimer = setTimeout("LoadPitch()", PitchFrequency);
 }
 
 function BallPos(X, Y, LR) {
