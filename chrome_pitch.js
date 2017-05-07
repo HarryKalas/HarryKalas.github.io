@@ -46,7 +46,7 @@ function LoadPitch() {
 	if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) { Mark('F'); 
 		GetPlay(LastPlay);	//catch any uncalled plays
 		LastPitch = 0; //reset the pitch count
-			source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
+		source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
 
 		//set the sides
 		if(selectNodes(source, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { Mark('J1'); //if it's the top of the inning
@@ -134,7 +134,8 @@ function LoadPitch() {
 			} else if (detail == "Pickoff Attempt 3B") {  Mark('R3');
 				theSound = "POA 3B";
 			} else {  Mark('R4');
-//				alert("Not a pitch: " + Pitch.xml);
+				window.open(gameFolder + "/game_events.xml");
+				alert("Not a pitch: " + Pitch.xml);
 				theSound = "";
 			}
 			break;
@@ -266,6 +267,12 @@ function ShowBatter(batterNode) {
 	batterPic = batterNode.getAttribute("pid");
 	batterName = batterNode.getAttribute("boxname");
 	batterAvg = batterNode.getAttribute("avg");
+	batterAB = batterNode.getAttribute("ab");
+	if (batterAB > 0) {
+		batterRec = batterNode.getAttribute("h") + ' for ' + batterAB;
+	} else {
+		batterRec = "";
+	}
 
 	document.getElementById("BatterPic").src = "http://mlb.mlb.com/images/players/mugshot/ph_" + batterPic + ".jpg";
 	document.getElementById("BatterName").innerHTML = batterName;
@@ -273,7 +280,7 @@ function ShowBatter(batterNode) {
 	document.getElementById("B").innerHTML = "0";
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
-	document.getElementById("InPlay").innerHTML = "";
+	document.getElementById("InPlay").innerHTML = batterRec;
 	getSound("Batters/2016" + batterName + LeadOff);
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
@@ -288,6 +295,11 @@ function ShowBatter(batterNode) {
 
 		//then scroll to the player
 		window.scrollTo(1, batterPos[1] - 150);
+	} else if (TeamInfo.Column == document.getElementById(TeamInfo.id + TeamInfo.AB).cells.length) {
+		//This is actually the end of the game -- the batter column is past the end of the table
+	} else { 
+		alert("No BatterPos"); // not sure how this could happen
+		die;
 	}
 }
 

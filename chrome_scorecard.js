@@ -207,7 +207,9 @@ function LoadGame(DateURL) {
 	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
 	document.getElementById("GameStatus").innerHTML = "<B>Status: </B> " + gameStatus;
 
-	document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
+	if (selectNodes(source, "alerts", game).snapshotItem(0)) {
+		document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
+	}
 
 	//Final, In Progress, Warmup, Pre-Game (35 min? 2:20?), Preview (5:20?), 
 	switch (gameStatus) {
@@ -264,6 +266,9 @@ function LoadPlayers() {
 	TeamInfo.AB = 1;
 	TeamInfo.Index = 1;
 
+	//put the TeamInfo back to the Away team because that's where the game starts
+	TeamInfo = document.getElementById("away");
+
 	//retrieve players for each team
 	for (TeamIdx = 0; TeamIdx <= 1; TeamIdx++) {
 		Team = selectNodes(plyrSource, "//game/team[@type='" + TeamType[TeamIdx] + "']").snapshotItem(0);
@@ -319,8 +324,9 @@ document.getElementById("PlayTime").innerHTML = Temp;
 	source = xdLoad(gameFolder + "/../master_scoreboard.xml");
 	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
 	document.getElementById("GameStatus").innerHTML = "<B>Status: </B> " + gameStatus;
-	document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
-//alert(selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text"));
+	if (selectNodes(source, "alerts", game).snapshotItem(0)) {
+		document.getElementById("GameAlert").innerHTML = selectNodes(source, "alerts", game).snapshotItem(0).getAttribute("text");
+	}
 
 	source = xdLoad(gameFolder + "/boxscore.xml");
 	document.getElementById("BoxScore").innerHTML = BoxScore();
@@ -356,6 +362,7 @@ document.getElementById("PlayTime").innerHTML = Temp;
 
 
 function showPlay(playText) {
+	LeadOff = "";	// next batter is NOT the leadoff batter
 	document.getElementById("InPlay").innerHTML = ""; //clear Ball In Play notation;
 
 	if (selectNodes(source, "..", playText).snapshotItem(0).nodeName == "top") {
@@ -364,7 +371,7 @@ function showPlay(playText) {
 		TeamInfo = document.getElementById("home");
 	}
 
-	//idenitify the batter's box
+	//identify the batter's box
 	Box = document.getElementById(TeamInfo.id + TeamInfo.AB).cells[TeamInfo.Column]; //get the batter's cell
 
 	if (!Box) {
@@ -397,6 +404,7 @@ function showPlay(playText) {
 	case "Sac Bunt" :
 	case "Strikeout - DP" :
 	case "Sac Fly" :
+	case "Sac Fly DP" :
 	case "Bunt Groundout" :
 	case "Bunt Pop Out" :
 		Box.setAttribute("background", "1out.gif");
@@ -475,7 +483,10 @@ function showPlay(playText) {
 	Review = 0;
 	playDes = playText.getAttribute("des");
 
-	if(playDes.indexOf("overturned: ") > 0) {
+	if(playDes.indexOf("overturned: Pitch challenge") > 0) {
+		playDes = playDes.split("overturned: ")[1];
+		Box.style.backgroundColor = "#E0E0FF";
+	} else if(playDes.indexOf("overturned: ") > 0) {
 		playDes = playDes.split("overturned: ")[1];
 		Box.style.backgroundColor = "#FFC0C0";
 	}
@@ -551,6 +562,16 @@ function showPlay(playText) {
 		}
 	} else if (Plays[0].indexOf("grounds into a double play") >=0) {
 		thePlay = "GIDP " + Fielding(Plays[0]);
+		//handle the second out here
+		for (Ptr = 1; Ptr < Plays.length; Ptr++) {
+			if (Plays[Ptr].indexOf(" out ") > -1) {
+				SecondaryPlay(Plays[Ptr], "DP ");
+				Plays[Ptr] = "";
+			}
+		}
+		theOut(Box, thePlay);
+	} else if (Plays[0].indexOf("flies into a sacrifice double play") >=0) {
+		thePlay = "SFDP " + Fielding(Plays[0]);
 		//handle the second out here
 		for (Ptr = 1; Ptr < Plays.length; Ptr++) {
 			if (Plays[Ptr].indexOf(" out ") > -1) {
@@ -766,7 +787,7 @@ alert(Plays[0]);
 		//instant replay that may change the call -- does not change anything
 		//example: Rangers challenged (tag play), call on the field was overturned: Pickoff attempt at 2nd. 
 window.open(gameFolder + "/game_events.xml");
-alert(Plays[0]);
+alert("Challenge: " + playDes);
 	} else if (Plays[0].indexOf('Coaching visit' >= 0)) {
 		getSound("Coach");
 	} else {
@@ -813,7 +834,7 @@ alert(Plays[0]);
 function SecondaryPlay(Play, Prefix) {
 	//DEAL WITH THINGS LIKE BALK, WP, ETC, THAT DON'T HAVE A PREFIX ON ADDITIONAL PLAYS
 	//THEY HAVE A PREFIX IF IT'S THE FIRST PLAY, BUT ADDITIONAL PLAYS DON'T
-	//MULTIPLE PLAYERS ADVANCING ON STEAL, WP, BALK
+	//MULTIPLE PLAYERS ADVANCING ON STEAL, WP, PB, BALK
 
 	SecondBox = findBox(Play);
 	if (!SecondBox) { 
@@ -821,6 +842,8 @@ function SecondaryPlay(Play, Prefix) {
 			ErrorHolder = "E ";
 		} else if ((Plays[Ptr].indexOf("Wild pitch") >= 0)) {
 			ErrorHolder = "WP ";
+		} else if ((Plays[Ptr].indexOf("Passed ball") >= 0)) {
+			ErrorHolder = "PB ";
 		} else {
 			ans = confirm("Second Box Not Found" + Play); 
 			if (!ans) { die; }
@@ -888,7 +911,7 @@ function SecondaryPlay(Play, Prefix) {
 	} else if (Play.indexOf("caught stealing 2nd") >= 0) {
 //alert("caught 2");
 		SecondBox.setAttribute("background", "2out.gif");
-		newDiv.className = "B2"
+		newDiv.className = "B2";
 		theOut(SecondBox);
 	} else if (Play.indexOf(" 2nd") >= 0) {
 		SecondBox.setAttribute("background", "2b.gif");
@@ -975,6 +998,8 @@ function nextBatter(Text) {
 	} else if (Text.indexOf("turns around") >= 0) { //no advance
 	} else if (Text.indexOf("ejected") >= 0) { //no advance
 	} else if (Text.indexOf("foul pop error") >= 0) { //no advance
+	} else if (Text.indexOf("Pitch challenge") >= 0) { //no advance
+	} else if (Text.indexOf("Foul tip") >= 0) { //no advance
 	} else {
 		TeamInfo.AB = TeamInfo.AB + 1;
 		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
@@ -1139,6 +1164,7 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	AudioQueue.push('../Commercials/' + Commercials[spnsr]);
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	TeamInfo.Inning++;
+	LeadOff = " Lead";	// next batter is the leadoff batter
 	TeamInfo.Column++;
 	TeamInfo.Outs = 0;
 
@@ -1558,9 +1584,9 @@ function BoxScore() {
 	result += '</tr>';
 
 	//away
-	result += '<tr><td class="BoxScore" style="text-align: left;"><b>';
+	result += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
 	result += topLevel.snapshotItem(0).getAttribute("away_sname");
-	result += '&#xa0;</b></td>'
+	result += '&#xa0;</nobr></b></td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
 		result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("away") + ' </td>';
 	}
@@ -1573,9 +1599,9 @@ function BoxScore() {
 	result += lineScore.snapshotItem(0).getAttribute("away_team_errors") + ' </th>';
 
 	//home
-	result += '<tr><td class="BoxScore" style="text-align: left;"><b>';
+	result += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
 	result += topLevel.snapshotItem(0).getAttribute("home_sname");
-	result += '&#xa0;</b></td>'
+	result += '&#xa0;</nobr></b></td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
 		if (inningScores.snapshotItem(Idx).getAttribute("home") > "") {
 			result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("home") + ' </td>';
