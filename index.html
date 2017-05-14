@@ -32,6 +32,7 @@
 </td><td id="HomeLogo" style="text-align: center; border-style: none; padding-left: 10px;">
 </td></tr></table>
 <p></p>
+<span id="GameDisplay">
 <h3>Away Team: <a id="away"></a></h3>
 <table cellpadding="0" cellspacing="0" id="awayTable" width="850">
 <tr id="awayHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
@@ -532,18 +533,20 @@
 </table>
 <p></p>
 <div id="BatterDiv" style="visibility: hidden;">
-<img id="BatterPic" src="spacer.gif" width="90" align="left"/>
+<img id="BatterPic" src="spacer.gif" width="90" align="left" style="padding-right: 5px;"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
-O: <span id="O"></span><br/><br/>
-<span id="InPlay"></span><br/>
+O: <span id="O"></span><br/>
+<span id="PitchSpeed" style="line-height: 35px;"></span><br/>
+<span id="InPlay"></span>
 </div>
 <div id="MessageDiv" style="visibility: hidden;">
 </div>
 <audio id="Audio" autoplay onended="playSound();" controls></audio>
 <div id="Plays" class="BoxScore"></div>
+</span>
 <p>
 <b>All Games Today:</b>
 </p>

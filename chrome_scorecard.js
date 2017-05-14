@@ -16,7 +16,7 @@ TeamType[0] = "away";
 TeamType[1] = "home";
 
 //Global Variables
-PitchFrequency = 5000;
+PitchFrequency = 2000;
 TeamInfo = new Object;	//this will hold the A tag for team at-bat, global because I'm tired of passing it
 var homeTeam = ""		//loaded in LoadPlayers
 var awayTeam = ""		//loaded in LoadPlayers
@@ -173,15 +173,20 @@ function LoadGame(DateURL) {
 			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);
 			if (Ans) { break; }
 		}
+
 		if (Idx == games.snapshotLength) {
 			alert("Those are the only games today.");
 			return false;
 		} else {
-			game = games[Idx];
+			game = games.snapshotItem(0);
 		}
 	}
 
-	gameFolder += "/gid_" + game.getAttribute("gameday");
+	if (game) {
+		gameFolder += "/gid_" + game.getAttribute("gameday");
+	} else {
+		alert(game.xml);
+	}
 
 	awayLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
 	awayLogo += game.getAttribute("away_file_code");
@@ -217,10 +222,12 @@ function LoadGame(DateURL) {
 	case "Pre-Game" :
 		//calculate the game start time
 		GameTime = game.getAttribute("time") + " " + game.getAttribute("time_zone");
-		document.write("<font size='14px'>Game has not yet started<br/>Game Time: " + GameTime + "</font>");   
-		document.write("<br/><B>Broadcast: </B> ");
-		document.write(selectNodes(source, "tv", Node).snapshotItem(0).innerHTML + "; ");
-		document.write(selectNodes(source, "radio", Node).snapshotItem(0).innerHTML);
+//		document.write("<font size='14px'>Game has not yet started<br/>Game Time: " + GameTime + "</font>");   
+//		document.write("<br/><B>Broadcast: </B> ");
+//		document.write(selectNodes(source, "tv", Node).snapshotItem(0).innerHTML + "; ");
+//		document.write(selectNodes(source, "radio", Node).snapshotItem(0).innerHTML);
+
+		document.getElementById("GameDisplay").innerHTML = "<font size='14px'>Game has not yet started<br/>Game Time: " + GameTime + "</font>";
 
 		TimeOffset = GameTime.split(":")[0]*3600000;
 		TimeOffset += GameTime.split(":")[1].split(" ")[0] * 60000;

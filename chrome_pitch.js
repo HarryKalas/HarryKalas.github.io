@@ -85,11 +85,11 @@ function LoadPitch() {
 		} else { Mark ('M2');
 			Strikes = "0";
 		}
-
+	
 		//update the batter's box
 		document.getElementById("B").innerHTML = Balls;
 		document.getElementById("S").innerHTML = Strikes;
-
+	
 		//update the pitcher's pitch count
 		PitchCounter = selectNodes(source, "game/players/pitcher").snapshotItem(0);
 		PitchTable = "";
@@ -108,12 +108,64 @@ function LoadPitch() {
 			PitchRow.cells[4].innerHTML = PitchCounter.getAttribute("strikes");
 			PitchRow.cells[5].innerHTML = PitchCounter.getAttribute("pitches");
 		}
-
+	
 		//build the pitch-count call
 		theSound = "Count/" + Balls + "-" + Strikes;
-
+	
 		//call only the most recent pitch
 		Pitch = Pitches.snapshotItem(Pitches.snapshotLength-1);
+	
+		//Pitch speed and type
+		document.getElementById("PitchSpeed").innerHTML = "";
+		if (Pitch.getAttribute("start_speed")) {
+			document.getElementById("PitchSpeed").innerHTML = Pitch.getAttribute("start_speed");
+		}
+		if (Pitch.getAttribute("pitch_type")) {
+			switch(Pitch.getAttribute("pitch_type")) {
+			case "CH" :
+				pitchtype = " Changeup";
+				break;
+			case "CU" :
+				pitchtype = " Curveball";
+				break;
+			case "FC" :
+				pitchtype = " Cutter";
+				break;
+			case "FF" :
+				pitchtype = " 4-seam fastball";
+				break;
+			case "FT" :
+				pitchtype = " 2-seam fastball";
+				break;
+			case "KC" :
+				pitchtype = " Knuckle Curve";
+				break;
+			case "KN" :
+				pitchtype = " Knuckleball";
+				break;
+			case "SI" :
+				pitchtype = " Sinker";
+				break;
+			case "SL" :
+				pitchtype = " Slider";
+				break;
+			}
+		}	
+	
+		document.getElementById("PitchSpeed").innerHTML += pitchtype;
+		if (Pitch.getAttribute("type")) {
+			document.getElementById("PitchSpeed").innerHTML += " (" + Pitch.getAttribute("type") + ")";
+		}
+	
+//CH = CHANGEUP
+//CU = CURVEBALL
+//FC = CUTTER
+//FF = 4-SEAM FASTBALL
+//FT = 2-SEAM FASTBALL
+//KC = KNUCKLE CURVE
+//SI = SINKER
+//SL = SLIDER
+	
 		if (Pitch.getAttribute("type")) { Mark('P1');
 			play = Pitch.getAttribute("type");
 		} else { Mark('P2');
@@ -124,7 +176,7 @@ function LoadPitch() {
 		} else { Mark('Q2');
 			detail = "";
 		}
-
+	
 		switch (play) {
 		case "" : Mark('a1');
 			if (detail == "Pickoff Attempt 1B") { Mark('R1');
@@ -222,9 +274,11 @@ function LoadPitch() {
 			getSound(theSound);
 		}
 		LastPitch = Pitches.snapshotLength;
+		clearTimeout(PitchTimer);
+		PitchTimer = setTimeout("LoadPitch()", 10000);	//allow 10 seconds between pitches
+	} else {
+		PitchTimer = setTimeout("LoadPitch()", 1000);	//check every second until a new pitch comes in
 	}
-	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", PitchFrequency);
 }
 
 function BallPos(X, Y, LR) {
@@ -291,7 +345,9 @@ function ShowBatter(batterNode) {
 		//position the picture box first
 		document.getElementById("BatterDiv").style.left = batterPos[0] + 64 + "px";
 		document.getElementById("BatterDiv").style.top = batterPos[1] + 1 + "px";
-		BatterDiv.style.visibility = "visible";
+		document.getElementById("BatterDiv").style.visibility = "visible";
+		document.getElementById("PitchSpeed").innerHTML = "";
+		document.getElementById("InPlay").innerHTML = "";
 
 		//then scroll to the player
 		window.scrollTo(1, batterPos[1] - 150);
