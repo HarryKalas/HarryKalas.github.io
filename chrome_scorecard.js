@@ -178,7 +178,7 @@ function LoadGame(DateURL) {
 			alert("Those are the only games today.");
 			return false;
 		} else {
-			game = games.snapshotItem(0);
+			game = games.snapshotItem(Idx);
 		}
 	}
 
@@ -1182,6 +1182,8 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	I123 = true;		// assume 1-2-3 inning until someone gets on base
 	LeadOff = " Lead";	// next batter is the leadoff batter
 	
+	clearTimeout(PitchTimer);
+	PitchTimer = setTimeout("LoadPitch()", 1000000);
 }
 
 function getPos(obj) {

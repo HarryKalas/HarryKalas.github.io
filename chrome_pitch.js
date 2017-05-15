@@ -277,7 +277,7 @@ function LoadPitch() {
 		clearTimeout(PitchTimer);
 		PitchTimer = setTimeout("LoadPitch()", 10000);	//allow 10 seconds between pitches
 	} else {
-		PitchTimer = setTimeout("LoadPitch()", 1000);	//check every second until a new pitch comes in
+		PitchTimer = setTimeout("LoadPitch()", 2000);	//check every second until a new pitch comes in
 	}
 }
 
