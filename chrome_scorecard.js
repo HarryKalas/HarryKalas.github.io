@@ -30,7 +30,11 @@ GameOver = false; //whether the game is over
 var PitchTimer;
 var PlayTimer;
 var AudioTimer;
-LastAction = "";
+LastPitch = 0;
+LastPlay = 0;
+var LastAction = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+LastPlayTime = "";	//variable to hold the date last modified of the game_events.xml file that holds the plays
+LastPitchTime = "";	//variable to hold the date last modified of the plays.xml file that holds the pitches
 var Review = 0;
 var Overturned = 1;
 var Upheld = 2;
@@ -48,6 +52,20 @@ PlayerFull = new Array;		//full name as it appears in the play-by-play (second i
 
 AudioQueue = new Array; 		// holds the list of audio files to play at the end of the play
 
+//XML object for the current game; can hold master scoreboard, event log, or box score
+var source;
+
+//XML object for the current game's players
+var plyrSource;
+
+//XML object for the game's pitching history
+var ptchSource;
+
+//older version of the game folder -- I think the results are the same
+//gameFolder="http://gd2.mlb.com/components/game/mlb";
+gameFolder="http://mlb.mlb.com/gdcross/components/game/mlb";
+
+
 //NEW XML cross-domain load
 //revised to return the responseXML for Chrome
 function xdLoad(FileName) {
@@ -62,18 +80,6 @@ function xdLoad(FileName) {
 		return null;
 	}
 }
-
-//XML object for the current game; can hold master scoreboard, event log, or box score
-var source;
-
-//XML object for the current game's players
-var plyrSource;
-
-//XML object for the game's pitching history
-var ptchSource;
-
-gameFolder="http://gd2.mlb.com/components/game/mlb";
-gameFolder="http://mlb.mlb.com/gdcross/components/game/mlb";
 
 function AfterLoad() {
 	//build the date URL, which gives the folder of the gameday
@@ -95,41 +101,58 @@ function AfterLoad() {
 		myTeam = myTeam.replace("%20", " ");
 	}
 
-	game = LoadGame(DateURL); //true if there is a game on the date; false if there is not
+	game = LoadGame(DateURL); //loaded if there is a game on the date; empty if there is not	=-= 1 =-=
 
 	if (game) {
-		LoadPlayers();
+		LoadPlayers(); //=-= 2 =-=
 
-		source = xdLoad(gameFolder + "/../master_scoreboard.xml");
-		LastPitch = 0;
-
-		UpdateIt();
+		UpdateIt();	// =-= 4 =-=
 		AudioQueue.length = 0;
 		playSound();
-		source = xdLoad(gameFolder + "/plays.xml");
-		if (source) {
-			batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
-			ShowBatter(batterNode);
-		} 
+//		source = xdLoad(gameFolder + "/plays.xml");
+//		if (source) {
+//			batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
+//			ShowBatter(batterNode);
+//		} 
 	}
 }
 
+
+function LastMod(URL) {
+	xhttp.open("HEAD", URL, false);
+	xhttp.send(null);
+	return xhttp.getResponseHeader("Last-Modified");
+}
+
 function UpdateIt() {
+
 	if (LastPlay == -1) {  //game over; stop updating
 		return;
 	}
-	LastPlay = LoadPlays(LastPlay);
-	if (LastPlay == -1) { return; }
 
-	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", PitchFrequency);
+	clearTimeout(PlayTimer);
+	PlayTimer = setTimeout("UpdateIt()", 2000);
+
+	thisTime = LastMod(gameFolder + "/game_events.xml");		
+	if (thisTime != LastPlayTime) {
+		LastPlayTime = thisTime;
+		LastPlay = LoadPlays(LastPlay); //=-= 5 =-=
+	}
+
+	thisTime = LastMod(gameFolder + "/plays.xml");		
+	if (thisTime != LastPitchTime) {
+		LastPitchTime = thisTime;
+		LoadPitch();
+	}
+
 }
 
 function selectNodes(Doc, XPath, context) {
 //UNORDERED_NODE_ITERATOR_TYPE
+
 	if(context) {
 		return Doc.evaluate(XPath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
-	} else {
+	} else if (Doc) {
 		return Doc.evaluate(XPath, Doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
 	}
 }
@@ -222,10 +245,6 @@ function LoadGame(DateURL) {
 	case "Pre-Game" :
 		//calculate the game start time
 		GameTime = game.getAttribute("time") + " " + game.getAttribute("time_zone");
-//		document.write("<font size='14px'>Game has not yet started<br/>Game Time: " + GameTime + "</font>");   
-//		document.write("<br/><B>Broadcast: </B> ");
-//		document.write(selectNodes(source, "tv", Node).snapshotItem(0).innerHTML + "; ");
-//		document.write(selectNodes(source, "radio", Node).snapshotItem(0).innerHTML);
 
 		document.getElementById("GameDisplay").innerHTML = "<font size='14px'>Game has not yet started<br/>Game Time: " + GameTime + "</font>";
 
@@ -273,9 +292,6 @@ function LoadPlayers() {
 	TeamInfo.AB = 1;
 	TeamInfo.Index = 1;
 
-	//put the TeamInfo back to the Away team because that's where the game starts
-	TeamInfo = document.getElementById("away");
-
 	//retrieve players for each team
 	for (TeamIdx = 0; TeamIdx <= 1; TeamIdx++) {
 		Team = selectNodes(plyrSource, "//game/team[@type='" + TeamType[TeamIdx] + "']").snapshotItem(0);
@@ -286,7 +302,7 @@ function LoadPlayers() {
 			Row.cells[2].innerHTML = Player.getAttribute("boxname");
 			Row.cells[3].innerHTML = Player.getAttribute("game_position");
 			PlayerOrd[TeamIdx][Ctr] = Player.getAttribute("num");
-			PlayerFull[TeamIdx][Ctr] = BuildName(Player);
+			PlayerFull[TeamIdx][Ctr] = BuildName(Player); // =-= 3 =-=
 		}
 
 		//pitcher
@@ -300,11 +316,13 @@ function LoadPlayers() {
 		//get pitcher's stats in case you are loading during or after the game
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
 		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
-		pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
-		PitchRow.cells[3].innerHTML = pBalls;
-		PitchRow.cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchRow.cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+		if (ptchNodes) {
+			pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
+			PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
+			PitchRow.cells[3].innerHTML = pBalls;
+			PitchRow.cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
+			PitchRow.cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+		}
 	}
 	return true;
 }
@@ -323,8 +341,7 @@ document.getElementById("PlayTime").innerHTML = Temp;
 	for (pIdx = StartPlay; pIdx < gamePlays.snapshotLength; pIdx++) {
 		document.getElementById("InPlay").innerHTML = "";
 		ErrorHolder = "";
-		LastAction = gamePlays.snapshotItem(pIdx).getAttribute("des");
-		showPlay(gamePlays.snapshotItem(pIdx));
+		showPlay(gamePlays.snapshotItem(pIdx)); // =-= 6 =-=
 	}
 
 	//update scoreboard
@@ -372,10 +389,42 @@ function showPlay(playText) {
 	LeadOff = "";	// next batter is NOT the leadoff batter
 	document.getElementById("InPlay").innerHTML = ""; //clear Ball In Play notation;
 
-	if (selectNodes(source, "..", playText).snapshotItem(0).nodeName == "top") {
+	//make sure the play hasn't already been called
+	playDes = playText.getAttribute("des");
+	for (idx = 0; idx < 10; idx++) {
+		if (LastAction[idx] == playDes) { break; }
+	}
+	if (idx == 10) { //hasn't been processed already; add it to the list
+		LastAction.push(playDes);
+		LastAction.shift();
+	} else {	//already processed; exit
+		return;
+	}
+
+	switch (selectNodes(source, "..", playText).snapshotItem(0).nodeName) {
+	case "top" : 
 		TeamInfo = document.getElementById("away");
-	} else {
+		break;
+	case "bottom" :
 		TeamInfo = document.getElementById("home");
+		break;
+	case "game" :
+		if (selectNodes(source, "..", playText).snapshotItem(0).getAttribute("top_inning") == "F") {
+			TeamInfo = document.getElementById("home");
+		} else {
+			TeamInfo = document.getElementById("away");
+		}
+		break;
+	default :
+		alert("WTF??");
+	}
+
+
+	if (playDes.indexOf("challenge") > 0) { 
+		Challenge = "Inning " + playText.parentNode.parentNode.getAttribute("num");
+		Challenge += ", Batter: " + document.getElementById(TeamInfo.id + TeamInfo.AB).cells[2].innerHTML;
+		Challenge += ", " + playDes.split(":")[0];
+		document.getElementById("Challenges").innerHTML += Challenge + "<br/>";
 	}
 
 	//identify the batter's box
@@ -395,10 +444,6 @@ function showPlay(playText) {
 		getSound("BA");
 	}
 
-
-	theTeam = "";
-	if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { theTeam = " MYTEAM" } 	// more excitement if a hit is by my team
-
 	//process the overall event basic part
 	playEvent = playText.getAttribute("event");
 	switch(playEvent) {			// set the background picture based on the event
@@ -415,8 +460,6 @@ function showPlay(playText) {
 	case "Bunt Groundout" :
 	case "Bunt Pop Out" :
 		Box.setAttribute("background", "1out.gif");
-		if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { theTeam = "" } 	// more excitement if the out is for the other team
-			else { theTeam = " MYTEAM" }
 		break;
 	case "Field Error" :
 		// ***** I think this needs to be handled later
@@ -433,8 +476,6 @@ function showPlay(playText) {
 	case "Forceout" :
 		I123 = false;		// not a 1-2-3 inning any more
 		Box.setAttribute("background", "1b.gif");	// batter to 1st
-		if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { theTeam = "" } 	// more excitement if the out is for the other team
-			else { theTeam = " MYTEAM" }
 		break;
 	case "Double" :
 		I123 = false;		// not a 1-2-3 inning any more
@@ -448,38 +489,40 @@ function showPlay(playText) {
 		I123 = false;		// not a 1-2-3 inning any more
 		Box.setAttribute("background", "hr.gif");	// home run
 		break;
-	case "Passed Ball" :
-	case "Wild Pitch" :
 	case "Balk" :
-	case "Stolen Base 2B" :
-	case "Stolen Base 3B" :
-	case "Picked off stealing 2B" :
-	case "Picked off stealing 3B" :
 	case "Caught Stealing 2B" :
 	case "Caught Stealing 3B" :
 	case "Caught Stealing Home" :
+	case "Defensive Indiff" :
+	case "Double Play" :
+	case "Error" :
+	case "Fan interference" :
+	case "Manager Review" :
+	case "Passed Ball" :
 	case "Pickoff 1B" :
 	case "Pickoff 2B" :
 	case "Pickoff 3B" :
 	case "Pickoff Error 1B" :
 	case "Pickoff Error 2B" :
 	case "Pickoff Error 3B" :
-	case "Defensive Indiff" :
+	case "Picked off stealing 2B" :
+	case "Picked off stealing 3B" :
+	case "Runner Advance" : 
 	case "Runner Out" : 
-	case "Double Play" :
-	case "Error" :
-	case "Fan interference" :
-	case "Manager Review" :
+	case "Stolen Base 2B" :
+	case "Stolen Base 3B" :
 	case "Umpire Review" :
+	case "Wild Pitch" :
 		// will be handled later
 		break;
-	case "Game Advisory" : 
-	case "Offensive Sub" : 
 	case "Defensive Sub" : 
 	case "Defensive Switch" : 
+	case "Game Advisory" : 
+	case "Offensive Sub" : 
 	case "Pitcher Switch" : 
 	case "Pitching Substitution" : 
 	case "Player Injured" :
+	case "Ejection" :
 		//nothing to handle
 		break;
 	default :
@@ -488,7 +531,6 @@ function showPlay(playText) {
 	}
 
 	Review = 0;
-	playDes = playText.getAttribute("des");
 
 	if(playDes.indexOf("overturned: Pitch challenge") > 0) {
 		playDes = playDes.split("overturned: ")[1];
@@ -544,14 +586,26 @@ function showPlay(playText) {
 		thePlay = "F" + playerNumber(Plays[0]);
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("pops out") >= 0) {
-		thePlay = "P" + playerNumber(Plays[0]);
+		if (Plays[0].indexOf("foul territory") >= 0) {
+			thePlay = "PF" + playerNumber(Plays[0]);
+		} else {
+			thePlay = "P" + playerNumber(Plays[0]);
+		}
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("out on a sacrifice bunt") >=0) {
 		thePlay = "SAC B " + Fielding(Plays[0]);
-		theOut(Box, thePlay);
+		if (playDes.indexOf("scores") >= 0) {
+			theOut(Box, thePlay + " RBI");
+		} else {
+			theOut(Box, thePlay);
+		}
 	} else if (Plays[0].indexOf("out on a sacrifice fly") >=0) {
 		thePlay = "SF " + playerNumber(Plays[0]);
-		theOut(Box, thePlay);
+		if (playDes.indexOf("scores") >= 0) {
+			theOut(Box, thePlay + " RBI");
+		} else {
+			theOut(Box, thePlay);
+		}
 	} else if (Plays[0].indexOf("unassisted double play") >=0) {
 		thePlay = "DP " + Fielding(Plays[0]);
 		//handle the second out here
@@ -775,7 +829,7 @@ alert("picked off");
 		Substitution(Plays[0]);
 	} else if (Plays[0].indexOf(" turns around ") >= 0) {
 window.open(gameFolder + "/game_events.xml");
-alert(Plays[0]);
+alert("1 " + Plays[0]);
 	} else if (Plays[0].indexOf("remains in the game") >= 0) {
 		//fix the postion of the person who remains in the game
 		Substitution(Plays[0]);
@@ -783,9 +837,8 @@ alert(Plays[0]);
 		document.getElementById("MessageDiv").innerHTML = Plays[0] + '<br/>';
 		document.getElementById("MessageDiv").visibility = "visible";
 		MessageTimer = setTimeout("clearMessage('" + Plays[0] + "<br>')", 5000);
-	} else if (Plays[0].indexOf("ejected") >= 0) {
-window.open(gameFolder + "/game_events.xml");
-alert(Plays[0]);
+	} else if (Plays[0].indexOf("ejected") >= 0) {	// manager ejected; nothing to show here, but maybe we can get a call?
+		getSound("Ejected");
 	} else if (Plays[0].indexOf("Dropped foul pop") >=0 ) {
 		//do nothing
 window.open(gameFolder + "/game_events.xml");
@@ -1007,6 +1060,7 @@ function nextBatter(Text) {
 	} else if (Text.indexOf("foul pop error") >= 0) { //no advance
 	} else if (Text.indexOf("Pitch challenge") >= 0) { //no advance
 	} else if (Text.indexOf("Foul tip") >= 0) { //no advance
+	} else if (Text == "Foul") { //no advance
 	} else {
 		TeamInfo.AB = TeamInfo.AB + 1;
 		if (TeamInfo.AB == 10) { TeamInfo.AB = 1; }
@@ -1099,7 +1153,7 @@ function theOut(Box, thePlay) {
 		return;
 	}
 
-	getSound(thePlay + " O" + TeamInfo.Outs+ theTeam);			// get the call for the play with outs if possible
+	getSound(thePlay + " O" + TeamInfo.Outs);			// get the call for the play with outs if possible
 
 	if(AudioQueue.length==0 || AudioQueue[AudioQueue.length-1].indexOf('O' + TeamInfo.Outs) == -1) { 	// if the outs haven't been called ...
 		getSound("Out" + TeamInfo.Outs +TeamCall + " I" + TeamInfo.Inning);	// get the out call for the inning
@@ -1108,18 +1162,29 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 
 	if (TeamInfo.Outs < 3) { return; }	// if the inning is not over, we're finished
 	
+//at the end of the inning, ideally, Harry calls RHE + score and teams
 	RHE = "";
+
 	if (I123) {		// if it's a 1-2-3 inning, call that
 		RHE = "RHE/I123" + " I" + TeamInfo.Inning + " " + TeamInfo.innerHTML;
 	} else {		// otherwise call the runs, hits and errors
 		RHE = "RHE/" + Runs + Hits + Errors + LOB + " I" + TeamInfo.Inning + " " + TeamInfo.innerHTML;
 	}
 
-	getSound(RHE);
-
 	awayScore = document.getElementById("away").Runs;
 	homeScore = document.getElementById("home").Runs;
-	PhilsHome = (document.getElementById("home").innerHTML == "Philadelphia Phillies");
+	if (homeScore > awayScore) {
+		RHE = RHE + " " + homeScore + "-" + awayScore;
+		RHE = RHE + " " + homeTeam + " " + awayTeam
+	} else if (homeScore == awayScore) {
+		RHE = RHE + " " + awayScore + "-" + homeScore;
+		RHE = RHE + " " + awayTeam + " " + homeTeam;
+	} else {
+		RHE = RHE + " " + awayScore + "-" + homeScore;
+		RHE = RHE + " " + awayTeam + " " + homeTeam
+	}
+
+	getSound(RHE);
 
 	GameOver = IsGameOver(TeamInfo.Inning, 3);
 
@@ -1170,6 +1235,7 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	spnsr = Math.floor(Math.random() * Commercials.length);
 	AudioQueue.push('../Commercials/' + Commercials[spnsr]);
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+	if (LastPitch > 0) { LastPitch++; } //to deal with the belated in-play call
 	TeamInfo.Inning++;
 	LeadOff = " Lead";	// next batter is the leadoff batter
 	TeamInfo.Column++;
@@ -1182,8 +1248,6 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	I123 = true;		// assume 1-2-3 inning until someone gets on base
 	LeadOff = " Lead";	// next batter is the leadoff batter
 	
-	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", 1000000);
 }
 
 function getPos(obj) {
@@ -1253,12 +1317,13 @@ function Substitution(Text) {
 		PitchRow = PitchTable.rows[r];
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
 		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
-		pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchTable.rows[r].cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
-		PitchTable.rows[r].cells[3].innerHTML = pBalls;
-		PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
-		PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
-
+		if (ptchNodes) {
+			pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
+			PitchTable.rows[r].cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
+			PitchTable.rows[r].cells[3].innerHTML = pBalls;
+			PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
+			PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+		}
 		Pitcher = Players[0].replace("Pitching Change:", "");
 		Pitcher = Pitcher.replace("Pitcher Change:", "");
 		InningText = TeamInfo.Inning + "." + TeamInfo.Outs;
@@ -1446,14 +1511,41 @@ function InsertPlayer(Ord, gamePos, TmID, PlyrXML) {
 }
 
 function getSound(SoundToGet) {
-   SoundArray = SoundToGet.split(" ");
+   fldrTeam = "";
+   if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { 
+      // more excitement if a hit is by my team
+      fldrTeam = "US/" ;
+   } else {
+      fldrTeam = "THEM/";
+   }
+
+   SoundArray = (fldrTeam + SoundToGet).split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
       for (SoundCtr = 0; SoundCtr < SoundFiles.length; SoundCtr++) {
          if (SoundFiles[SoundCtr][0] == SoundFile) {
             FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
             AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
-document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+            document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+            document.all.LastSound.innerHTML = SoundFiles[SoundCtr][0] + " (" + FileNum + ")";
+            document.all.LastSound.innerHTML += " --- " + SoundToGet;
+            return;
+         }
+      }
+      SoundArray.length--;
+   }
+
+   //if it wasn't found for the team, try it for neutral
+   SoundArray = ("NEUTRAL/" + SoundToGet).split(" ");
+   while (SoundArray.length > 0) {
+      SoundFile = SoundArray.join(" ");
+      for (SoundCtr = 0; SoundCtr < SoundFiles.length; SoundCtr++) {
+         if (SoundFiles[SoundCtr][0] == SoundFile) {
+            FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
+            AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
+            document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+            document.all.LastSound.innerHTML = SoundFiles[SoundCtr][0] + " (" + FileNum + ")";
+            document.all.LastSound.innerHTML += " --- " + SoundToGet;
             return;
          }
       }

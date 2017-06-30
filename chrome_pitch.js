@@ -24,19 +24,22 @@ function LoadPitch() {
 	//if there is a game action other than a pitch, get the call
 	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
 		ABPlay = selectNodes(source, "game/action/@des").snapshotItem(0).nodeValue;
-		if (LastAction != ABPlay) { Mark('C');
-			GetPlay(LastPlay);	//get the next play
-			return;
+		for (idx = 0; idx < 10; idx++) {
+			if (LastAction[idx] == ABPlay) { break; }
+
+		}
+		if (idx == 10) { //hasn't been called already; call it
+			alert("HASN'T BEEN CALLED");
 		}
 	}
 
-	//occurs when: wild pitch, a ball in play
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").nodeValue);
-		ABPlay = selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue;
-		if (LastAction != ABPlay) { Mark('E-' + LastAction);
-			GetPlay(LastPlay);	//get the next play
-			return;
-		}
+	//if the atbat has an action, get the call for it
+	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('B');
+		AtBat = selectNodes(source, "game/atbat").snapshotItem(0); //.nodeValue;
+		ABPlay = AtBat.getAttribute("des");
+
+		showPlay(AtBat);
+
 	}
 
 	//check for a change of batter	
@@ -149,8 +152,15 @@ function LoadPitch() {
 			case "SL" :
 				pitchtype = " Slider";
 				break;
+			case "FS" :
+				pitchtype = " Fastball Sinker";
+				break; 
+			default :
+				alert("Pitch Type: " + Pitch.getAttribute("pitch_type"));
 			}
-		}	
+		} else {
+			pitchtype = "!"
+		}
 	
 		document.getElementById("PitchSpeed").innerHTML += pitchtype;
 		if (Pitch.getAttribute("type")) {
@@ -240,7 +250,7 @@ function LoadPitch() {
 					theSound += " Foul " + Pitch.getAttribute("pitch_type");
 					pitchCount = selectNodes(source, "game/atbat/p");
 					if (pitchCount.snapshotLength > (Balls + Strikes)) {
-						theSound += " X " + Pitch.getAttribute("pitch_type");
+						theSound += " Foul X " + Pitch.getAttribute("pitch_type");
 					}
 					break;
 				case "Foul Tip" : Mark('b3');
@@ -274,10 +284,6 @@ function LoadPitch() {
 			getSound(theSound);
 		}
 		LastPitch = Pitches.snapshotLength;
-		clearTimeout(PitchTimer);
-		PitchTimer = setTimeout("LoadPitch()", 10000);	//allow 10 seconds between pitches
-	} else {
-		PitchTimer = setTimeout("LoadPitch()", 2000);	//check every second until a new pitch comes in
 	}
 }
 
@@ -334,10 +340,17 @@ function ShowBatter(batterNode) {
 	document.getElementById("B").innerHTML = "0";
 	document.getElementById("S").innerHTML = "0";
 	document.getElementById("O").innerHTML = TeamInfo.Outs;
+	document.getElementById("PitchSpeed").innerHTML = "";
 	document.getElementById("InPlay").innerHTML = batterRec;
 	getSound("Batters/2016" + batterName + LeadOff);
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
+
+	if(selectNodes(source, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { 
+		TeamInfo = document.getElementById("away"); //the current team is the Away team
+	} else { 
+		TeamInfo = document.getElementById("home"); //the current team is the Home team
+	}
 
 	Box = document.getElementById(TeamInfo.id + TeamInfo.AB).cells[TeamInfo.Column];
 	batterPos = getPos(Box);
@@ -346,8 +359,6 @@ function ShowBatter(batterNode) {
 		document.getElementById("BatterDiv").style.left = batterPos[0] + 64 + "px";
 		document.getElementById("BatterDiv").style.top = batterPos[1] + 1 + "px";
 		document.getElementById("BatterDiv").style.visibility = "visible";
-		document.getElementById("PitchSpeed").innerHTML = "";
-		document.getElementById("InPlay").innerHTML = "";
 
 		//then scroll to the player
 		window.scrollTo(1, batterPos[1] - 150);
@@ -359,23 +370,24 @@ function ShowBatter(batterNode) {
 	}
 }
 
-function GetPlay(After) {
-	//used to make sure you get a play at certain points
-	if (LastPlay == -1) {  // game over; stop updating
-		return;
-	}
-	
-	if (LastPlay > After) {  // plays have already been updated; stop looking
-		return;
-	}
 
-	// if plays haven't been updated yet, see if there is anything new 
-	//	and keep checking until there is
-	source = xdLoad(gameFolder + "/game_events.xml");
-	gamePlays = selectNodes(source, "//game/inning/*/*");
-	if (gamePlays.snapshotLength > LastPlay) { // if there is a new call, get it
-		UpdateIt();
-	} else {	//otherwise keep trying
-		setTimeout("GetPlay(" + After + ")", 5000);
-	}
+function GetPlay(After) {
+//	//used to make sure you get a play at certain points
+//	if (LastPlay == -1) {  // game over; stop updating
+//		return;
+//	}
+//	
+//	if (LastPlay > After) {  // plays have already been updated; stop looking
+//		return;
+//	}
+//
+//	// if plays haven't been updated yet, see if there is anything new 
+//	//	and keep checking until there is
+//	source = xdLoad(gameFolder + "/game_events.xml");
+//	gamePlays = selectNodes(source, "//game/inning/*/*");
+//	if (gamePlays.snapshotLength > LastPlay) { // if there is a new call, get it
+//		UpdateIt();
+//	} else {	//otherwise keep trying
+//		setTimeout("GetPlay(" + After + ")", 5000);
+//	}
 }
