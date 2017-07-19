@@ -16,30 +16,17 @@ function LoadPitch() {
 
 	//if the game is over, exit
 	if (selectNodes(source, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
-//UpdateIt();
-//		GetPlay(LastPlay);	//get the next play
-//		//*****CHECK FOR A WIN HERE
-//		return; 
+		return; 
 	}
 
 	//if there is a game action other than a pitch, get the call
 	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
 		LastPlay = LoadPlays(LastPlay);
-//UpdateIt();
-		ABPlay = selectNodes(source, "game/action/@des").snapshotItem(0).nodeValue;
-//		if (LastAction != ABPlay) { Mark('C');
-//			GetPlay(LastPlay);	//get the next play
-//			return;
-//		}
 	}
 
 	//occurs when: wild pitch, a ball in play
 	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").nodeValue);
-		ABPlay = selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue;
-		if (LastAction != ABPlay) { Mark('E-' + LastAction);
-			GetPlay(LastPlay);	//get the play
-			return;
-		}
+		LastPlay = LoadPlays(LastPlay);
 	}
 
 	//check for a change of batter	
