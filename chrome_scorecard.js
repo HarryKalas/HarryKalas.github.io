@@ -104,11 +104,20 @@ function AfterLoad() {
 	game = LoadGame(DateURL); //loaded if there is a game on the date; empty if there is not	=-= 1 =-=
 
 	if (game) {
-		LoadPlayers(); //=-= 2 =-=
+		LoadPlayers();
 
-		UpdateIt();	// =-= 4 =-=
+		LastPlay = LoadPlays(LastPlay); 
+
+		if (LastPlay < 0) { // game over
+			return; 
+		}
+
 		AudioQueue.length = 0;
 		playSound();
+
+		LoadPitch();
+		PlayMonitor();
+
 //		source = xdLoad(gameFolder + "/plays.xml");
 //		if (source) {
 //			batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
@@ -122,29 +131,6 @@ function LastMod(URL) {
 	xhttp.open("HEAD", URL, false);
 	xhttp.send(null);
 	return xhttp.getResponseHeader("Last-Modified");
-}
-
-function UpdateIt() {
-
-	if (LastPlay == -1) {  //game over; stop updating
-		return;
-	}
-
-	clearTimeout(PlayTimer);
-	PlayTimer = setTimeout("UpdateIt()", 2000);
-
-	thisTime = LastMod(gameFolder + "/game_events.xml");		
-	if (thisTime != LastPlayTime) {
-		LastPlayTime = thisTime;
-		LastPlay = LoadPlays(LastPlay); //=-= 5 =-=
-	}
-
-	thisTime = LastMod(gameFolder + "/plays.xml");		
-	if (thisTime != LastPitchTime) {
-		LastPitchTime = thisTime;
-		LoadPitch();
-	}
-
 }
 
 function selectNodes(Doc, XPath, context) {
@@ -324,6 +310,9 @@ function LoadPlayers() {
 			PitchRow.cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
 		}
 	}
+
+	TeamInfo = document.getElementById("away");
+
 	return true;
 }
 
@@ -333,6 +322,7 @@ function LoadPlays(StartPlay) {
 //	show plays for that node and higher
 
 Temp = new Date;
+console.log("Play: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
 document.getElementById("PlayTime").innerHTML = Temp;
 
  	if (StartPlay < 0) { return; } // this shouldn't happen
@@ -383,7 +373,6 @@ document.getElementById("PlayTime").innerHTML = Temp;
 
 	return gamePlays.snapshotLength;
 }
-
 
 function showPlay(playText) {
 	LeadOff = "";	// next batter is NOT the leadoff batter
@@ -1012,6 +1001,12 @@ function SecondaryPlay(Play, Prefix) {
 	}
 }
 
+function PlayMonitor() {
+	//load plays every 15 seconds in case anything slips through the cracks
+	console.log("Monitor: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+	LastPlay = LoadPlays(LastPlay); 
+	setTimeout("PlayMonitor()", 15000);
+}
 function playerNumber(Text) {
 	result = "";
 
@@ -1536,7 +1531,7 @@ function getSound(SoundToGet) {
    }
 
    //if it wasn't found for the team, try it for neutral
-   SoundArray = ("NEUTRAL/" + SoundToGet).split(" ");
+   SoundArray = (SoundToGet).split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
       for (SoundCtr = 0; SoundCtr < SoundFiles.length; SoundCtr++) {

@@ -1,0 +1,63 @@
+load scripts:
+	Sound_Files.js
+	Commercials.js
+	chrome_scorecard.js
+	chrome_pitch.js
+
+onload of page:
+AfterLoad();	(construct the URL for the game; call LoadGame() =-= 1 =-= ; call  LoadPlayers() =-= 2 =-= ; set LastPitch = 0; call UpdateIt() =-= 4 =-=
+	LoadGame(); (=-= 1 =-= load the masterscoreboard into source; from data in masterscoreboard: build a list of other games; identify today's game's gameFolder; put the team logos and records and the home team's broadcast information on top; put the game status and game alert on top; if status is pre-game, set a timeout to reload the page halfway between now and game time; otherwise return the game snapshotItem)
+	LoadPlayers() (=-= 2 =-= load players.xml into plyrSource; loads the TeamInfo tag for the away and home teams with the team name, 0 runs, 0 outs, inning 1, column 4, ab 1, index 0 for away and 1 for home; retrieves from plyrSource the number, name and position of each player; builds PlayerOrd with player numbers indexed to batting order and PlayerFull with the player's full name built from the node =-= 3 =-= for each team; puts the pitcher's boxname into the pitching table; loads boxscore.xml into ptchSource to get the ERA, B, S, Pitches)
+		BuildName(Player); (=-= 3 =-= builds the player name from the passed node, putting first together with last and removing any periods after a single letter or after a Jr/Sr)
+	UpdateIt() (=-= 4 =-= if game is over, return, otherwise call LoadPlays =-= 5 =-=;
+		LoadPlays() (=-= 5 =-= put the time into PlayTime [this is just to see that it's still running]; exit if StartPlay is -1; load game_events.xml into source; load gamePlays with all the play nodes from both halves of every inning; starting with the StartPlay, clear the InPlay html (that's in the batter picture box) and the ErrorHolder and set LastAction = des of the current play; showPlay for the current play
+			showPlay() (=-=6 =-= LeadOff = '' so next batter is not announced as leadoff; InPlay is cleared again; set TeamInfo based on whether this play is from the top of the inning; if the word "challenge" is in the play text, the challenge information is put under the box score; if there is no cell for the current batter/column, AddColumn
+				AddColumn (=-= 7 =-= 
+
+onended audio file:
+playSound();
+
+fundamentally, what calls LoadPlays and LoadPitch and playSound?
+	LoadPlays: 
+		UpdateIt (directly)
+	LoadPitch:
+		UpdateIt (on a timer)
+	UpdateIt:
+		AfterLoad
+		GetPlay (in Pitch file, gets called every 5 seconds, but not really; there are a lot of things that directly call GetPlay; )
+
+all the functions (figure out what calls them):
+Scorecard:
+	xdLoad (lots of calls)
+	AfterLoad (called only from HTML)
+	UpdateIt (called only from AfterLoad; also called by GetPlay in pitch)
+	selectNodes (lots of calls)
+	LoadGame (called once from AfterLoad)
+	LoadPlayers (called from AfterLoad)
+	LoadPlays (called from UpdateIt)
+	showPlay (called from LoadPlays)
+	SecondaryPlay (called many times from showPlay)
+	playerNumber (called many times from showPlay)
+	nextBatter (called once from showPlay)
+	Fielding (called many times from showPlay)
+	HitDetail (called many times from showPlay)
+	findBox
+	theOut
+	getPos
+	AddColumn
+	Substitution
+	InsertPlayer
+	getSound
+	playSound
+	BuildName
+	SaveIt
+	IsGameOver
+	clearMessage
+	getScore
+	BoxScore
+Pitch:
+	LoadPitch
+	BallPos
+	Mark
+	ShowBatter
+	GetPlay

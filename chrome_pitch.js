@@ -10,36 +10,36 @@
 
 function LoadPitch() {
 	Temp = new Date;
-	document.getElementById("PitchTime").innerHTML = Temp;
+	console.log("Pitch: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
 	theSound = "";
 	source = xdLoad(gameFolder + "/plays.xml");
 
 	//if the game is over, exit
 	if (selectNodes(source, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
-		GetPlay(LastPlay);	//get the next play
-		//*****CHECK FOR A WIN HERE
-		return; 
+//UpdateIt();
+//		GetPlay(LastPlay);	//get the next play
+//		//*****CHECK FOR A WIN HERE
+//		return; 
 	}
 
 	//if there is a game action other than a pitch, get the call
 	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
+		LastPlay = LoadPlays(LastPlay);
+//UpdateIt();
 		ABPlay = selectNodes(source, "game/action/@des").snapshotItem(0).nodeValue;
-		for (idx = 0; idx < 10; idx++) {
-			if (LastAction[idx] == ABPlay) { break; }
-
-		}
-		if (idx == 10) { //hasn't been called already; call it
-			alert("HASN'T BEEN CALLED");
-		}
+//		if (LastAction != ABPlay) { Mark('C');
+//			GetPlay(LastPlay);	//get the next play
+//			return;
+//		}
 	}
 
-	//if the atbat has an action, get the call for it
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('B');
-		AtBat = selectNodes(source, "game/atbat").snapshotItem(0); //.nodeValue;
-		ABPlay = AtBat.getAttribute("des");
-
-		showPlay(AtBat);
-
+	//occurs when: wild pitch, a ball in play
+	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").nodeValue);
+		ABPlay = selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue;
+		if (LastAction != ABPlay) { Mark('E-' + LastAction);
+			GetPlay(LastPlay);	//get the play
+			return;
+		}
 	}
 
 	//check for a change of batter	
@@ -47,7 +47,8 @@ function LoadPitch() {
 
 	//if there is a different batter
 	if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) { Mark('F'); 
-		GetPlay(LastPlay);	//catch any uncalled plays
+		LastPlay = LoadPlays(LastPlay);
+
 		LastPitch = 0; //reset the pitch count
 		source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
 
@@ -152,14 +153,9 @@ function LoadPitch() {
 			case "SL" :
 				pitchtype = " Slider";
 				break;
-			case "FS" :
-				pitchtype = " Fastball Sinker";
-				break; 
-			default :
-				alert("Pitch Type: " + Pitch.getAttribute("pitch_type"));
 			}
 		} else {
-			pitchtype = "!"
+			pitchtype = "!" + Pitch.getAttribute("pitch_type");
 		}
 	
 		document.getElementById("PitchSpeed").innerHTML += pitchtype;
@@ -281,10 +277,13 @@ function LoadPitch() {
 			alert("Unknown pitch type: " + play + " " + detail);
 		}
 		if (theSound > "") { Mark('V');
+			LastPlay = LoadPlays(LastPlay);
 			getSound(theSound);
 		}
 		LastPitch = Pitches.snapshotLength;
 	}
+	clearTimeout(PitchTimer);
+	PitchTimer = setTimeout("LoadPitch()", 2000);	//check every second until a new pitch comes in
 }
 
 function BallPos(X, Y, LR) {
@@ -370,24 +369,18 @@ function ShowBatter(batterNode) {
 	}
 }
 
-
 function GetPlay(After) {
-//	//used to make sure you get a play at certain points
-//	if (LastPlay == -1) {  // game over; stop updating
-//		return;
-//	}
-//	
-//	if (LastPlay > After) {  // plays have already been updated; stop looking
-//		return;
-//	}
-//
-//	// if plays haven't been updated yet, see if there is anything new 
-//	//	and keep checking until there is
-//	source = xdLoad(gameFolder + "/game_events.xml");
-//	gamePlays = selectNodes(source, "//game/inning/*/*");
-//	if (gamePlays.snapshotLength > LastPlay) { // if there is a new call, get it
-//		UpdateIt();
-//	} else {	//otherwise keep trying
-//		setTimeout("GetPlay(" + After + ")", 5000);
-//	}
+	//used to make sure you get a play at certain points
+	if (LastPlay == -1) {  // game over; stop updating
+		return;
+	}
+
+	LastPlay = LoadPlays(LastPlay);
+
+	if (LastPlay > After) {  // plays have already been updated; stop looking
+		return;
+	} else {		//plays haven't been updated; keep looking
+		setTimeout("GetPlay(" + After + ")", 2000);
+	}
+
 }

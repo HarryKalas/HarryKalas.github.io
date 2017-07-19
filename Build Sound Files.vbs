@@ -11,7 +11,6 @@
 Set fldr = fso.GetFolder(CurrentFolder)
 Set theFiles = CreateObject("System.Collections.ArrayList")
 
-
 for each fl in fldr.files
 	'validate file name
 	Pieces = split(FL.name, " ")
@@ -38,6 +37,18 @@ for each subfldr in fldr.subfolders
       theFiles.Add subfldr.name + "/" +fl.name
    next
 
+   for each subsub in subfldr.subfolders
+      for each Fl in subsub.files
+         'validate file name
+         Pieces = split(Fl.name, " ")
+
+         if right(Pieces(Ubound(Pieces)), 4) = ".mp3" and right(Pieces(Ubound(Pieces)), 5) <> ").mp3" then
+            msgbox fl.name
+            fl.name = replace(fl.name, ".mp3", " (0).mp3")
+         end if
+         theFiles.Add subfldr.name + "/" + subsub.name + "/" +fl.name
+      next
+   next
 next
 
 theFiles.Sort()
@@ -74,7 +85,7 @@ For Each fl in theFiles
 	else
 		'print it; print previous file count
 		if LastName > "" then
-		 	ts.WriteLine("SoundFiles[SoundFiles.length] = new Array('" + LastName + "', " + cstr(FileCount + 1) + ");")
+		 	ts.WriteLine("SoundFiles.push(['" + LastName + "', " + cstr(FileCount + 1) + "]);")
 		end if
 		FileCount = 0
 		LastName = FL2
@@ -83,4 +94,4 @@ For Each fl in theFiles
 Next
 
 'catch the last file name
-ts.WriteLine("SoundFiles[SoundFiles.length] = new Array('" + FL2 + "', " + cstr(FileCount + 1) + ");")
+ts.WriteLine("SoundFiles.push(['" + FL2 + "', " + cstr(FileCount + 1) + "]);")

@@ -1,0 +1,16 @@
+bat around should be called when the batter comes up to bat
+
+4/9 review reversal at end of first inning isn't handled properly 
+
+can we get more stats? or the day's performance?
+
+status during a rain delay
+<status status="Delayed Start" ind="PR" reason="Rain" inning="1" top_inning="Y" b="0" s="0" o="0" inning_state="" note="(rain) with 0 out in the top of the 1st and a 0-0 count on Cesar Hernandez." is_perfect_game="N" is_no_hitter="N"/>
+
+OTHER INTERESTING THINGS FROM MASTER SCOREBOARD
+<review challenges_away_used="0" challenges_away_remaining="1" challenges_home_used="0" challenges_home_remaining="1"/>
+
+<alerts text="In Chicago: The start of the Philadelphia at Chi Cubs game is delayed due to rain" brief_text="At CHC: Start of PHI at CHC delayed due to rain" type="status"/>
+
+POST GAME STATUS FROM MASTER SCOREBOARD
+<status status="Final" ind="F" reason="" inning="9" top_inning="N" b="0" s="0" o="3" inning_state="" note="" is_perfect_game="N" is_no_hitter="N"/>

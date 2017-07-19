@@ -485,10 +485,18 @@ function showPlay(playText) {
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("out on a sacrifice bunt") >=0) {
 		thePlay = "SAC B " + Fielding(Plays[0]);
-		theOut(Box, thePlay);
+		if (playDes.indexOf("scores") >= 0) {
+			theOut(Box, thePlay + " RBI";
+		} else {
+			theOut(Box, thePlay);
+		}
 	} else if (Plays[0].indexOf("out on a sacrifice fly") >=0) {
 		thePlay = "SF " + playerNumber(Plays[0]);
-		theOut(Box, thePlay);
+		if (playDes.indexOf("scores") >= 0) {
+			theOut(Box, thePlay + " RBI";
+		} else {
+			theOut(Box, thePlay);
+		}
 	} else if (Plays[0].indexOf("unassisted double play") >=0) {
 		thePlay = "DP " + Fielding(Plays[0]);
 		//handle the second out here
@@ -1016,10 +1024,10 @@ function theOut(Box, thePlay) {
 		return;
 	}
 
-	getSound(thePlay + " O" + TeamInfo.Outs+ theTeam);			// get the call for the play with outs if possible
+	getSound(thePlay + " O" + TeamInfo.Outs + theTeam);			// get the call for the play with outs if possible
 
 	if(AudioQueue.length==0 || AudioQueue[AudioQueue.length-1].indexOf('O' + TeamInfo.Outs) == -1) { 	// if the outs haven't been called ...
-		getSound("Out" + TeamInfo.Outs +TeamCall + " I" + TeamInfo.Inning);	// get the out call for the inning
+		getSound("Out" + TeamInfo.Outs + TeamCall + " I" + TeamInfo.Inning);	// get the out call for the inning
 document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 	}
 
