@@ -10,7 +10,8 @@
 
 function LoadPitch() {
 	Temp = new Date;
-	console.log("Pitch: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+//	console.log("Pitch: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+	Mark("Pitch");
 	theSound = "";
 	source = xdLoad(gameFolder + "/plays.xml");
 
@@ -25,7 +26,7 @@ function LoadPitch() {
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").nodeValue);
+	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue);
 		LastPlay = LoadPlays(LastPlay);
 	}
 
@@ -33,7 +34,9 @@ function LoadPitch() {
 	batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
 
 	//if there is a different batter
-	if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) { Mark('F'); 
+	if (selectNodes(source, "game/players/batter").snapshotLength == 0) { //nothing you can do if the node isn't there
+		Mark("No batter");
+	} else if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) { Mark('F'); 
 		LastPlay = LoadPlays(LastPlay);
 
 		LastPitch = 0; //reset the pitch count
@@ -306,7 +309,7 @@ function BallPos(X, Y, LR) {
 
 function Mark(Text) {
 	//for debugging purposes, prints in the Debug DIV whatever text is provided
-//	document.getElementById("Debug").innerHTML += ' ' + Text + ' ';
+	console.log(Text);
 }
 
 function ShowBatter(batterNode) {
