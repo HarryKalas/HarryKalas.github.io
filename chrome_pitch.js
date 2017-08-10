@@ -11,9 +11,11 @@
 function LoadPitch() {
 	Temp = new Date;
 //	console.log("Pitch: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+//	console.log("Pitch");
 	Mark("Pitch");
 	theSound = "";
 	source = xdLoad(gameFolder + "/plays.xml");
+//console.log("Pitch", "Pitches: " + selectNodes(source, "game/atbat/p | game/atbat/po").snapshotLength, "Actions: " + selectNodes(source, "game/action[@des != '']").snapshotLength, "Play: " + selectNodes(source, "game/atbat[@des != '']").snapshotLength);
 
 	//if the game is over, exit
 	if (selectNodes(source, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
@@ -22,11 +24,14 @@ function LoadPitch() {
 
 	//if there is a game action other than a pitch, get the call
 	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
+		showPlay(selectNodes(source, "game/action").snapshotItem(0));
 		LastPlay = LoadPlays(LastPlay);
 	}
 
 	//occurs when: wild pitch, a ball in play
 	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue);
+		
+		showPlay(selectNodes(source, "game/atbat").snapshotItem(0));
 		LastPlay = LoadPlays(LastPlay);
 	}
 
@@ -49,7 +54,7 @@ function LoadPitch() {
 			TeamInfo = document.getElementById("home"); //the current team is the Home team
 		}
 		ShowBatter(batterNode); //reset the batter box
-
+	
 		//calculate the number of runners on base
 		Runners = 0;
 		if (selectNodes(source, "game/field/offense/man[@bnum='1']").snapshotLength > 0) { 
@@ -61,8 +66,11 @@ function LoadPitch() {
 		if (selectNodes(source, "game/field/offense/man[@bnum='3']").snapshotLength > 0) { 
 			Runners += 4;
 		}
-		//call the number of runners on base
-		getSound("Runners/" + Runners + " O" + TeamInfo.Outs + " I" + TeamInfo.Inning + " " + TeamInfo.id);
+		if (Runners > 0) {
+			I123 = false;
+			//call the number of runners on base
+			getSound("Runners/" + Runners + " O" + TeamInfo.Outs + " I" + TeamInfo.Inning + " " + TeamInfo.id);
+		}
 	}
 
 	//get all pitches to this batter
@@ -143,9 +151,11 @@ function LoadPitch() {
 			case "SL" :
 				pitchtype = " Slider";
 				break;
+			default :
+				pitchtype = " " + Pitch.getAttribute("pitch_type");
 			}
 		} else {
-			pitchtype = "!" + Pitch.getAttribute("pitch_type");
+			pitchtype = Pitch.getAttribute("des");
 		}
 	
 		document.getElementById("PitchSpeed").innerHTML += pitchtype;
@@ -273,7 +283,7 @@ function LoadPitch() {
 		LastPitch = Pitches.snapshotLength;
 	}
 	clearTimeout(PitchTimer);
-	PitchTimer = setTimeout("LoadPitch()", 2000);	//check every second until a new pitch comes in
+	PitchTimer = setTimeout("LoadPitch()", 3000);	//check every second until a new pitch comes in
 }
 
 function BallPos(X, Y, LR) {
@@ -309,7 +319,7 @@ function BallPos(X, Y, LR) {
 
 function Mark(Text) {
 	//for debugging purposes, prints in the Debug DIV whatever text is provided
-	console.log(Text);
+//	console.log(Text);
 }
 
 function ShowBatter(batterNode) {

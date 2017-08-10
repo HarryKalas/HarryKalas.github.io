@@ -196,7 +196,6 @@ function LoadGame(DateURL) {
 	} else {
 		alert(game.xml);
 	}
-
 	awayLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
 	awayLogo += game.getAttribute("away_file_code");
 	awayLogo += '@2x.png" /><br/>(' + game.getAttribute("away_win") + "-" + game.getAttribute("away_loss") + ")";
@@ -322,7 +321,8 @@ function LoadPlays(StartPlay) {
 //	show plays for that node and higher
 
 Temp = new Date;
-console.log("Play: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+//console.log("Play: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+//console.log("Play");
 document.getElementById("PlayTime").innerHTML = Temp;
 
  	if (StartPlay < 0) { return; } // this shouldn't happen
@@ -378,26 +378,30 @@ function showPlay(playText) {
 	LeadOff = "";	// next batter is NOT the leadoff batter
 	document.getElementById("InPlay").innerHTML = ""; //clear Ball In Play notation;
 
-	//make sure the play hasn't already been called
 	playDes = playText.getAttribute("des");
+
+	//make sure the play hasn't already been called
+	playGUID = playText.getAttribute("play_guid");
 	for (idx = 0; idx < 10; idx++) {
-		if (LastAction[idx] == playDes) { break; }
+		if (LastAction[idx] == playGUID) { Mark("Already Called"); return; }
 	}
-	if (idx == 10) { //hasn't been processed already; add it to the list
-		LastAction.push(playDes);
+
+	if (playGUID > "") {
+		LastAction.push(playGUID);
 		LastAction.shift();
-	} else {	//already processed; exit
-		return;
 	}
 
 	switch (selectNodes(source, "..", playText).snapshotItem(0).nodeName) {
 	case "top" : 
+		console.log(playGUID, "from GAME_EVENTS");
 		TeamInfo = document.getElementById("away");
 		break;
 	case "bottom" :
+		console.log(playGUID, "from GAME_EVENTS");
 		TeamInfo = document.getElementById("home");
 		break;
 	case "game" :
+		console.log(playGUID, "from PLAYS");
 		if (selectNodes(source, "..", playText).snapshotItem(0).getAttribute("top_inning") == "F") {
 			TeamInfo = document.getElementById("home");
 		} else {
@@ -433,92 +437,6 @@ function showPlay(playText) {
 		getSound("BA");
 	}
 
-	//process the overall event basic part
-	playEvent = playText.getAttribute("event");
-	switch(playEvent) {			// set the background picture based on the event
-	case "Groundout" :
-	case "Lineout" :
-	case "Flyout" :
-	case "Pop Out" :
-	case "Strikeout" :
-	case "Grounded Into DP" :
-	case "Sac Bunt" :
-	case "Strikeout - DP" :
-	case "Sac Fly" :
-	case "Sac Fly DP" :
-	case "Bunt Groundout" :
-	case "Bunt Pop Out" :
-		Box.setAttribute("background", "1out.gif");
-		break;
-	case "Field Error" :
-		// ***** I think this needs to be handled later
-		break;
-	case "Single" :
-	case "Walk" :
-	case "Hit By Pitch" :
-	case "Intent Walk" :
-	case "Fielders Choice" :
-	case "Fielders Choice Out" :
-		I123 = false;		// not a 1-2-3 inning any more
-		Box.setAttribute("background", "1b.gif");	// batter to 1st
-		break;
-	case "Forceout" :
-		I123 = false;		// not a 1-2-3 inning any more
-		Box.setAttribute("background", "1b.gif");	// batter to 1st
-		break;
-	case "Double" :
-		I123 = false;		// not a 1-2-3 inning any more
-		Box.setAttribute("background", "2b.gif");	// batter to 2nd
-		break;
-	case "Triple" :
-		I123 = false;		// not a 1-2-3 inning any more
-		Box.setAttribute("background", "3b.gif");	// batter to 3rd
-		break;
-	case "Home Run" :
-		I123 = false;		// not a 1-2-3 inning any more
-		Box.setAttribute("background", "hr.gif");	// home run
-		break;
-	case "Balk" :
-	case "Caught Stealing 2B" :
-	case "Caught Stealing 3B" :
-	case "Caught Stealing Home" :
-	case "Defensive Indiff" :
-	case "Double Play" :
-	case "Error" :
-	case "Fan interference" :
-	case "Manager Review" :
-	case "Passed Ball" :
-	case "Pickoff 1B" :
-	case "Pickoff 2B" :
-	case "Pickoff 3B" :
-	case "Pickoff Error 1B" :
-	case "Pickoff Error 2B" :
-	case "Pickoff Error 3B" :
-	case "Picked off stealing 2B" :
-	case "Picked off stealing 3B" :
-	case "Runner Advance" : 
-	case "Runner Out" : 
-	case "Stolen Base 2B" :
-	case "Stolen Base 3B" :
-	case "Umpire Review" :
-	case "Wild Pitch" :
-		// will be handled later
-		break;
-	case "Defensive Sub" : 
-	case "Defensive Switch" : 
-	case "Game Advisory" : 
-	case "Offensive Sub" : 
-	case "Pitcher Switch" : 
-	case "Pitching Substitution" : 
-	case "Player Injured" :
-	case "Ejection" :
-		//nothing to handle
-		break;
-	default :
-		window.open(gameFolder + "/game_events.xml");
-		alert(playEvent + "\n" + playText.xml);
-	}
-
 	Review = 0;
 
 	if(playDes.indexOf("overturned: Pitch challenge") > 0) {
@@ -547,6 +465,7 @@ function showPlay(playText) {
 	//PROCESS THE INITIAL PLAY
 	thePlay = ""; // "thePlay" will be the text inside the batter's box
 	if (Plays[0].indexOf("called out on strikes") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "K..";
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("strikes out") >=0 ) {
@@ -559,22 +478,28 @@ function showPlay(playText) {
 			thePlay = "K, WP";
 			getSound(thePlay);
 		} else if (playDes.indexOf("foul") >=0) {
+			Box.setAttribute("background", "1out.gif");
 			thePlay = "K";
 			theOut(Box, "K Foul Tip");
 		} else {
+			Box.setAttribute("background", "1out.gif");
 			thePlay = "K";
 			theOut(Box, thePlay);
 		}
 	} else if (Plays[0].indexOf("grounds out") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = Fielding(Plays[0]);
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("lines out") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "L" + playerNumber(Plays[0]);
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("flies out") >=0 ) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "F" + playerNumber(Plays[0]);
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("pops out") >= 0) {
+		Box.setAttribute("background", "1out.gif");
 		if (Plays[0].indexOf("foul territory") >= 0) {
 			thePlay = "PF" + playerNumber(Plays[0]);
 		} else {
@@ -582,6 +507,7 @@ function showPlay(playText) {
 		}
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("out on a sacrifice bunt") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "SAC B " + Fielding(Plays[0]);
 		if (playDes.indexOf("scores") >= 0) {
 			theOut(Box, thePlay + " RBI");
@@ -589,6 +515,7 @@ function showPlay(playText) {
 			theOut(Box, thePlay);
 		}
 	} else if (Plays[0].indexOf("out on a sacrifice fly") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "SF " + playerNumber(Plays[0]);
 		if (playDes.indexOf("scores") >= 0) {
 			theOut(Box, thePlay + " RBI");
@@ -611,6 +538,7 @@ function showPlay(playText) {
 			theOut(Box, thePlay);
 		}
 	} else if (Plays[0].indexOf("grounds into a double play") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "GIDP " + Fielding(Plays[0]);
 		//handle the second out here
 		for (Ptr = 1; Ptr < Plays.length; Ptr++) {
@@ -621,6 +549,7 @@ function showPlay(playText) {
 		}
 		theOut(Box, thePlay);
 	} else if (Plays[0].indexOf("flies into a sacrifice double play") >=0) {
+		Box.setAttribute("background", "1out.gif");
 		thePlay = "SFDP " + Fielding(Plays[0]);
 		//handle the second out here
 		for (Ptr = 1; Ptr < Plays.length; Ptr++) {
@@ -646,18 +575,22 @@ function showPlay(playText) {
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("grounds into a force out") >=0) {
 //alert(["GFC", playDes]);
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "FC " + Fielding(Plays[0]);
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("lines into a force out") >=0) {
 //alert(["LFC", playDes]);
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "FC " + Fielding(Plays[0]);
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("flies into a force out") >=0) {
 //alert(["FFC", playDes]);
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "FC " + Fielding(Plays[0]);
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("reaches on a fielder's choice") >=0) {
 //alert(["FC", playDes]);
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Sequence = Plays[0].split(" to ");
 		thePlay = "FC " + playerNumber(Sequence[0]);
 		if (Sequence.length == 1) {
@@ -669,6 +602,7 @@ function showPlay(playText) {
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("ground bunts into a force out") >=0) {
 //alert(["BFC", playDes]);
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Sequence = Plays[0].split(" to ");
 		thePlay = "FC " + playerNumber(Sequence[0]);
 		if (Sequence.length == 1) {
@@ -679,27 +613,33 @@ function showPlay(playText) {
 		}
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("singles") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Hits += 1; //**
 		thePlay = "1B";
 		getSound(thePlay + " " + HitDetail(Plays[0]));
 	} else if (Plays[0].indexOf("hits a sacrifice bunt") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Hits += 1; //** he gets to first if it says "hits"
 		thePlay = "Sac B";
-		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		getSound("SAC_B");
 	} else if (Plays[0].indexOf("hits a sacrifice fly") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Hits += 1; //**
 		thePlay = "SF";
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("intentionally walks") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "IBB";
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("walks") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "BB";
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("hit by pitch") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		thePlay = "HBP";
 	} else if (Plays[0].indexOf("reaches on catcher interference") >= 0) {
+		Box.setAttribute("background", "1b.gif");	// batter to 1st
 		Errors += 1;
 		thePlay = "E2 I";
 		getSound(thePlay);
@@ -720,19 +660,23 @@ function showPlay(playText) {
 			getSound(thePlay);
 		}
 	} else if (Plays[0].indexOf("doubles") >= 0) {
+		Box.setAttribute("background", "2b.gif");
 		Hits += 1; //**
 		thePlay = "2B";
 		getSound(thePlay + " " + HitDetail(Plays[0]));
 	} else if (Plays[0].indexOf("ground-rule double") >= 0) {
+		Box.setAttribute("background", "2b.gif");
 		Hits += 1; //**
 		thePlay = "GRD";
-		Box.setAttribute("background", "2b.gif");
 		getSound(thePlay);
 	} else if (Plays[0].indexOf("triples") >= 0) {
+		Box.setAttribute("background", "3b.gif");
 		Hits += 1; //**
 		thePlay = "3B";
 		getSound(thePlay + " " + HitDetail(Plays[0]));
 	} else if (Plays[0].indexOf("homers") >=0) {
+		Box.setAttribute("background", "hr.gif");
+		I123 = false;
 		thePlay = "&nbsp;";
 		getSound("HR " + HitDetail(Plays[0]));
 		if (TeamInfo.innerHTML == 'Philadelphia Phillies')  { getSound("Bell"); }
@@ -741,6 +685,8 @@ function showPlay(playText) {
 		Hits += 1;
 		LOB -= 1;
 	} else if (Plays[0].indexOf("inside-the-park home run") >=0) {
+		Box.setAttribute("background", "hr.gif");
+		I123 = false;
 		thePlay = "&nbsp;";
 		//getSound(??? I'll never get a Harry call for this one!);
 		TeamInfo.Runs += 1;
@@ -748,6 +694,8 @@ function showPlay(playText) {
 		Hits += 1;
 		LOB -= 1;
 	} else if (Plays[0].indexOf("hits a grand slam") >=0) {
+		Box.setAttribute("background", "hr.gif");
+		I123 = false;
 		thePlay = "&nbsp;";
 		getSound("HR " + HitDetail(Plays[0]));
 		TeamInfo.Runs += 1;
@@ -885,6 +833,7 @@ function SecondaryPlay(Play, Prefix) {
 	//THEY HAVE A PREFIX IF IT'S THE FIRST PLAY, BUT ADDITIONAL PLAYS DON'T
 	//MULTIPLE PLAYERS ADVANCING ON STEAL, WP, PB, BALK
 
+	if (Play == "Official Scorer ruling pending") { return; }
 	SecondBox = findBox(Play);
 	if (!SecondBox) { 
 		if ((Plays[Ptr].indexOf(" error") >= 0)) {
@@ -1003,7 +952,7 @@ function SecondaryPlay(Play, Prefix) {
 
 function PlayMonitor() {
 	//load plays every 15 seconds in case anything slips through the cracks
-	console.log("Monitor: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+//	console.log("Monitor: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
 	LastPlay = LoadPlays(LastPlay); 
 	setTimeout("PlayMonitor()", 15000);
 }
@@ -1313,11 +1262,11 @@ function Substitution(Text) {
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
 		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
 		if (ptchNodes) {
-			pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
-			PitchTable.rows[r].cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
-			PitchTable.rows[r].cells[3].innerHTML = pBalls;
-			PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
-			PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+			//pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
+			//PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
+			//PitchTable.rows[r].cells[3].innerHTML = pBalls;
+			//PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
+			//PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
 		}
 		Pitcher = Players[0].replace("Pitching Change:", "");
 		Pitcher = Pitcher.replace("Pitcher Change:", "");
@@ -1514,34 +1463,31 @@ function getSound(SoundToGet) {
       fldrTeam = "THEM/";
    }
 
-   SoundArray = (fldrTeam + SoundToGet).split(" ");
-   while (SoundArray.length > 0) {
-      SoundFile = SoundArray.join(" ");
-      for (SoundCtr = 0; SoundCtr < SoundFiles.length; SoundCtr++) {
-         if (SoundFiles[SoundCtr][0] == SoundFile) {
-            FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
-            AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
-            document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
-            document.all.LastSound.innerHTML = SoundFiles[SoundCtr][0] + " (" + FileNum + ")";
-            document.all.LastSound.innerHTML += " --- " + SoundToGet;
-            return;
-         }
-      }
-      SoundArray.length--;
-   }
-
-   //if it wasn't found for the team, try it for neutral
    SoundArray = (SoundToGet).split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
-      for (SoundCtr = 0; SoundCtr < SoundFiles.length; SoundCtr++) {
-         if (SoundFiles[SoundCtr][0] == SoundFile) {
-            FileNum = Math.floor(Math.random() * SoundFiles[SoundCtr][1]);
-            AudioQueue.push(SoundFiles[SoundCtr][0] + " (" + FileNum + ")");
-            document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
-            document.all.LastSound.innerHTML = SoundFiles[SoundCtr][0] + " (" + FileNum + ")";
-            document.all.LastSound.innerHTML += " --- " + SoundToGet;
-            return;
+      idx = SoundFiles.indexOf(SoundFile)
+      if (idx >= 0) {	// if there is a sound file with that name
+         if (fldrTeam == "THEM/") {  //if they are at bat
+            if (SoundCounts[idx][1] > 0) {  //and there is a THEM file, then use it
+               FileNum = Math.floor(Math.random() * SoundCounts[idx][1]);
+               AudioQueue.push("THEM/" + SoundFiles[idx] + " (" + FileNum + ")");
+               return;
+            } else {  // if there is not a THEM file, just use the standard one
+               FileNum = Math.floor(Math.random() * SoundCounts[idx][0]);
+               AudioQueue.push(SoundFiles[idx] + " (" + FileNum + ")");
+               return;
+            }
+         } else { // otherwise we are at bat
+            if (SoundCounts[idx][2] > 0) {  //and there is an US file, then use it
+               FileNum = Math.floor(Math.random() * SoundCounts[idx][2]);
+               AudioQueue.push("US/" + SoundFiles[idx] + " (" + FileNum + ")");
+               return;
+            } else {  // if there is not an US file, just use the standard one
+               FileNum = Math.floor(Math.random() * SoundCounts[idx][0]);
+               AudioQueue.push(SoundFiles[idx] + " (" + FileNum + ")");
+               return;
+            }
          }
       }
       SoundArray.length--;

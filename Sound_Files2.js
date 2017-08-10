@@ -158,7 +158,7 @@ SoundFiles.push('Batters/2016Featherston');
 SoundCounts.push([1, 0, 0]);
 SoundFiles.push('Batters/2016Fowler');
 SoundCounts.push([1, 0, 0]);
-SoundFiles.push('Batters/2016Franco');
+SoundFiles.push('Batters/2016Franco, M');
 SoundCounts.push([2, 0, 0]);
 SoundFiles.push('Batters/2016Francoeur');
 SoundCounts.push([1, 0, 0]);
