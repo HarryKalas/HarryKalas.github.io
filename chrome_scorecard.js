@@ -62,13 +62,15 @@ var plyrSource;
 var ptchSource;
 
 //older version of the game folder -- I think the results are the same
-//gameFolder="http://gd2.mlb.com/components/game/mlb";
-gameFolder="http://mlb.mlb.com/gdcross/components/game/mlb";
+//25 Feb 2018: the GDCROSS version isn't working any more
+gameFolder="http://gd2.mlb.com/components/game/mlb";
+//gameFolder="http://mlb.mlb.com/gdcross/components/game/mlb";
 
 
 //NEW XML cross-domain load
 //revised to return the responseXML for Chrome
 function xdLoad(FileName) {
+console.log("xdLoad");
 	if (window.XMLHttpRequest) { xhttp=new XMLHttpRequest(); }
 	 else { xhttp=new ActiveXObject("Microsoft.XMLHTTP"); }
 	xhttp.open("GET",FileName,false);
@@ -82,6 +84,7 @@ function xdLoad(FileName) {
 }
 
 function AfterLoad() {
+console.log("AfterLoad");
 	//build the date URL, which gives the folder of the gameday
 	Today = new Date; 
 	if (theDate == "") {
@@ -116,7 +119,7 @@ function AfterLoad() {
 		playSound();
 
 		LoadPitch();
-		PlayMonitor();
+		Monitor = setInterval(PlayMonitor, 15000); //check for missing plays every 15 seconds
 
 //		source = xdLoad(gameFolder + "/plays.xml");
 //		if (source) {
@@ -128,12 +131,14 @@ function AfterLoad() {
 
 
 function LastMod(URL) {
+console.log("LastMod");
 	xhttp.open("HEAD", URL, false);
 	xhttp.send(null);
 	return xhttp.getResponseHeader("Last-Modified");
 }
 
 function selectNodes(Doc, XPath, context) {
+console.log("selectNodes");
 //UNORDERED_NODE_ITERATOR_TYPE
 
 	if(context) {
@@ -144,6 +149,7 @@ function selectNodes(Doc, XPath, context) {
 }
 
 function LoadGame(DateURL) {
+console.log("LoadGame");
 	//determines whether there is a game for the selected day and builds the folder URL text for Phillies' game that day
 	gameFolder += DateURL;
 	source = xdLoad(gameFolder + "/master_scoreboard.xml");
@@ -250,6 +256,7 @@ function LoadGame(DateURL) {
 
 
 function LoadPlayers() {
+console.log("LoadPlayers");
 	plyrSource = xdLoad(gameFolder + "/players.xml");
 	if (plyrSource == null) {
 	  alert("Error loading players");
@@ -291,18 +298,18 @@ function LoadPlayers() {
 		}
 
 		//pitcher
-		Player = selectNodes(plyrSource, "player[@game_position='P']", Team).snapshotItem(0).getAttribute("boxname");
+		Player = selectNodes(plyrSource, "player[@game_position='P']", Team).snapshotItem(0).getAttribute("id");
 		PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
 		r = PitchTable.rows.length-1;
 		PitchRow = PitchTable.rows[r];
-		PitchRow.cells[0].innerHTML = Player;
 		PitchRow.className = "BoxScore";
 
-		//get pitcher's stats in case you are loading during or after the game
+		//get pitcher's information
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
-		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
+		ptchNodes = selectNodes(ptchSource, "boxscore/pitching/pitcher[@id=" + Player + "]");
 		if (ptchNodes) {
 			pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
+			PitchRow.cells[0].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("name_display_first_last");
 			PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
 			PitchRow.cells[3].innerHTML = pBalls;
 			PitchRow.cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
@@ -316,6 +323,7 @@ function LoadPlayers() {
 }
 
 function LoadPlays(StartPlay) {
+console.log("LoadPlays");
 // 8/23/2015 -- rewrote a lot of this because it didn't make sense!
 // StartPlay should be the node index of the next node
 //	show plays for that node and higher
@@ -323,6 +331,7 @@ function LoadPlays(StartPlay) {
 Temp = new Date;
 //console.log("Play: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
 //console.log("Play");
+//console.log("Play",StartPlay);
 document.getElementById("PlayTime").innerHTML = Temp;
 
  	if (StartPlay < 0) { return; } // this shouldn't happen
@@ -375,33 +384,34 @@ document.getElementById("PlayTime").innerHTML = Temp;
 }
 
 function showPlay(playText) {
+console.log("showPlay");
 	LeadOff = "";	// next batter is NOT the leadoff batter
 	document.getElementById("InPlay").innerHTML = ""; //clear Ball In Play notation;
 
 	playDes = playText.getAttribute("des");
 
 	//make sure the play hasn't already been called
-	playGUID = playText.getAttribute("play_guid");
+//	playGUID = playText.getAttribute("play_guid");
 	for (idx = 0; idx < 10; idx++) {
-		if (LastAction[idx] == playGUID) { Mark("Already Called"); return; }
+		if (LastAction[idx] == playDes) { Mark("Already Called"); return; }
 	}
 
-	if (playGUID > "") {
-		LastAction.push(playGUID);
+	if (playDes > "") {
+		LastAction.push(playDes);
 		LastAction.shift();
 	}
 
 	switch (selectNodes(source, "..", playText).snapshotItem(0).nodeName) {
 	case "top" : 
-		console.log(playGUID, "from GAME_EVENTS");
+//		console.log(playGUID, "from GAME_EVENTS");
 		TeamInfo = document.getElementById("away");
 		break;
 	case "bottom" :
-		console.log(playGUID, "from GAME_EVENTS");
+//		console.log(playGUID, "from GAME_EVENTS");
 		TeamInfo = document.getElementById("home");
 		break;
 	case "game" :
-		console.log(playGUID, "from PLAYS");
+//		console.log(playGUID, "from PLAYS");
 		if (selectNodes(source, "..", playText).snapshotItem(0).getAttribute("top_inning") == "F") {
 			TeamInfo = document.getElementById("home");
 		} else {
@@ -694,10 +704,10 @@ function showPlay(playText) {
 		Hits += 1;
 		LOB -= 1;
 	} else if (Plays[0].indexOf("hits a grand slam") >=0) {
-		Box.setAttribute("background", "hr.gif");
+		Box.setAttribute("background", "gs.gif");
 		I123 = false;
 		thePlay = "&nbsp;";
-		getSound("HR " + HitDetail(Plays[0]));
+		getSound("GS " + HitDetail(Plays[0]));
 		TeamInfo.Runs += 1;
 		Runs += 1;
 		Hits += 1; //**
@@ -763,7 +773,7 @@ alert("picked off");
 			FieldingTeam = document.getElementById("away").innerHTML;
 		}
 		getSound("PC " + FieldingTeam);
-		Substitution(Plays[0]);
+		Substitution(Plays[0], playText.getAttribute("player"));
 	} else if (Plays[0].indexOf(" turns around ") >= 0) {
 window.open(gameFolder + "/game_events.xml");
 alert("1 " + Plays[0]);
@@ -829,6 +839,7 @@ alert("Challenge: " + playDes);
 }
 
 function SecondaryPlay(Play, Prefix) {
+console.log("SecondaryPlay");
 	//DEAL WITH THINGS LIKE BALK, WP, ETC, THAT DON'T HAVE A PREFIX ON ADDITIONAL PLAYS
 	//THEY HAVE A PREFIX IF IT'S THE FIRST PLAY, BUT ADDITIONAL PLAYS DON'T
 	//MULTIPLE PLAYERS ADVANCING ON STEAL, WP, PB, BALK
@@ -951,12 +962,14 @@ function SecondaryPlay(Play, Prefix) {
 }
 
 function PlayMonitor() {
+console.log("PlayMonitor");
 	//load plays every 15 seconds in case anything slips through the cracks
-//	console.log("Monitor: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
+	if (LastPlay < 0) { clearInterval(Monitor); }
 	LastPlay = LoadPlays(LastPlay); 
-	setTimeout("PlayMonitor()", 15000);
 }
+
 function playerNumber(Text) {
+console.log("playerNumber");
 	result = "";
 
 	if (Text.indexOf("left field") >= 0) {
@@ -982,6 +995,7 @@ function playerNumber(Text) {
 }
 
 function nextBatter(Text) {
+console.log("nextBatter");
 	if (Text.indexOf("Pitcher Change: ") >= 0 || Text.indexOf("Pitching Change: ") >= 0) { //no advance
 	} else if (Text.indexOf("Coaching visit") >= 0) { //no advance
 	} else if (Text.indexOf("Injury Delay") >= 0) { //no advance
@@ -1013,6 +1027,7 @@ function nextBatter(Text) {
 }
 
 function Fielding(playText) {
+console.log("Fielding");
 	Sequence = playText.split(" to ");
 	thePlay = playerNumber(Sequence[0]);
 	if (thePlay == "") {
@@ -1030,10 +1045,13 @@ function Fielding(playText) {
 }
 
 function HitDetail(playText) {
+console.log("HitDetail");
 	Result = "";
 	if (playText.indexOf("homers") >= 0) {
 		Result = "";
 	} else if (playText.indexOf("grand slam") >= 0) {
+		Result = "";
+	} else if (playText.indexOf("doubles") >= 0) {
 		Result = "";
 	} else if (playText.indexOf("fly ball") >= 0) {
 		Result = "F";
@@ -1053,6 +1071,7 @@ function HitDetail(playText) {
 }
 
 function findBox(playText) {
+console.log("findBox");
 	for (Idx = 1; Idx <=9; Idx++) {  //check each batter to see if they are the runner
 		if (playText.indexOf(PlayerFull[TeamInfo.Index][Idx]) > -1) {
 			foundBox = document.getElementById(TeamInfo.id + Idx).cells[TeamInfo.Column];
@@ -1065,6 +1084,7 @@ function findBox(playText) {
 }
 
 function theOut(Box, thePlay) {
+console.log("theOut");
 	LOB--;					// if someone is out, then there is one less left on base
 	outDiv = document.createElement('div');		// create a new DIV for the out
 	Box.appendChild(outDiv);			// put it on the current batter's box
@@ -1195,6 +1215,7 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 }
 
 function getPos(obj) {
+console.log("getPos");
 	var curleft = curtop = 0;
 
 	if (obj) {} else { return [curleft,curtop]; }	
@@ -1210,6 +1231,7 @@ function getPos(obj) {
 }
 
 function AddColumn() {
+console.log("AddColumn");
 	document.getElementById(TeamInfo.id + "Table").width = parseFloat(document.getElementById(TeamInfo.id +"Table").width) + 60;
 
 	newCell = document.getElementById(TeamInfo.id + "Header").insertCell(TeamInfo.Column);
@@ -1235,7 +1257,8 @@ function AddColumn() {
 
 }
 
-function Substitution(Text) {
+function Substitution(Text, Player) {
+console.log("Substitution");
 	//pattern of the text:
 	//Defensive substitution:
 	//  NAME1 replaces POSITION1 NAME2, batting ORDER, playing POSITION2
@@ -1259,14 +1282,16 @@ function Substitution(Text) {
 		PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
 		r = PitchTable.rows.length-1;
 		PitchRow = PitchTable.rows[r];
+		//get pitcher's information
 		ptchSource = xdLoad(gameFolder + "/boxscore.xml");
-		ptchNodes = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher");
+		ptchNodes = selectNodes(ptchSource, "boxscore/pitching/pitcher[@id=" + Player + "]");
 		if (ptchNodes) {
-			//pBalls = ptchNodes.snapshotItem(r-1).getAttribute("np") - ptchNodes.snapshotItem(r-1).getAttribute("s");
-			//PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("era");
-			//PitchTable.rows[r].cells[3].innerHTML = pBalls;
-			//PitchTable.rows[r].cells[4].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("s");
-			//PitchTable.rows[r].cells[5].innerHTML = ptchNodes.snapshotItem(r-1).getAttribute("np");
+			pBalls = ptchNodes.snapshotItem(0).getAttribute("np") - ptchNodes.snapshotItem(0).getAttribute("s");
+			PitchRow.cells[0].innerHTML = ptchNodes.snapshotItem(0).getAttribute("name_display_first_last");
+			PitchRow.cells[2].innerHTML = ptchNodes.snapshotItem(0).getAttribute("era");
+			PitchRow.cells[3].innerHTML = pBalls;
+			PitchRow.cells[4].innerHTML = ptchNodes.snapshotItem(0).getAttribute("s");
+			PitchRow.cells[5].innerHTML = ptchNodes.snapshotItem(0).getAttribute("np");
 		}
 		Pitcher = Players[0].replace("Pitching Change:", "");
 		Pitcher = Pitcher.replace("Pitcher Change:", "");
@@ -1391,6 +1416,8 @@ function Substitution(Text) {
 		gamePos = "CF";
 	} else if (Players[1].indexOf("right field") > -1) {
 		gamePos = "RF";
+	} else if (Players[1].indexOf("designated hitter") > -1) {
+		gamePos = "DH";
 	} else {
 		window.open(gameFolder + "/game_events.xml");
 		alert("Unknown Position Substitution: " + Text);
@@ -1408,6 +1435,7 @@ function Substitution(Text) {
 }
 
 function InsertPlayer(Ord, gamePos, TmID, PlyrXML) {
+console.log("InsertPlayer");
 	//find the cell to insert the player
 	//start with the row after the row for the current batting order position
 	newRow = document.getElementById(TeamType[TmID] + Ord).nextElementSibling; //this works in IE10 but may not work in IE9 or earlier
@@ -1455,6 +1483,7 @@ function InsertPlayer(Ord, gamePos, TmID, PlyrXML) {
 }
 
 function getSound(SoundToGet) {
+console.log("getSound");
    fldrTeam = "";
    if (TeamInfo.innerHTML.indexOf(myTeam) >= 0) { 
       // more excitement if a hit is by my team
@@ -1495,6 +1524,7 @@ function getSound(SoundToGet) {
 }
 
 function playSound() {
+console.long("playSound");
    if (AudioQueue.length > 0) {
       //play the first sound in the queue
       //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
@@ -1509,6 +1539,7 @@ document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 }
 
 function BuildName(playerNode) {
+console.log("BuildName");
 //Player.getAttribute("num");
 	First = playerNode.getAttribute("first");
 	First = First.replace(/[A-Z]\./g, "");
@@ -1519,6 +1550,7 @@ function BuildName(playerNode) {
 }
 
 function SaveIt(){
+console.log("SaveIt");
 	Now = new Date;
 	var re=/\w* (\w*) (\d*) .* (\d\d\d\d)/;
 	FileName = Now.toString().replace(re, "$3$1$2"); 
@@ -1547,6 +1579,7 @@ alert(FilePath + FileName + ".html");
 
 
 function IsGameOver(theInning, theOuts) {
+console.log("IsGameOver");
 	Result = false;
 
 	awayScore = document.getElementById("away").Runs;
@@ -1572,6 +1605,7 @@ function IsGameOver(theInning, theOuts) {
 }
 
 function clearMessage(Msg) {
+console.log("clearMessage");
 	document.getElementById("MessageDiv").innerHTML = document.getElementById("MessageDiv").innerHTML.replace(Msg, '');
 	if (document.getElementById("MessageDiv").innerHTML == '') {
 		document.getElementById("MessageDiv").style.visibility = "hidden";
@@ -1581,6 +1615,7 @@ function clearMessage(Msg) {
 }
 
 function getScore() {
+console.log("getScore");
 	awayScore = document.getElementById("away").Runs;
 	awayTeam = document.getElementById("away").innerHTML;
 	homeScore = document.getElementById("home").Runs;
@@ -1608,6 +1643,7 @@ function getScore() {
 }
 
 function BoxScore() {
+console.log("BoxScore");
 	topLevel = selectNodes(source, "//boxscore");
 	lineScore = selectNodes(source, "//boxscore/linescore");
 	inningScores = selectNodes(source, "//boxscore/linescore/inning_line_score");

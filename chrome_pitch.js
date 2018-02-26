@@ -9,46 +9,47 @@
 
 
 function LoadPitch() {
+console.log("LoadPitch");
 	Temp = new Date;
-//	console.log("Pitch: ", Temp.getHours() + ":" + Temp.getMinutes() + ":" + Temp.getSeconds());
-//	console.log("Pitch");
 	Mark("Pitch");
 	theSound = "";
-	source = xdLoad(gameFolder + "/plays.xml");
-//console.log("Pitch", "Pitches: " + selectNodes(source, "game/atbat/p | game/atbat/po").snapshotLength, "Actions: " + selectNodes(source, "game/action[@des != '']").snapshotLength, "Play: " + selectNodes(source, "game/atbat[@des != '']").snapshotLength);
+	PitchSource = xdLoad(gameFolder + "/plays.xml");
 
 	//if the game is over, exit
-	if (selectNodes(source, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
+	if (selectNodes(PitchSource, "game[@status_ind='O']").snapshotLength > 0) { Mark('A');
 		return; 
 	}
 
 	//if there is a game action other than a pitch, get the call
-	if (selectNodes(source, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
-		showPlay(selectNodes(source, "game/action").snapshotItem(0));
+	if (selectNodes(PitchSource, "game/action[@des != '']").snapshotLength > 0) { Mark('B');
 		LastPlay = LoadPlays(LastPlay);
+		showPlay(selectNodes(PitchSource, "game/action").snapshotItem(0));
 	}
 
 	//occurs when: wild pitch, a ball in play
-	if (selectNodes(source, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(source, "game/atbat/@des").snapshotItem(0).nodeValue);
-		
-		showPlay(selectNodes(source, "game/atbat").snapshotItem(0));
+	if (selectNodes(PitchSource, "game/atbat[@des != '']").snapshotLength > 0) { Mark('D-' +  selectNodes(PitchSource, "game/atbat/@des").snapshotItem(0).nodeValue);
+		//check for a play
 		LastPlay = LoadPlays(LastPlay);
+		//call the description
+		showPlay(selectNodes(PitchSource, "game/atbat").snapshotItem(0));
+		//return at this point, because there is no batter change yet and no need to call any pitchers -- this will avoid the ball in play after the play
+		PitchTimer = setTimeout("LoadPitch()", 3000);	//check every second until a new pitch comes in
+		return;
 	}
 
 	//check for a change of batter	
-	batterNode = selectNodes(source, "game/players/batter").snapshotItem(0);
+	batterNode = selectNodes(PitchSource, "game/players/batter").snapshotItem(0);
 
 	//if there is a different batter
-	if (selectNodes(source, "game/players/batter").snapshotLength == 0) { //nothing you can do if the node isn't there
+	if (selectNodes(PitchSource, "game/players/batter").snapshotLength == 0) { //nothing you can do if the node isn't there
 		Mark("No batter");
 	} else if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) { Mark('F'); 
 		LastPlay = LoadPlays(LastPlay);
 
 		LastPitch = 0; //reset the pitch count
-		source = xdLoad(gameFolder + "/plays.xml"); //reload the plays because GetPlay replaces source
 
 		//set the sides
-		if(selectNodes(source, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { Mark('J1'); //if it's the top of the inning
+		if(selectNodes(PitchSource, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { Mark('J1'); //if it's the top of the inning
 			TeamInfo = document.getElementById("away"); //the current team is the Away team
 		} else { Mark('J2'); //otherwise
 			TeamInfo = document.getElementById("home"); //the current team is the Home team
@@ -57,13 +58,13 @@ function LoadPitch() {
 	
 		//calculate the number of runners on base
 		Runners = 0;
-		if (selectNodes(source, "game/field/offense/man[@bnum='1']").snapshotLength > 0) { 
+		if (selectNodes(PitchSource, "game/field/offense/man[@bnum='1']").snapshotLength > 0) { 
 			Runners += 1;
 		}
-		if (selectNodes(source, "game/field/offense/man[@bnum='2']").snapshotLength > 0) { 
+		if (selectNodes(PitchSource, "game/field/offense/man[@bnum='2']").snapshotLength > 0) { 
 			Runners += 2;
 		}
-		if (selectNodes(source, "game/field/offense/man[@bnum='3']").snapshotLength > 0) { 
+		if (selectNodes(PitchSource, "game/field/offense/man[@bnum='3']").snapshotLength > 0) { 
 			Runners += 4;
 		}
 		if (Runners > 0) {
@@ -74,16 +75,16 @@ function LoadPitch() {
 	}
 
 	//get all pitches to this batter
-	Pitches = selectNodes(source, "game/atbat/p | game/atbat/po");
+	Pitches = selectNodes(PitchSource, "game/atbat/p | game/atbat/po");
 	if (Pitches.snapshotLength > LastPitch) { Mark('K'); //if there are more pitches than last time
 		//get the number of balls and strikes
-		if (selectNodes(source, "game/@b").snapshotLength > 0) { Mark('L1');
-			Balls = selectNodes(source, ("game/@b")).snapshotItem(0).nodeValue;
+		if (selectNodes(PitchSource, "game/@b").snapshotLength > 0) { Mark('L1');
+			Balls = selectNodes(PitchSource, ("game/@b")).snapshotItem(0).nodeValue;
 		} else { Mark('L2');
 			Balls = "0";
 		}
-		if (selectNodes(source, "game/@s").snapshotLength > 0) { Mark('M1');
-			Strikes = selectNodes(source, ("game/@s")).snapshotItem(0).nodeValue;
+		if (selectNodes(PitchSource, "game/@s").snapshotLength > 0) { Mark('M1');
+			Strikes = selectNodes(PitchSource, ("game/@s")).snapshotItem(0).nodeValue;
 		} else { Mark ('M2');
 			Strikes = "0";
 		}
@@ -93,10 +94,10 @@ function LoadPitch() {
 		document.getElementById("S").innerHTML = Strikes;
 	
 		//update the pitcher's pitch count
-		PitchCounter = selectNodes(source, "game/players/pitcher").snapshotItem(0);
+		PitchCounter = selectNodes(PitchSource, "game/players/pitcher").snapshotItem(0);
 		PitchTable = "";
 		if (PitchCounter) { Mark('N');
-			PitchSide = selectNodes(source, "game/@top_inning").snapshotItem(0).nodeValue;
+			PitchSide = selectNodes(PitchSource, "game/@top_inning").snapshotItem(0).nodeValue;
 			if (PitchSide == "T") { Mark('O1');
 				PitchTable = document.getElementById("homePitching");
 			} else {  Mark('O2');
@@ -201,7 +202,7 @@ function LoadPitch() {
 			if (Balls == "4") {  Mark('S1');
 				//walked; let the Action routine handle it
 				theSound = "";
-				GetPlay(LastPlay);	//get the next play
+				//GetPlay(LastPlay);	//get the next play
 				break;
 			} else {  Mark('S2');
 				if (detail == "Ball In Dirt") { Mark('T1');
@@ -213,7 +214,7 @@ function LoadPitch() {
 					//Y = Pitch.selectSingleNode("@y").text
 					X = Pitch.getAttribute("px")
 					Y = Pitch.getAttribute("pz")
-					LR = selectNodes(source, "//game/players/batter").snapshotItem(0).getAttribute("stand");
+					LR = selectNodes(PitchSource, "//game/players/batter").snapshotItem(0).getAttribute("stand");
 					theSound += " Ball" + BallPos(X, Y, LR) + " " + Pitch.getAttribute("pitch_type");
 				} else if (detail == "Intent Ball") { Mark('T4');
 					//no sound for the individual balls of an intentional walk
@@ -221,7 +222,7 @@ function LoadPitch() {
 				} else if (detail == "Hit By Pitch") {  Mark('T5');
 					//walked; let the Action routine handle it
 					theSound = "";
-					GetPlay(LastPlay);	//get the next play
+					//GetPlay(LastPlay);	//get the next play
 					break;
 				} else { Mark('T6');
 					window.open(gameFolder + "/game_events.xml");
@@ -233,7 +234,7 @@ function LoadPitch() {
 			if (Strikes == "3") {  Mark('U1');
 				//struck out; let the Action routine handle it
 				theSound = "";
-				GetPlay(LastPlay);	//get the next play
+				//GetPlay(LastPlay);	//get the next play
 				break;
 			} else { Mark('U2');
 				switch (detail) {
@@ -244,8 +245,8 @@ function LoadPitch() {
 				case "Foul Bunt" :
 				case "Foul (Runner Going)" : Mark('b2');
 					theSound += " Foul " + Pitch.getAttribute("pitch_type");
-					pitchCount = selectNodes(source, "game/atbat/p");
-					if (pitchCount.snapshotLength > (Balls + Strikes)) {
+					pitchCount = selectNodes(PitchSource, "game/atbat/p");
+					if (pitchCount.snapshotLength > (parseInt(Balls) + parseInt(Strikes))) {
 						theSound += " Foul X " + Pitch.getAttribute("pitch_type");
 					}
 					break;
@@ -267,8 +268,7 @@ function LoadPitch() {
 			break;
 		case "X" : Mark('a4');
 			//ball in play; let the action routine handle it
-			theSound = "";
-//			document.getElementById("InPlay").innerHTML = "Ball in play...";
+			theSound = "";	
 			document.getElementById("InPlay").innerHTML = detail;
 			theSound = "InPlay";
 			break;
@@ -277,7 +277,7 @@ function LoadPitch() {
 			alert("Unknown pitch type: " + play + " " + detail);
 		}
 		if (theSound > "") { Mark('V');
-			LastPlay = LoadPlays(LastPlay);
+//			LastPlay = LoadPlays(LastPlay);
 			getSound(theSound);
 		}
 		LastPitch = Pitches.snapshotLength;
@@ -287,6 +287,7 @@ function LoadPitch() {
 }
 
 function BallPos(X, Y, LR) {
+console.log("BallPos");
 	Result = "";
 
 	if (Y < 1) {
@@ -318,11 +319,12 @@ function BallPos(X, Y, LR) {
 }
 
 function Mark(Text) {
-	//for debugging purposes, prints in the Debug DIV whatever text is provided
+	//for debugging purposes
 //	console.log(Text);
 }
 
 function ShowBatter(batterNode) {
+console.log("ShowBatter");
 	batterPic = batterNode.getAttribute("pid");
 	batterName = batterNode.getAttribute("boxname");
 	batterAvg = batterNode.getAttribute("avg");
@@ -345,11 +347,11 @@ function ShowBatter(batterNode) {
 	LeadOff = "";
 	getSound("Average/" + batterAvg);
 
-	if(selectNodes(source, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { 
-		TeamInfo = document.getElementById("away"); //the current team is the Away team
-	} else { 
-		TeamInfo = document.getElementById("home"); //the current team is the Home team
-	}
+//	if(selectNodes(source, ("//game/@inning_state")).snapshotItem(0).nodeValue == 'Top') { 
+//		TeamInfo = document.getElementById("away"); //the current team is the Away team
+//	} else { 
+//		TeamInfo = document.getElementById("home"); //the current team is the Home team
+//	}
 
 	Box = document.getElementById(TeamInfo.id + TeamInfo.AB).cells[TeamInfo.Column];
 	batterPos = getPos(Box);
@@ -370,6 +372,8 @@ function ShowBatter(batterNode) {
 }
 
 function GetPlay(After) {
+console.log("GetPlay");
+//I'VE COMMENTED THIS OUT IN MOST PLACES THAT CALL IT BECAUSE I THINK IT MAKES A MESS OF THINGS
 	//used to make sure you get a play at certain points
 	if (LastPlay == -1) {  // game over; stop updating
 		return;
