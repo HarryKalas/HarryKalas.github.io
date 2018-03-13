@@ -116,7 +116,7 @@ console.log("AfterLoad");
 		}
 
 		AudioQueue.length = 0;
-		playSound();
+		Sounds = setInterval(playSound, 1000); //check for a sound to play every second
 
 		LoadPitch();
 		Monitor = setInterval(PlayMonitor, 15000); //check for missing plays every 15 seconds
@@ -138,7 +138,6 @@ console.log("LastMod");
 }
 
 function selectNodes(Doc, XPath, context) {
-console.log("selectNodes");
 //UNORDERED_NODE_ITERATOR_TYPE
 
 	if(context) {
@@ -1524,18 +1523,16 @@ console.log("getSound");
 }
 
 function playSound() {
-console.long("playSound");
-   if (AudioQueue.length > 0) {
+   console.log("playSound");
+   if (AudioQueue.length > 0 ) { 
+     if (document.getElementById("Audio").currentSrc = "" || document.getElementById("Audio").ended) {
       //play the first sound in the queue
       //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
       thisSound = AudioQueue.shift();
       document.getElementById("Audio").setAttribute('src', "Audio/" + thisSound + ".mp3");
-document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
-   } else {
-      //if nothing in the queue, wait a second and try again
-     setTimeout("playSound()", 1000);
-document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
+     }
    }
+   document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 }
 
 function BuildName(playerNode) {
