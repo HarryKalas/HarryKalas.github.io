@@ -116,7 +116,7 @@ console.log("AfterLoad");
 		}
 
 		AudioQueue.length = 0;
-		Sounds = setInterval(playSound, 1000); //check for a sound to play every second
+		setTimeout("playSound()", 1000);
 
 		LoadPitch();
 		Monitor = setInterval(PlayMonitor, 15000); //check for missing plays every 15 seconds
@@ -1524,14 +1524,15 @@ console.log("getSound");
 
 function playSound() {
    console.log("playSound");
-   if (AudioQueue.length > 0 ) { 
-     if (document.getElementById("Audio").currentSrc = "" || document.getElementById("Audio").ended) {
-      //play the first sound in the queue
-      //HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
-      thisSound = AudioQueue.shift();
-      document.getElementById("Audio").setAttribute('src', "Audio/" + thisSound + ".mp3");
-     }
-   }
+	if (AudioQueue.length > 0) {
+		//play the first sound in the queue
+		//HTML5 player will automatically call the next one when this one is ended; knowing the length is no longer necessary
+		thisSound = AudioQueue.shift();
+		document.getElementById("Audio").setAttribute('src', "file:///C:/Users/Home/documents/GitHub/HarryKalas.github.io/Audio/" + thisSound + ".mp3");
+	} else {
+		//if nothing in the queue, wait a second and try again
+		setTimeout("playSound()", 1000);
+	}
    document.all.Debug.innerHTML = "Queue: " + AudioQueue.length;
 }
 
