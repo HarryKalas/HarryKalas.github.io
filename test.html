@@ -1,0 +1,22 @@
+<html>
+<head>
+<script>
+folder = "http://gd2.mlb.com/components/game/mlb/year_2018/month_05/day_26/gid_2018_05_26_tormlb_phimlb_1/";
+GetIt("game_events.xml");
+GetIt("inning/inning_2.xml");
+
+function GetIt(FileName) {
+	xhttp=new XMLHttpRequest();
+	xhttp.open("HEAD",folder + FileName,false);
+	try {
+		xhttp.send(null);
+		console.log(FileName.substring(0,6), xhttp.getResponseHeader("Last-Modified"));
+	} catch(e) {
+		console.log("Error");
+	}
+}
+</script>
+</head>
+<body>
+</body>
+</html>

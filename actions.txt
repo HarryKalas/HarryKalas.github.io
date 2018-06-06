@@ -1,0 +1,28 @@
+event -- what to do or who the player is
+
+Game Advisory
+	des: Mound Visit -- maybe put up a message?
+
+Caught Stealing 2B -- player is the one who was caught
+
+Wild Pitch -- player is the one who advances (what if more than one does? if more than one base? you can get the final base from des -- FROM LATER ONE: THE FIRST RUNNER IS THE ONE IDENTIFIED IN PLAYER, BUT THERE MAY BE OTHERS)
+
+Pitching Substitution -- player is incoming pitcher - des gives who they are replacing, where they are batting
+
+Ejection -- player is the person ejected, even if it's a manager -- maybe put up a message?
+
+Passed Ball -- player is the one who advanced (what if more than one advanced? more than one base? you can get the base from des)
+
+Offensive Sub -- player is the one coming in (is it always a pinch hitter? des tells you who the player is replacing)
+
+Defensive Sub -- player is the one coming in, des tells you who they are replacing, where they are batting
+
+THERE SEEMS TO BE A PROBLEM WITH DOUBLE SWITCHES -- EASY TO TELL WHO'S COMING IN, HARD TO TELL WHO'S GOING OUT
+
+Defensive Switch -- that's someone moving around, des tells start and end, player is who is moving -- also comes up when a pinch hitter stays in the game, gives fielding position
+
+
+
+=== 
+pitchers/[id].xml gives throws=R/L, but you have to open a file for each one of those
+when game is in progress, you can get it from plays.xml

@@ -3,59 +3,57 @@
 <head>
 <title>Scorekeeping</title>
 <link href="scoreboard.css" rel="stylesheet" type="text/css"/>
-<script>
-	//set game variables
-	theYear = "";	//if blank, it calculates the current date
-	theMonth = "";	//if blank, it calculates the current date
-	theDate = "";	//if blank, it calculates the current date
-	myTeam = "Phillies";
-	LastPlay = 0;			//that's actually the starting point: the last play already shown
-	MaxPlay = 0;			//if 0, whole game; otherwise, nothing higher than MaxPlay -- for testing
-</script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script type="text/javascript" src="Commercials.js"></script>
-<script type="text/javascript" src="chrome_scorecard.js"></script>
+<script type="text/javascript" src="scorecard_2018.js"></script>
 <script type="text/javascript" src="chrome_pitch.js"></script>
 </head>
 <body onload="AfterLoad();">
-<table style="border-style: none;"><tr><td id="AwayLogo" style="text-align: center; border-style: none;">
-</td><td style="width: 400px; border-style: none;">
-<div id="Broadcast" class="BoxScore"><b>Broadcast: </b></div>
+<table style="border-style: none;">
+<tr>
+<td id="AwayLogo" style="text-align: center; border-style: none;"></td>
+<td style="width: 400px; border-style: none;">
+<div id="Broadcast" class="BoxScore"></div>
+<div id="GameTime" class="BoxScore"></div>
 <div id="GameStatus" class="BoxScore"></div>
 <div id="GameAlert" class="BoxScore"></div>
 <div id="BoxScore" class="BoxScore"></div>
 <div id="PitchCountT" class="BoxScore"></div>
 <div id="PitchCountF" class="BoxScore"></div>
 <div id="Debug" class="BoxScore"></div>
-
-<div id="PitchTime" class="BoxScore">a</div>
-
-<div id="PlayTime" class="BoxScore">b</div>
-
-<div id="LastSound" class="BoxScore">c</div>
-
-</td><td id="HomeLogo" style="text-align: center; border-style: none; padding-left: 10px;">
-</td></tr></table>
+<div id="PitchTime" class="BoxScore">PitchTime: </div>
+<div id="PlayTime" class="BoxScore">PlayTime: </div>
+<div id="LastSound" class="BoxScore">LastSound: </div>
+</td>
+<td id="HomeLogo" style="text-align: center; border-style: none; padding-left: 10px;"></td>
+</tr>
+</table>
 <div id="Challenges" class="BoxScore" style="font-style: italic;"></div>
 <p></p>
-<span id="GameDisplay">
+<div id="GameDisplay" class="GameDisplay">
 <h3>Away Team: <a id="away"></a></h3>
-<table cellpadding="0" cellspacing="0" id="awayTable" width="850">
-<tr id="awayHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
+<table id="awayTable" style="width: 850px;">
+<tr id="awayHeader">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
 <tr id="away1">
-<td align="center" valign="top" rowspan="3">1</td>
+<td class="Order" rowspan="3">1</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -68,19 +66,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away2">
-<td align="center" valign="top" rowspan="3">2</td>
+<td class="Order" rowspan="3">2</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -92,19 +90,19 @@
 <td class="Player Bottom">&nbsp;</td>
 <td class="Number Bottom">&nbsp;</td>
 <tr id="away3">
-<td align="center" valign="top" rowspan="3">3</td>
+<td class="Order" rowspan="3">3</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -117,19 +115,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away4">
-<td align="center" valign="top" rowspan="3">4</td>
+<td class="Order" rowspan="3">4</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -142,19 +140,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away5">
-<td align="center" valign="top" rowspan="3">5</td>
+<td class="Order" rowspan="3">5</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -167,19 +165,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away6">
-<td align="center" valign="top" rowspan="3">6</td>
+<td class="Order" rowspan="3">6</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -192,19 +190,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away7">
-<td align="center" valign="top" rowspan="3">7</td>
+<td class="Order" rowspan="3">7</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -217,19 +215,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away8">
-<td align="center" valign="top" rowspan="3">8</td>
+<td class="Order" rowspan="3">8</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -242,19 +240,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="away9">
-<td align="center" valign="top" rowspan="3">9</td>
+<td class="Order" rowspan="3">9</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -266,46 +264,63 @@
 <td class="Player Bottom">&nbsp;</td>
 <td class="Number Bottom">&nbsp;</td>
 </tr>
-<tr id="awayFooter"><th>&nbsp;Ord&nbsp;</th><th width="30">#</th><th width="200">Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
+<tr id="awayFooter">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
 <tr id="awaySpaceIt" style="visibility: collapse;">
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="220" height="1"><br/></td>
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
-<table id="awayPitching" cellspacing="1">
-<tr class="PitchingHead"><td colspan="2" width="200" style="text-align: left;"><b>Pitching</b></td><td width="50"><b>ERA</b></td><td width="40"><b>B</b></td><td width="40"><b>S</b></td><td width="50"><b>Pitches</b></td></tr>
-<tr><td style="text-align: left; width: 150px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<table id="awayPitching">
+<tr class="PitchingHead">
+<td colspan="2" style="text-align: left; min-width: 200px;"><b>Pitching</b></td>
+<td style="min-width: 50px"><b>ERA</b></td>
+<td style="min-width: 40px"><b>B</b></td>
+<td style="min-width: 40px"><b>S</b></td>
+<td style="min-width: 50px"><b>Pitches</b></td>
+</tr>
 </table>
 <p></p>
-<h3>Home Team: <a id="home" Runs="0" Outs="0" Inning="1" Column="4" AB="1" Index="1"></a></h3>
-<table cellpadding="0" cellspacing="0" id="homeTable" width=850>
-<tr id="homeHeader"><th width="30">&nbsp;Ord&nbsp;</th><th width="30">#</th><th>Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
+<h3>Home Team: <a id="home"></a></h3>
+<table id="homeTable" style="width: 850px;">
+<tr id="homeHeader">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
 <tr id="home1">
-<td align="center" valign="top" rowspan="3">1</td>
+<td class="Order" rowspan="3">1</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -317,19 +332,19 @@
 <td class="Player Bottom">&nbsp;</td>
 <td class="Number Bottom">&nbsp;</td>
 <tr id="home2">
-<td align="center" valign="top" rowspan="3">2</td>
+<td class="Order" rowspan="3">2</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -342,19 +357,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home3">
-<td align="center" valign="top" rowspan="3">3</td>
+<td class="Order" rowspan="3">3</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -367,19 +382,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home4">
-<td align="center" valign="top" rowspan="3">4</td>
+<td class="Order" rowspan="3">4</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -392,19 +407,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home5">
-<td align="center" valign="top" rowspan="3">5</td>
+<td class="Order" rowspan="3">5</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -417,19 +432,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home6">
-<td align="center" valign="top" rowspan="3">6</td>
+<td class="Order" rowspan="3">6</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -442,19 +457,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home7">
-<td align="center" valign="top" rowspan="3">7</td>
+<td class="Order" rowspan="3">7</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -467,19 +482,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home8">
-<td align="center" valign="top" rowspan="3">8</td>
+<td class="Order" rowspan="3">8</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -492,19 +507,19 @@
 <td class="Number Bottom">&nbsp;</td>
 </tr>
 <tr id="home9">
-<td align="center" valign="top" rowspan="3">9</td>
+<td class="Order" rowspan="3">9</td>
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
-<td rowspan="3" style="position: relative" background="0b.gif" width="60" height="60">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)">&nbsp;</td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -515,33 +530,45 @@
 <td class="Player Bottom">&nbsp;</td>
 <td class="Number Bottom">&nbsp;</td>
 </tr>
-<tr id="homeFooter"><th>&nbsp;Ord&nbsp;</th><th width="30">#</th><th width="200">Player</th><th width="30">Pos</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
+<tr id="homeFooter">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
 <tr id="homeSpaceIt" style="visibility: collapse;">
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="220" height="1"><br/></td>
-<td><img src="spacer.gif" width="30" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
-<td><img src="spacer.gif" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
-<table id="homePitching" cellspacing="1">
-<tr class="PitchingHead"><td colspan="2" width="200" style="text-align: left;"><b>Pitching</b></td><td width="50"><b>ERA</b></td><td width="40"><b>B</b></td><td width="40"><b>S</b></td><td width="50"><b>Pitches</b></td></tr>
-<tr><td style="text-align: left; width: 150px;"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<table id="homePitching">
+<tr class="PitchingHead">
+<td colspan="2" style="text-align: left; min-width: 200px;"><b>Pitching</b></td>
+<td style="width: 50px"><b>ERA</b></td>
+<td style="width: 40px"><b>B</b></td>
+<td style="width: 40px"><b>S</b></td>
+<td style="width: 50px"><b>Pitches</b></td>
+</tr>
 </table>
 <p></p>
 <div id="BatterDiv" style="visibility: hidden;">
-<img id="BatterPic" src="spacer.gif" width="90" align="left" style="padding-right: 5px;"/>
+<img id="BatterPic" src="spacer.gif" width="90" style="padding-right: 5px; float: left" alt="Batter"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
+<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;">
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>
@@ -552,10 +579,100 @@ O: <span id="O"></span><br/>
 </div>
 <audio id="Audio" autoplay onended="playSound();" controls></audio>
 <div id="Plays" class="BoxScore"></div>
-</span>
-<p>
-<b>All Games Today:</b>
-</p>
+</div>
+<form>
+<table class="GameDisplay">
+<tr class="GameDisplay">
+<td class="GameDisplay" style="width: 100%"><b>All Games Today:</b></td>
+<td class="GameDisplay">
+   <select name="myTeam" id="myTeam">
+      <option value="143" selected="selected">Philadelphia Phillies</option>
+      <option value="109">Arizona Diamondbacks</option>
+      <option value="144">Atlanta Braves</option>
+      <option value="110">Baltimore Orioles</option>
+      <option value="111">Boston Red Sox</option>
+      <option value="112">Chicago Cubs</option>
+      <option value="145">Chicago White Sox</option>
+      <option value="113">Cincinnati Reds</option>
+      <option value="114">Cleveland Indians</option>
+      <option value="115">Colorado Rockies</option>
+      <option value="116">Detroit Tigers</option>
+      <option value="117">Houston Astros</option>
+      <option value="118">Kansas City Royals</option>
+      <option value="108">Los Angeles Angels</option>
+      <option value="119">Los Angeles Dodgers</option>
+      <option value="146">Miami Marlins</option>
+      <option value="158">Milwaukee Brewers</option>
+      <option value="142">Minnesota Twins</option>
+      <option value="121">New York Mets</option>
+      <option value="147">New York Yankees</option>
+      <option value="133">Oakland Athletics</option>
+      <option value="134">Pittsburgh Pirates</option>
+      <option value="135">San Diego Padres</option>
+      <option value="137">San Francisco Giants</option>
+      <option value="136">Seattle Mariners</option>
+      <option value="138">St. Louis Cardinals</option>
+      <option value="139">Tampa Bay Rays</option>
+      <option value="140">Texas Rangers</option>
+      <option value="141">Toronto Blue Jays</option>
+      <option value="120">Washington Nationals</option>
+   </select>
+</td>
+<td class="GameDisplay" style="white-space: nowrap">
+   <select name="theMonth" id="theMonth">
+      <option value="02">February</option>
+      <option value="03">March</option>
+      <option value="04">April</option>
+      <option value="05">May</option>
+      <option value="06">June</option>
+      <option value="07">July</option>
+      <option value="08">August</option>
+      <option value="09">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+   </select>
+   <select name="theDate" id="theDate">
+      <option value="01">1</option>
+      <option value="02">2</option>
+      <option value="03">3</option>
+      <option value="04">4</option>
+      <option value="05">5</option>
+      <option value="06">6</option>
+      <option value="07">7</option>
+      <option value="08">8</option>
+      <option value="09">9</option>
+      <option value="10">10</option>
+      <option value="11">11</option>
+      <option value="12">12</option>
+      <option value="13">13</option>
+      <option value="14">14</option>
+      <option value="15">15</option>
+      <option value="16">16</option>
+      <option value="17">17</option>
+      <option value="18">18</option>
+      <option value="19">19</option>
+      <option value="20">20</option>
+      <option value="21">21</option>
+      <option value="22">22</option>
+      <option value="23">23</option>
+      <option value="24">24</option>
+      <option value="25">25</option>
+      <option value="26">26</option>
+      <option value="27">27</option>
+      <option value="28">28</option>
+      <option value="29">29</option>
+      <option value="30">30</option>
+      <option value="31">31</option>
+   </select>
+   <input type="text" name="theYear" id="theYear" size="4" maxlength="4">
+</td>
+<td class="GameDisplay">
+   <input type="submit" value="Load Game"><br/><br/>
+   <input type="button" value="Load Default" onclick="location.search = ''">
+</td>
+</tr>
+</table>
+</form>
 <div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
 </div>
 </body>

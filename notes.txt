@@ -1,19 +1,28 @@
-make a different sound for  when the p/@type="X" and:
-* p/@des="In play, out(s)"
-* p/@des="In play, no out"
-* p/@des="In play, run(s)"
+ACTIONS NOT GETTING HANDLED PROPERLY:
+* "Pitching Change: Marcus Walden replaces Marcus Walden, batting 8th. "
+* HANDLE THE NO SECOND BOX WHEN THEY ARE MISSING THE FIRST NAME
+	APR 29 NYM
+	APR 28 TAMPA BAY
+* BATTER INTERFERENCE
+	APR 28 CIN, THERE'S ANOTHER
+* WILD PITCH: BE SURE TO GET IT FOR THE PLAYS IT LANDS ON
+* With 608577 batting, 592261 caught stealing 3rd base, catcher 435263 to third baseman 608324, 425783 to 2nd.
 
-game/@inning_state=Top when the top starts
-game/@inning_state=Middle  between top and bottom
-game/@inning_state=Bottom when the bottom starts
-game/@inning_state=End between bottom and top of next
+	NOT SURE IF i CAN DO ANYTHING ABOUT THIS; THE COMMA AT THE END SHOULDN'T BE THERE
 
-Challenge
-status_ind="MF" status="Manager Challenge" reason="Close play at 1st"
-status_ind="MO" status="Manager Challenge" reason="Fair/foul in outfield"
 
-need calls for Joseph (Joseph, T), Rupp, Asche, Nola... everybody on the roster we can get
 
-Is there a call for action/@des="Offensive Substitution
 
-2009-03-15 4b
+I DON'T NEED TO KEEP TRACK OF THE TOTAL OUTS FOR THE INNING BECAUSE THE ATBAT AND ACTION NODES GET THAT -- BUT MAYBE COMPARE TO THE TOTAL I'M STORING
+
+GET THE OUT NUMBER FROM THE PLAY (ATBAT OR ACTION)? NO, THAT WON'T WORK FOR DP
+
+ATBAT AND ACTION ALSO TRACK HOME_TEAM_RUNS AND AWAY_TEAM_RUNS
+
+PLAYS USUALLY COMES BEFORE EVENTS, BUT SOMETIMES BATTER CHANGES BEFORE PLAY -- KEEP TRACK OF PLAY AND DO NOT CALL NEW BATTER UNTIL PREVIOUS BATTER'S PLAY HAS BEEN CALLED
+
+MAYBE SHOW A K COUNT FOR HOME TEAM WHEN HOME TEAM GETS A K?
+
+DON'T NEED TO CALCULATE THE SIDE BECAUSE ATBAT.ID GIVES YOU THAT (HOME OR AWAY)
+
+NEED TO PUT ONLY 1ST PITCHER ON PLAYER NAMES AT BEGINNING AND CHANGE PLAYER NAMES WHEN PITCHER CHANGES

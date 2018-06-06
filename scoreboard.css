@@ -2,6 +2,8 @@ TABLE {
 	border: solid;
 	border-width: 1px;
 	border-color: black;
+	padding:0; 
+	border-spacing: 0; 
 }
 TD, TH {
 	border: solid;
@@ -9,6 +11,12 @@ TD, TH {
 	border-color: black;
 	padding-right: 1px;
 	padding-left: 1px;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+TD.Order {
+	text-align: center;
+	vertical-align: top;
 }
 TD.Number {
 	text-align: center;
@@ -21,10 +29,13 @@ TD.Bottom {
 	BORDER-TOP: medium none; 
 }
 TD.PlayBox {
+ 	position: relative; 
+	text-align: center;
 	font-family: Arial;
 	font-weight: bold;
 	color: blue;
-	text-align: center;
+	width: 60px; 
+	height: 60px;
 }
 DIV {
 	font-size: 8px; 
@@ -139,7 +150,9 @@ DIV.BoxScore {
 }
 
 #BatterDiv {
-	left: 700px;
+	position: fixed;
+	left: 600px;
+	top: 10px;
 	width: 250px; 
 	font-family: Arial;
 	font-size: 10pt;
@@ -161,4 +174,13 @@ DIV.BoxScore {
 	z-index: 1000;
 	background-color: #FFFF00;
 	padding: 20px;
+}
+.GameDisplay { 
+	position: static;
+	font-family: Arial Narrow;
+	font-size: 12pt;
+	color: black;
+	width: 910px;
+	border: none;
+	vertical-align: top;
 }

@@ -1,0 +1,52 @@
+<html>
+<head>
+<script>
+//use this to find all instances of a particular event
+event = "Catcher Interference";
+
+baseFolder = "http://gd2.mlb.com/components/game/mlb/year_2018/";
+
+m = 5
+for (d = 1; d < 16; d++) {
+	if (d < 10) { d = "0" + d }
+	dayFolder = "month_04/day_" + d;
+	console.log(dayFolder);
+	source = GetIt(baseFolder + dayFolder + "/master_scoreboard.xml");
+	Games = selectNodes(source, "//games/game");
+	for (gIdx = 0; gIdx < Games.snapshotLength; gIdx++) {
+		GameFile = baseFolder + dayFolder + "/gid_";
+		GameFile += Games.snapshotItem(gIdx).getAttribute("gameday") + "/game_events.xml";
+		PlaySource = GetIt(GameFile);
+		Plays = selectNodes(PlaySource, "//game/inning/*/*[@event='"+event+"']");
+		for (pIdx = 0; pIdx < Plays.snapshotLength; pIdx++) {
+			document.writeln(Plays.snapshotItem(0).getAttribute("des"));
+			document.writeln("..." + GameFile + "<br/>");
+		}
+	}
+}
+
+function GetIt(FileName) {
+	xhttp=new XMLHttpRequest();
+	xhttp.open("GET",FileName,false);
+	try {
+		xhttp.send(null);
+		return xhttp.responseXML;
+	} catch(e) {
+		console.log("Error");
+	}
+}
+
+function selectNodes(Doc, XPath, context) {
+//replaces the selectNodes feature that doesn't seem to be there
+
+	if(context) {
+		return Doc.evaluate(XPath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
+	} else if (Doc) {
+		return Doc.evaluate(XPath, Doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
+	}
+}
+</script>
+</head>
+<body>
+</body>
+</html>

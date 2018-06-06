@@ -1,0 +1,51 @@
+BY FILE
+master_scoreboard.xml
+	LoadGame
+
+players.xml
+	LoadPlayers
+	InsertBatter
+
+boxscore.xml
+	LoadPlayers
+	LoadPitcher
+	InsertBatter
+	BoxScore
+	IncomingPlayer
+
+individual pitcher files
+	LoadPitcher
+
+game_events.xml
+	LoadPlays
+
+plays.xml
+	BoxScore (to get the game status -- would be better to learn the conversion from boxscore.xml which is loaded right after it)
+
+
+BY PROCESS
+LoadGame (called by AfterLoad)
+	master_scoreboard.xml -- gets the games, the broadcast information and the initial status along with alerts in progress
+
+LoadPlayers (called by AfterLoad)
+	players.xml -- gets the names of the teams, the starting players for each team
+	boxscore.xml -- gets the player's full name, which is turned into a RegExp (only has current players I think)
+
+LoadPitcher (called by LoadPlayers, showAction when there is a pitchingg substitution)
+	boxscore.xml -- gets the current pitcher's name and stats (only has current pitchers I think)
+	pitcher-specific xml -- get's the current pitcher's throwing hand
+
+LoadPlays (called by AfterLoad, and a timer is set up there)
+	game_events.xml -- gets all of the information about the current atbat or action play
+
+InsertBatter (called by showAction when there is a defensive or offensive substitution or switch or pitching substitution)
+	players.xml  -- *** CHANGE THIS TO XDLOAD ONLY ONCE AT THE BEGINNING OF LOADPLAYS AND SAVE IT, BECAUSE IT WOULDN'T CHANGE IN THE MIDDLE OF PLAYS -- THIS MIGHT NOT EVEN CHANGE AT ALL DURING A GAME AND MAYBE COULD BE CALLED ONLY DURING LOADPLAYERS
+	boxscore.xml -- *** CHANGE THIS TO XDLOAD ONLY ONCE AT THE BEGINNING OF LOADPLAYS AND SAVE IT, BECAUSE IT WOULDN'T CHANGE IN THE MIDDLE OF PLAYS
+
+BoxScore (at the end of LoadPlays)
+	plays.xml -- gets current game status (*** COULD WE GET ELSEWHERE? BUT IT WOULD STILL HAVE TO READ ***) 
+	boxscore.xml -- gets the score for displaying in the boxscore box 
+
+IncomingPlayer (called by ShowAction for various events)
+	boxscore.xml -- cleans up the player's name *** THIS COULD BE XDLOADED BEFORE THE LOOPING
+	
