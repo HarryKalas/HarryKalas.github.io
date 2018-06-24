@@ -6,7 +6,6 @@
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="scorecard_2018.js"></script>
-<script type="text/javascript" src="chrome_pitch.js"></script>
 </head>
 <body onload="AfterLoad();">
 <table style="border-style: none;">
@@ -24,6 +23,7 @@
 <div id="PitchTime" class="BoxScore">PitchTime: </div>
 <div id="PlayTime" class="BoxScore">PlayTime: </div>
 <div id="LastSound" class="BoxScore">LastSound: </div>
+<audio id="Audio" autoplay onended="playSound();" controls></audio>
 </td>
 <td id="HomeLogo" style="text-align: center; border-style: none; padding-left: 10px;"></td>
 </tr>
@@ -568,16 +568,17 @@
 <img id="BatterPic" src="spacer.gif" width="90" style="padding-right: 5px; float: left" alt="Batter"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
-<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;">
+<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>
 <span id="PitchSpeed" style="line-height: 35px;"></span><br/>
-<span id="InPlay"></span>
+<span id="InPlay"></span><br/>
+<p style="clear: left; margin: 15px 0px 0px 10px;">Pitcher: <span id="Pitcher"></span></p>
+<div id="MiniBox" class="BoxScore"></div>
 </div>
 <div id="MessageDiv" style="visibility: hidden;">
 </div>
-<audio id="Audio" autoplay onended="playSound();" controls></audio>
 <div id="Plays" class="BoxScore"></div>
 </div>
 <form>

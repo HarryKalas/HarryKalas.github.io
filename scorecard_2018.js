@@ -1,3 +1,4 @@
+// TESTED FROM 27 APR 2018 TO 26 MAY 2018, NO ERRORS 
 //	OUTS SOMETIMES GET OUT OF SYNC DURING LIVE GAMES; I DON'T KNOW WHY
 //	EXCEPT THE 14 MAY GAME ASTROS V. ANGELS THAT HAS A DOUBLE-PLAY IN THE 9TH THAT DOESN'T TELL THE SECOND OUT
 //	I HAVE CODED AROUND IT AT 491 BUT HAVE COMMENTED IT OUT SO I CAN SEE HOW MUCH IT HAPPENS AND MAKE SURE CODING AROUND WORKS
@@ -9,6 +10,8 @@
 //	WHEN BATTERS ARE BEING CALLED, USE document.getElementById("away#").scrollIntoView() TO DISPLAY
 //
 //	BUG IN THE PITCHING CHANGE CALL IN gid_2018_05_03_bosmlb_texmlb_1: SAYS A PITCHER REPLACES HIMSELF! I AM NOT HANDLING THIS WELL
+//	PASSED BALL IS GETTING CALLED TWICE
+//	SOMETIMES THE NUMBER OF RUNNERS IS CALLED TOO MANY TIMES
 
 //GLOBAL VARIABLES
 myTeam=143; //defaults to the Phillies
@@ -267,11 +270,12 @@ function LoadGame() {
 	case "Game Over" :
 		break;
 	case "Manager Challenge" :
+	case "Umpire Review" :
 		setTimeout("location.reload()", 15000);
 		break;
 	default :
 		// there may be other options
-		console.log("other game status");
+		console.log("other game status: ", gameStatus);
 		oy;
 	}
 
@@ -506,7 +510,7 @@ function LoadPlays(StartPlay) {
 
 
 	//update the boxscore
-	document.getElementById("BoxScore").innerHTML = BoxScore();
+	BoxScore();
 	GameOver = IsGameOver();
 
 	document.getElementById("PlayTime").innerHTML = GameEventsXML[1];
@@ -784,7 +788,8 @@ function showAction(playDes, ActionPlay) {
 			showMessage(ActionPlay.getAttribute("des"));
 			break;
 		case 'Runner Advance' :
-			SecondaryPlay(Plays[sIdx], "E "); // I ASSUME THIS IS AN ERROR
+			SecondaryPlay(Plays[sIdx], "E"); // I ASSUME THIS IS AN ERROR
+			getSound("E");
 			break;
 		case 'Runner Out' :
 //THIS REALLY CAN'T BE HANDLED WITHOUT DUPLICATING EVERYTHING AND IT DOSN'T COME UP OFTEN ENOUGH TO DO THAT
@@ -834,7 +839,24 @@ console.log(gamePlays.snapshotItem(pIdx).getAttribute("des"));
 
 	if (AtBat.Outs == 3) {
 		EndOfInning();
+		return;
 	}
+
+	//calculate the number of runners on base and refresh the display
+	pitchSource = PlaysXML[2];
+	if (pitchSource == "") { return; }
+	Runners = 0;
+	if (selectNodes(pitchSource, "game/field/offense/man[@bnum='1']").snapshotLength > 0) { 
+		Runners += 1;
+	}
+	if (selectNodes(pitchSource, "game/field/offense/man[@bnum='2']").snapshotLength > 0) { 
+		Runners += 2;
+	}
+	if (selectNodes(pitchSource, "game/field/offense/man[@bnum='3']").snapshotLength > 0) { 
+		Runners += 4;
+	}
+	document.getElementById("Runners").src = Runners + ".gif";
+	return;
 }
 
 function showMessage(Msg) {
@@ -1632,54 +1654,85 @@ function BoxScore() {
 	lineScore = selectNodes(source, "//boxscore/linescore");
 	inningScores = selectNodes(source, "//boxscore/linescore/inning_line_score");
 
-	result  = '<table cellpadding="0" cellspacing="0">';
+	full  = '<table>';
+	mini  = '<table style="width: 100%; margin: 10px 0px;">';
 
 	//header
-	result += '<tr><td class="BoxScoreHead" style="text-align: left;">&#xa0;</td>'
+	full += '<tr><td class="BoxScoreHead">&#xa0;</td>'
+	mini += '<tr><td class="BoxScoreHead" style="width: 90%;">&#xa0;</td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
-		result += '<th class="BoxScoreHead"> &#xa0;' + inningScores.snapshotItem(Idx).getAttribute("inning") + '&#xa0; </th>';
+		full += '<th class="BoxScoreHead"> &#xa0;' + inningScores.snapshotItem(Idx).getAttribute("inning") + '&#xa0; </th>';
 	}
-	result += '<th class="BoxScoreHead">&#xa0;</th>';
-	result += '<th class="BoxScoreHead">&#xa0;&#xa0;R&#xa0;&#xa0;</th>';
-	result += '<th class="BoxScoreHead">&#xa0;&#xa0;H&#xa0;&#xa0;</th>';
-	result += '<th class="BoxScoreHead">&#xa0;&#xa0;E&#xa0;&#xa0;</th>';
-	result += '</tr>';
+	full += '<th class="BoxScoreHead">&#xa0;</th>';
+	full += '<th class="BoxScoreHead">&#xa0;&#xa0;R&#xa0;&#xa0;</th>';
+	full += '<th class="BoxScoreHead">&#xa0;&#xa0;H&#xa0;&#xa0;</th>';
+	full += '<th class="BoxScoreHead">&#xa0;&#xa0;E&#xa0;&#xa0;</th>';
+	full += '</tr>';
+
+	mini += '<th class="BoxScoreHead">&#xa0;&#xa0;R&#xa0;&#xa0;</th>';
+	mini += '<th class="BoxScoreHead">&#xa0;&#xa0;H&#xa0;&#xa0;</th>';
+	mini += '<th class="BoxScoreHead">&#xa0;&#xa0;E&#xa0;&#xa0;</th>';
+	mini += '</tr>';
 
 	//away
-	result += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
-	result += topLevel.snapshotItem(0).getAttribute("away_sname");
-	result += '&#xa0;</nobr></b></td>'
+	full += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
+	mini += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
+	full += topLevel.snapshotItem(0).getAttribute("away_sname");
+	mini += topLevel.snapshotItem(0).getAttribute("away_sname");
+	full += '&#xa0;</nobr></b></td>'
+	mini += '&#xa0;</nobr></b></td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
-		result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("away") + ' </td>';
+		full += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("away") + ' </td>';
 	}
-	result += '<th class="BoxScore">&#xa0;</th>';
-	result += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("away_team_runs");
-	result += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("away_team_hits");
-	result += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("away_team_errors") + ' </th>';
+	full += '<th class="BoxScore">&#xa0;</th>';
+	full += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("away_team_runs");
+	full += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("away_team_hits");
+	full += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("away_team_errors") + ' </th>';
+
+	mini += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("away_team_runs");
+	mini += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("away_team_hits");
+	mini += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("away_team_errors") + ' </th>';
 
 	//home
-	result += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
-	result += topLevel.snapshotItem(0).getAttribute("home_sname");
-	result += '&#xa0;</nobr></b></td>'
+	full += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
+	full += topLevel.snapshotItem(0).getAttribute("home_sname");
+	full += '&#xa0;</nobr></b></td>'
+	mini += '<tr><td class="BoxScore" style="text-align: left;"><b><nobr>';
+	mini += topLevel.snapshotItem(0).getAttribute("home_sname");
+	mini += '&#xa0;</nobr></b></td>'
 	for (Idx = 0; Idx < inningScores.snapshotLength; Idx++) {
 		if (inningScores.snapshotItem(Idx).getAttribute("home") > "") {
-			result += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("home") + ' </td>';
+			full += '<td class="BoxScore"> ' + inningScores.snapshotItem(Idx).getAttribute("home") + ' </td>';
 		} else {
-			result += '<td class="BoxScore"> &#xa0; </td>';
+			full += '<td class="BoxScore"> &#xa0; </td>';
 		} 
 	}
-	result += '<th class="BoxScore">&#xa0;</th>';
-	result += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("home_team_runs");
-	result += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("home_team_hits");
-	result += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
-	result += lineScore.snapshotItem(0).getAttribute("home_team_errors") + ' </th>';
+	full += '<th class="BoxScore">&#xa0;</th>';
+	full += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("home_team_runs");
+	full += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("home_team_hits");
+	full += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	full += lineScore.snapshotItem(0).getAttribute("home_team_errors") + ' </th>';
+	full += '</tr></table>'
 
-	result += '</tr></table>'
+	mini += '<th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("home_team_runs");
+	mini += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("home_team_hits");
+	mini += ' </th><th class="BoxScore" style="background-color: #F0F0F0;"> ';
+	mini += lineScore.snapshotItem(0).getAttribute("home_team_errors") + ' </th>';
+	mini += '</tr></table>'
+	
+	document.getElementById("BoxScore").innerHTML = full;
+	document.getElementById("MiniBox").innerHTML = mini;
+
 	return result;
 }
 
@@ -1850,8 +1903,17 @@ function LoadPitches() {
 	document.getElementById("PitchTime").innerHTML = PlaysXML[1];
 
 	//reset pitch information
-	document.getElementById("InPlay").innerHTML = "";
 	document.getElementById("PitchSpeed").innerHTML = "";
+
+	//show the pitcher information
+	pitcherNodes = selectNodes(pitchSource, "game/players/pitcher");
+	if (pitcherNodes.snapshotLength > 0) {
+		Temp = document.getElementById("Pitcher");
+		Temp.innerHTML = pitcherNodes.snapshotItem(0).getAttribute("boxname");
+		Temp.innerHTML += " B: " + pitcherNodes.snapshotItem(0).getAttribute("balls");
+		Temp.innerHTML += " S: " + pitcherNodes.snapshotItem(0).getAttribute("strikes");
+		Temp.innerHTML += " T: " + pitcherNodes.snapshotItem(0).getAttribute("pitches");
+	}
 
 	//if there is a different batter, show new batter
 	batterNodes = selectNodes(pitchSource, "game/players/batter");
@@ -1861,6 +1923,7 @@ function LoadPitches() {
 			LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
 
 			// clear the pitch count
+			LastPitch = 0;
 			document.getElementById("B").innerHTML = 0;
 			document.getElementById("S").innerHTML = 0;
 
@@ -1900,35 +1963,40 @@ console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).ge
 	Pitches = selectNodes(pitchSource, "game/atbat/p | game/atbat/po");
 	Balls = "0";
 	Strikes = "0";
-	//if there are more pitches than last time, handle them
-	if (Pitches.snapshotLength > LastPitch) { 
-		//get the number of balls and strikes
-		if (selectNodes(pitchSource, "game/@b").snapshotLength > 0) { 
-			Balls = selectNodes(pitchSource, ("game")).snapshotItem(0).getAttribute("b");
-		}
-		if (selectNodes(pitchSource, "game/@s").snapshotLength > 0) {
-			Strikes = selectNodes(pitchSource, ("game")).snapshotItem(0).getAttribute("s");
-		}
+
+	//if there are not more pitches and pickoffs than last time, nothing left to do, return
+	if (Pitches.snapshotLength <= LastPitch) { 
+		return; 
+	} else {
+		LastPitch = Pitches.snapshotLength;
+	}
 	
-		//update the batter's box
-		document.getElementById("B").innerHTML = Balls;
-		document.getElementById("S").innerHTML = Strikes;		
-	
-		//update the pitcher's pitch count
-		PitchCounter = selectNodes(pitchSource, "game/players/pitcher").snapshotItem(0);
-		if (PitchCounter) {
-			if (AtBat.id == "away") { 
-				PitchTable = document.getElementById("homePitching");
- 				} else {
-				PitchTable = document.getElementById("homePitching");
-			}
-			PitchRow = PitchTable.rows[PitchTable.rows.length-1];
-			PitchRow.cells[1].innerHTML = PitchCounter.getAttribute("p_throws") + 'HP';
-			PitchRow.cells[2].innerHTML = PitchCounter.getAttribute("era");
-			PitchRow.cells[3].innerHTML = PitchCounter.getAttribute("balls");
-			PitchRow.cells[4].innerHTML = PitchCounter.getAttribute("strikes");
-			PitchRow.cells[5].innerHTML = PitchCounter.getAttribute("pitches");
+	//get the number of balls and strikes
+	if (selectNodes(pitchSource, "game/@b").snapshotLength > 0) { 
+		Balls = selectNodes(pitchSource, ("game")).snapshotItem(0).getAttribute("b");
+	}
+	if (selectNodes(pitchSource, "game/@s").snapshotLength > 0) {
+		Strikes = selectNodes(pitchSource, ("game")).snapshotItem(0).getAttribute("s");
+	}
+
+	//update the batter's box
+	document.getElementById("B").innerHTML = Balls;
+	document.getElementById("S").innerHTML = Strikes;		
+
+	//update the pitcher's pitch count
+	PitchCounter = selectNodes(pitchSource, "game/players/pitcher").snapshotItem(0);
+	if (PitchCounter) {
+		if (AtBat.id == "away") { 
+			PitchTable = document.getElementById("homePitching");
+		} else {
+			PitchTable = document.getElementById("homePitching");
 		}
+		PitchRow = PitchTable.rows[PitchTable.rows.length-1];
+		PitchRow.cells[1].innerHTML = PitchCounter.getAttribute("p_throws") + 'HP';
+		PitchRow.cells[2].innerHTML = PitchCounter.getAttribute("era");
+		PitchRow.cells[3].innerHTML = PitchCounter.getAttribute("balls");
+		PitchRow.cells[4].innerHTML = PitchCounter.getAttribute("strikes");
+		PitchRow.cells[5].innerHTML = PitchCounter.getAttribute("pitches");
 	}
 
 	//build the pitch-count call
@@ -2013,6 +2081,7 @@ console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).ge
 		}
 		break;
 	case "Foul" :
+	case "Foul (Runner Going)" :
 		console.log("F", selectNodes(pitchSource, "game/atbat/p").snapshotLength > (parseInt(Balls) + parseInt(Strikes)));
 		theSound += " Foul ";
 		if (selectNodes(pitchSource, "game/atbat/p").snapshotLength > (parseInt(Balls) + parseInt(Strikes))) {
@@ -2112,6 +2181,8 @@ console.log("BallPos:", X, Y, LR);
 	Result = "";
 	if (Y >= 192) {
 		Result += "Low ";
+	} else if (Y <= 120) {
+		Result += "High Very ";
 	} else if (Y <= 152) {
 		Result += "High ";
 	}
