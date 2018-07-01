@@ -1358,6 +1358,7 @@ function SecondaryPlay(Play, Prefix) {
 }
 
 function getSound(SoundToGet) {
+if (SoundToGet == "PR") { OY; }
 //console.log(SoundToGet);
    fldrTeam = "";
    if (AtBat.name == myTeam) { 
