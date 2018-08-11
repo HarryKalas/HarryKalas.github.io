@@ -161,40 +161,13 @@ function LoadGame() {
 		GameDay = "";
 		document.getElementById("GameDisplay").style.display = "none";
 	}
+	
+	OtherGames(GameDay);
+	//fix the master scoreboard folder for future calls
+	MasterScoreboardXML[0] = '/../master_scoreboard.xml';
 
-	// show a list of all the other games
-	otherGames = selectNodes(source, "//games/game[@gameday != '" + GameDay + "']");
-	OGText = "";
-	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
-		OGText += '<a href="index.html?myTeam=';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_id");
-		OGText += "&theMonth=" + theMonth + "&theDate=" + theDate + "&theYear=" + theYear + '">';
-		City = otherGames.snapshotItem(gIdx).getAttribute("away_team_city");
-		Team = otherGames.snapshotItem(gIdx).getAttribute("away_team_name");
-		OGText += City + " ";
-		if (City.indexOf(Team) >= 0) {
-			OGText += "</a> at ";
-		} else {
-			OGText += Team + "</a> at ";
-		}
-		OGText += '<a href="index.html?myTeam=';
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_id");
-		OGText += "&theMonth=" + theMonth + "&theDate=" + theDate + "&theYear=" + theYear + '">';
-		City = otherGames.snapshotItem(gIdx).getAttribute("home_team_city");
-		Team = otherGames.snapshotItem(gIdx).getAttribute("home_team_name");
-		OGText += City + " ";
-		if (City.indexOf(Team) >= 0) {
-			OGText += "</a> at ";
-		} else {
-			OGText += Team + "</a> at ";
-		}
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("time") + " ";
-		OGText += otherGames.snapshotItem(gIdx).getAttribute("time_zone") 
-		OGText += " (" + selectNodes(source, "status", otherGames.snapshotItem(gIdx)).snapshotItem(0).getAttribute("status") + ")<br/>";
-	}
-	document.getElementById("OtherGames").innerHTML = OGText;
 
-	// IF THERE IS NOT A GAME TO DISPLAY AT THIS POINT, WE'RE DONE
+ 	// IF THERE IS NOT A GAME TO DISPLAY AT THIS POINT, WE'RE DONE
 	if (typeof game == 'undefined') { return false; };
 
 	// IF THERE IS A GAME ...
@@ -311,7 +284,8 @@ function xdLoad(theFile) {
 	xhttp.open("GET", gameFolder + theFile[0], false);
 	try {
 		xhttp.send();
-		theFile[2] = xhttp.responseXML;
+		resp = xhttp.responseXML;
+		theFile[2] = resp;
 		return theFile[2];
 	}
 	catch(e) {
@@ -329,6 +303,49 @@ function selectNodes(Doc, XPath, context) {
 	} else if (Doc) {
 		return Doc.evaluate(XPath, Doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
 	}
+}
+
+function OtherGames(GameDay) {
+	// show a list of all the other games
+
+	source = xdLoad(MasterScoreboardXML);
+
+	otherGames = selectNodes(source, "//games/game[@gameday != '" + GameDay + "']");
+
+	OGText = "";
+	for (gIdx = 0; gIdx < otherGames.snapshotLength; gIdx++) {
+		OGText += '<a href="index.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("away_team_id");
+		OGText += "&theMonth=" + theMonth + "&theDate=" + theDate + "&theYear=" + theYear + '">';
+		City = otherGames.snapshotItem(gIdx).getAttribute("away_team_city");
+		Team = otherGames.snapshotItem(gIdx).getAttribute("away_team_name");
+		OGText += City + " ";
+		if (City.indexOf(Team) >= 0) {
+			OGText += "</a> at ";
+		} else {
+			OGText += Team + "</a> at ";
+		}
+		OGText += '<a href="index.html?myTeam=';
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("home_team_id");
+		OGText += "&theMonth=" + theMonth + "&theDate=" + theDate + "&theYear=" + theYear + '">';
+		City = otherGames.snapshotItem(gIdx).getAttribute("home_team_city");
+		Team = otherGames.snapshotItem(gIdx).getAttribute("home_team_name");
+		OGText += City + " ";
+		if (City.indexOf(Team) >= 0) {
+			OGText += "</a> at ";
+		} else {
+			OGText += Team + "</a> at ";
+		}
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time") + " ";
+		OGText += otherGames.snapshotItem(gIdx).getAttribute("time_zone") 
+		OGText += " (" + selectNodes(source, "status", otherGames.snapshotItem(gIdx)).snapshotItem(0).getAttribute("status")
+		score = selectNodes(source, "linescore/r", otherGames.snapshotItem(gIdx)).snapshotItem(0);
+		if (score) {
+			OGText += " " + score.getAttribute("away") + "-" + score.getAttribute("home")
+		}
+		OGText += ")<br/>";
+	}
+	document.getElementById("OtherGames").innerHTML = OGText;
 }
 
 function LoadPlayers() {
@@ -412,7 +429,7 @@ function BuildName(DisplayName) {
 function LoadPitcher(TeamIdx) {
 	//PitcherID could be incoming or outgoing, but it gets the right team
 
-	//get pitcher
+	//get pitchers
 	ptchSource = xdLoad(BoxscoreXML);
 
 	var ptchNode;
@@ -423,7 +440,8 @@ function LoadPitcher(TeamIdx) {
 	//add a row for the new pitcher
 	PitchRow = PitchTable.insertRow();
 	PitchRow.className = "BoxScore";
-	for (c = 0; c < 6; c++) { 
+	PitchRow.id = ptchNode.getAttribute("id");
+	for (c = 0; c <= 13; c++) { 
 		PitchRow.insertCell(c);
 	}
 	PitchRow.cells[0].style="text-align: left; min-width: 150px;";
@@ -434,6 +452,14 @@ function LoadPitcher(TeamIdx) {
 	PitchRow.cells[3].innerHTML = ptchNode.getAttribute("np") - ptchNode.getAttribute("s");
 	PitchRow.cells[4].innerHTML = ptchNode.getAttribute("s");
 	PitchRow.cells[5].innerHTML = ptchNode.getAttribute("np");
+
+	PitchRow.cells[6].innerHTML = ptchNode.getAttribute("bf");
+	PitchRow.cells[7].innerHTML = ptchNode.getAttribute("h");
+	PitchRow.cells[8].innerHTML = ptchNode.getAttribute("bb");
+	PitchRow.cells[9].innerHTML = ptchNode.getAttribute("so");
+	PitchRow.cells[10].innerHTML = ptchNode.getAttribute("r");
+	PitchRow.cells[11].innerHTML = ptchNode.getAttribute("er");
+	PitchRow.cells[12].innerHTML = ptchNode.getAttribute("hr");
 
 	ptchHand = xdLoad(["/pitchers/" + ptchNode.getAttribute("id") + ".xml", null, '']);
 	PitchRow.cells[1].innerHTML = selectNodes(ptchHand, "Player/@throws").snapshotItem(0).value + "HP";
@@ -446,6 +472,10 @@ function LoadPitcher(TeamIdx) {
 		PitchRow.cells[0].innerHTML += " (" + AtBat.Inning + "." + AtBat.Outs + ")";
 	} else if (AtBat.Inning > 1) {
 		PitchRow.cells[0].innerHTML += " (" + AtBat.Inning + ")";
+	}
+
+	if (ptchNode.getAttribute("note")) {
+		PitchRow.cells[13].innerHTML = ptchNode.getAttribute("note");
 	}
 }
 
@@ -604,7 +634,7 @@ function showAtBat(playDes, AtBatPlay) {
 console.log("Outs are incorrect: ", "At Bat: " + AtBat.id, "XML: "+gamePlays.snapshotItem(pIdx).getAttribute("o"), "AB: " + AtBat.Outs);
 console.log(gamePlays.snapshotItem(pIdx).getAttribute("des"));
 //			AtBat.Outs = gamePlays.snapshotItem(pIdx).getAttribute("o");
-			oy; 
+//		setTimeout("location.reload()", 1000); //reload because it's probably due to some replay review
 	}
 
 	if (AtBat.Outs < 3) {
@@ -1551,6 +1581,9 @@ function EndOfInning() {
 	Runs = 0;		// reset runs in the inning
 	Hits = 0;		// reset hits in the inning
 	Errors = 0;		// reset errors in the inning
+
+	// UPDATE OTHER GAMES
+	OtherGames(GameDay);
 }
 
 function playSound() {
@@ -1649,7 +1682,21 @@ function BoxScore() {
 		}
 		console.log(gameStatus);
 	}
+
+	PID = selectNodes(source, "game/players/pitcher").snapshotItem(0).getAttribute("pid");
+
 	source = xdLoad(BoxscoreXML);
+
+	//update the current pitcher information
+	ptchNode = selectNodes(source, "boxscore/pitching/pitcher[@id='" + PID + "']").snapshotItem(0);
+	PitchRow = document.getElementById(PID);
+	PitchRow.cells[6].innerHTML = ptchNode.getAttribute("bf");
+	PitchRow.cells[7].innerHTML = ptchNode.getAttribute("h");
+	PitchRow.cells[8].innerHTML = ptchNode.getAttribute("bb");
+	PitchRow.cells[9].innerHTML = ptchNode.getAttribute("so");
+	PitchRow.cells[10].innerHTML = ptchNode.getAttribute("r");
+	PitchRow.cells[11].innerHTML = ptchNode.getAttribute("er");
+	PitchRow.cells[12].innerHTML = ptchNode.getAttribute("hr");
 
 	topLevel = selectNodes(source, "//boxscore");
 	lineScore = selectNodes(source, "//boxscore/linescore");
@@ -1896,6 +1943,10 @@ function MLBGlitch(Inning, Player, Event) {
 function LoadPitches() {
 	// check the plays.xml file
 	pitchSource = xdLoad(PlaysXML);
+	if (selectNodes(pitchSource, "game").snapshotItem(0).getAttribute("status") == "Manager Challenge"){
+		//if a manager challenge is in progress, reload the page in 15 seconds
+		setTimeout("location.reload()", 15000);
+	}
 
 	// if the last-modified hasn't changed, return
 	if (document.getElementById("PitchTime").innerHTML == PlaysXML[1]) {
@@ -1914,6 +1965,13 @@ function LoadPitches() {
 		Temp.innerHTML += " B: " + pitcherNodes.snapshotItem(0).getAttribute("balls");
 		Temp.innerHTML += " S: " + pitcherNodes.snapshotItem(0).getAttribute("strikes");
 		Temp.innerHTML += " T: " + pitcherNodes.snapshotItem(0).getAttribute("pitches");
+		Temp = document.getElementById(pitcherNodes.snapshotItem(0).getAttribute("pid"));
+		if (Temp) {
+			Temp.cells[2].innerHTML = pitcherNodes.snapshotItem(0).getAttribute("era");
+			Temp.cells[3].innerHTML = pitcherNodes.snapshotItem(0).getAttribute("balls");
+			Temp.cells[4].innerHTML = pitcherNodes.snapshotItem(0).getAttribute("strikes");
+			Temp.cells[5].innerHTML = pitcherNodes.snapshotItem(0).getAttribute("pitches");
+		}
 	}
 
 	//if there is a different batter, show new batter
@@ -1998,6 +2056,9 @@ console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).ge
 		PitchRow.cells[3].innerHTML = PitchCounter.getAttribute("balls");
 		PitchRow.cells[4].innerHTML = PitchCounter.getAttribute("strikes");
 		PitchRow.cells[5].innerHTML = PitchCounter.getAttribute("pitches");
+		if (ptchNode.getAttribute("note")) {
+			PitchRow.cells[13].innerHTML = PitchCounter.getAttribute("note");
+		}
 	}
 
 	//build the pitch-count call
@@ -2083,15 +2144,19 @@ console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).ge
 		break;
 	case "Foul" :
 	case "Foul (Runner Going)" :
-		console.log("F", selectNodes(pitchSource, "game/atbat/p").snapshotLength > (parseInt(Balls) + parseInt(Strikes)));
 		theSound += " Foul ";
 		if (selectNodes(pitchSource, "game/atbat/p").snapshotLength > (parseInt(Balls) + parseInt(Strikes))) {
 			theSound += "X ";
 		}
 		theSound += Pitch.getAttribute("pitch_type");
 		break;
+	case "Foul Bunt" :
+		theSound += " Foul Bunt ";
+		if (Strikes == 3) {
+			theSound = ""; //let the play handle it
+		}
+		break;
 	case "Foul Tip" :
-		console.log("FT", selectNodes(pitchSource, "game/atbat/p").snapshotLength > (parseInt(Balls) + parseInt(Strikes)));
 		if (Strikes == 3) {
 			theSound = ""; //let the play handle it
 		} else {

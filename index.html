@@ -32,6 +32,7 @@
 <p></p>
 <div id="GameDisplay" class="GameDisplay">
 <h3>Away Team: <a id="away"></a></h3>
+
 <table id="awayTable" style="width: 850px;">
 <tr id="awayHeader">
 <th style="width: 30px;">&nbsp;Ord&nbsp;</th>
@@ -288,13 +289,21 @@
 </tr>
 </table>
 <p></p>
-<table id="awayPitching">
+<table id="homePitching">
 <tr class="PitchingHead">
-<td colspan="2" style="text-align: left; min-width: 200px;"><b>Pitching</b></td>
-<td style="min-width: 50px"><b>ERA</b></td>
-<td style="min-width: 40px"><b>B</b></td>
-<td style="min-width: 40px"><b>S</b></td>
-<td style="min-width: 50px"><b>Pitches</b></td>
+<th colspan="2" style="text-align: left; min-width: 200px;">Home Pitching</th>
+<th style="min-width: 50px">ERA</th>
+<th style="min-width: 40px">B</th>
+<th style="min-width: 40px">S</th>
+<th style="min-width: 50px">Pitches</th>
+<th style="min-width: 40px">BF</th>
+<th style="min-width: 40px">H</th>
+<th style="min-width: 40px">BB</th>
+<th style="min-width: 40px">SO</th>
+<th style="min-width: 40px">R</th>
+<th style="min-width: 40px">ER</th>
+<th style="min-width: 40px">HR</th>
+<th style="min-width: 60px">NOTES</th>
 </tr>
 </table>
 <p></p>
@@ -554,18 +563,26 @@
 </tr>
 </table>
 <p></p>
-<table id="homePitching">
+<table id="awayPitching">
 <tr class="PitchingHead">
-<td colspan="2" style="text-align: left; min-width: 200px;"><b>Pitching</b></td>
-<td style="width: 50px"><b>ERA</b></td>
-<td style="width: 40px"><b>B</b></td>
-<td style="width: 40px"><b>S</b></td>
-<td style="width: 50px"><b>Pitches</b></td>
+<th colspan="2" style="text-align: left; min-width: 200px;">Away Pitching</th>
+<th style="min-width: 50px">ERA</th>
+<th style="min-width: 40px">B</th>
+<th style="min-width: 40px">S</th>
+<th style="min-width: 50px">Pitches</th>
+<th style="min-width: 40px">BF</th>
+<th style="min-width: 40px">H</th>
+<th style="min-width: 40px">BB</th>
+<th style="min-width: 40px">SO</th>
+<th style="min-width: 40px">R</th>
+<th style="min-width: 40px">ER</th>
+<th style="min-width: 40px">HR</th>
+<th style="min-width: 60px">NOTES</th>
 </tr>
 </table>
 <p></p>
 <div id="BatterDiv" style="visibility: hidden;">
-<img id="BatterPic" src="spacer.gif" width="90" style="padding-right: 5px; float: left" alt="Batter"/>
+<img id="BatterPic" src="spacer.gif" width="90" style="padding-right: 5px; float: left" alt="Batter" onclick="document.getElementById(AtBat.id + AtBat.AB).scrollIntoView()"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
 <img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
