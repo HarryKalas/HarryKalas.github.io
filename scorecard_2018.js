@@ -239,6 +239,7 @@ function LoadGame() {
 	case "Warmup" :
 	case "In Progress" :
 	case "Delayed Start" :
+	case "Delayed" :
 	case "Final" :
 	case "Game Over" :
 		break;
