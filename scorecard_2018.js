@@ -1389,7 +1389,7 @@ function SecondaryPlay(Play, Prefix) {
 }
 
 function getSound(SoundToGet) {
-if (SoundToGet == "PR") { OY; }
+//if (SoundToGet == "PR") { OY; }
 //console.log(SoundToGet);
    fldrTeam = "";
    if (AtBat.name == myTeam) { 
@@ -1944,9 +1944,37 @@ function MLBGlitch(Inning, Player, Event) {
 function LoadPitches() {
 	// check the plays.xml file
 	pitchSource = xdLoad(PlaysXML);
-	if (selectNodes(pitchSource, "game").snapshotItem(0).getAttribute("status") == "Manager Challenge"){
-		//if a manager challenge is in progress, reload the page in 15 seconds
-		setTimeout("location.reload()", 15000);
+
+	if (selectNodes(pitchSource, "game/atbat").snapshotItem(0)) {
+		if (selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des")) {
+			playDes = selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des");
+			playDes = FixNames(playDes);
+
+			//if play hasn't been called, look for a call
+			for (idx = 0; idx < 10; idx++) {
+				if (LastAction[idx] == playDes) { break; }
+			}
+			if (idx == 10) {
+				console.log("atbat...", playDes);
+				LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
+			}
+		}
+	}
+	
+	if (selectNodes(pitchSource, "game/action").snapshotItem(0)) {
+		if (selectNodes(pitchSource, "game/action").snapshotItem(0).getAttribute("des")) {
+			playDes = selectNodes(pitchSource, "game/action").snapshotItem(0).getAttribute("des");
+			playDes = FixNames(playDes);
+
+			//if play hasn't been called, look for a call
+			for (idx = 0; idx < 10; idx++) {
+				if (LastAction[idx] == playDes) { break; }
+			}
+			if (idx == 10) {
+				console.log("action...", playDes);
+				LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
+			}
+		}
 	}
 
 	// if the last-modified hasn't changed, return
@@ -2015,8 +2043,9 @@ console.log("action: ", selectNodes(pitchSource, "game/action").snapshotItem(0).
 
 	//if there is an AtBat action, get the call
 	if (selectNodes(pitchSource, "game/atbat[@des != '']").snapshotLength > 0) {
-console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des"));
-		setTimeout("console.log('game_events from pitches');LastPlay = LoadPlays(LastPlay);", 1000); // get the call a second later, sometimes it shows up a little after in this place
+//		console.log("atbat: ", selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des"));
+//		setTimeout("console.log('game_events from pitches');LastPlay = LoadPlays(LastPlay);", 1000); // get the call a second later, sometimes it shows up a little after in this place
+		showAtBat
 	}
 
 	//get all of the pitches and pickoff attempts
