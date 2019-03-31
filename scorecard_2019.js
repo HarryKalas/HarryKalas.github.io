@@ -402,7 +402,8 @@ function LoadPlayers() {
 		}
 
 		// RETRIEVE STARTING PITCHER
-		LoadPitcher(TeamIdx);
+		PitcherID = selectNodes(boxSource, "//boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher").snapshotItem(0).getAttribute("id");
+		LoadPitcher(PitcherID);
 	}
 
 	//set at-bat team at beginning of game to AWAY
@@ -439,14 +440,16 @@ function BuildName(DisplayName) {
 	return new RegExp(result + suffix, "g");
 }
 
-function LoadPitcher(TeamIdx) {
-	//PitcherID could be incoming or outgoing, but it gets the right team
-	PitchTable = document.getElementById(TeamType[TeamIdx] + "Pitching");
+function LoadPitcher(PitcherID) {
+	//THIS ONLY WORKS IF PITCHER ID IS THE RIGHT ONE!
 
 	//get pitcher
 	ptchSource = xdLoad(BoxscoreXML);
 	var ptchNode;
-	ptchNode = selectNodes(ptchSource, "boxscore/pitching[@team_flag='" + TeamType[TeamIdx] + "']/pitcher").snapshotItem(PitchTable.rows.length - 1); //-1 because count starts from 0
+	ptchNode = selectNodes(ptchSource, "boxscore/pitching/pitcher[@id='" + PitcherID + "']").snapshotItem(0);
+	Team = selectNodes(ptchSource, "..", ptchNode).snapshotItem(0).getAttribute("team_flag");
+
+	PitchTable = document.getElementById(Team + "Pitching");
 
 	//add a row for the new pitcher
 	PitchRow = PitchTable.insertRow();
@@ -477,6 +480,7 @@ function LoadPitcher(TeamIdx) {
 	PitchRow.cells[1].innerHTML = selectNodes(ptchHand, "Player/@throws").snapshotItem(0).value + "HP";
 
 	//put pitcher into the 10th slot
+	if (Team == "away") { TeamIdx = 0 } else { TeamIdx = 1 }
 	PlayerID[TeamIdx][10] = ptchNode.getAttribute("id")
 	PlayerName[TeamIdx][10] = BuildName(ptchNode.getAttribute("name_display_first_last"));
 
@@ -494,7 +498,6 @@ function LoadPitcher(TeamIdx) {
 function LoadPlays(StartPlay) {
 // StartPlay is the node index of the next node
 //	show plays for that node and higher
-
 	// check the game_events.xml file
 	source = xdLoad(GameEventsXML);
 
@@ -513,8 +516,7 @@ function LoadPlays(StartPlay) {
 	for (pIdx = StartPlay; pIdx < gamePlays.snapshotLength; pIdx++) {
 		playDes = gamePlays.snapshotItem(pIdx).getAttribute("des");
 
-		if (playDes == "") {	//*** I THINK THIS IS A SPRING TRAINING MALFUNCTION
-			console.log("Blank description -- SPRING TRAINING MALFUNCTION?");
+		if (playDes == "") {	//*** NODE IS THERE BUT PLAY IS NOT
 			return pIdx - 1;
 		}
 		if (playDes.indexOf(" error ") >= 0) {
@@ -536,9 +538,11 @@ function LoadPlays(StartPlay) {
 			id = gamePlays.snapshotItem(pIdx).getAttribute("player");
 			if (id > "") {
 				boxSource = xdLoad(BoxscoreXML);
-				if (selectNodes(boxSource, "//boxscore/batting/batter[@id='" + id + "']").snapshotLength == 0) {
+				if (gamePlays.snapshotItem(pIdx).getAttribute("event") == "Umpire Substitution") {
+					//this is just an umpire change; I don't show this
+				} else if (selectNodes(boxSource, "//boxscore/batting/batter[@id='" + id + "']").snapshotLength == 0) {
 					//probably a spring training malfunction
-					console.log("Unknown Player: ", id);
+					console.log("Unknown Player: ", id, "I" + AtBat.Inning + " " + AtBat.id + " B" + AtBat.AB);
 				} else {
 					playDes = playDes.replace(/\s\s+/g, ' ');	//get rid of extra spaces				playDes = playDes.replace(PlayerName[tmIdx][plIdx], PlayerID[tmIdx][plIdx]);
 					NewName = BuildName(selectNodes(boxSource, "//boxscore/batting/batter[@id='" + id + "']").snapshotItem(0).getAttribute("name_display_first_last"));
@@ -551,7 +555,23 @@ function LoadPlays(StartPlay) {
 	
 		switch (gamePlays.snapshotItem(pIdx).nodeName) {
 		case "atbat" :
-			showAtBat(playDes, gamePlays.snapshotItem(pIdx));
+			switch(gamePlays.snapshotItem(pIdx).getAttribute("event")) {
+			//this catches things that should really be an Action, not an AtBat, seems to be a spring training problem
+			case 'Caught Stealing 2B':
+			case 'Caught Stealing 3B' :
+			case 'Caught Stealing Home' :
+			case "Caught Stealing 2B" :
+			case 'Pickoff 1B' :
+			case 'Pickoff 2B' :
+			case 'Pickoff Caught Stealing 2B' :
+			case 'Pickoff 3B' :
+			case 'Pitching Substitution' :
+			case "Runner Out" :
+				showAction(playDes, gamePlays.snapshotItem(pIdx));
+			default:
+				showAtBat(playDes, gamePlays.snapshotItem(pIdx));
+				break;
+			}
 			break;
 		case "action" :
 			showAction(playDes, gamePlays.snapshotItem(pIdx));
@@ -652,19 +672,10 @@ function showAtBat(playDes, AtBatPlay) {
 	}
 
 	// move to the next batter
-	switch (AtBatPlay.getAttribute("event")) {  //plays that don't represent the runner shouldn't be an action
-					 // may be Spring Training error
-	case "Caught Stealing 2B" :
-	case "Caught Stealing 3B" :
-	case "Pickoff 2B" :
-	case "Runner Out" :
-		break;
-	default :
-		AtBat.AB++;					// next batter
-		if (AtBat.AB == 10) { AtBat.AB = 1 }		// loop around
-		document.getElementById("B").innerHTML = "0";	// reset balls
-		document.getElementById("S").innerHTML = "0";	// reset strikes
-	}
+	AtBat.AB++;					// next batter
+	if (AtBat.AB == 10) { AtBat.AB = 1 }		// loop around
+	document.getElementById("B").innerHTML = "0";	// reset balls
+	document.getElementById("S").innerHTML = "0";	// reset strikes
 	
 // *** USE THIS TO TELL WHEN OUTS ARE OUT OF SYNC
 	if (gamePlays.snapshotItem(pIdx).getAttribute("o") != AtBat.Outs) { 
@@ -713,8 +724,8 @@ function showAction(playDes, ActionPlay) {
 	case 'Pitching Substitution' :
 		// take care of this here, to make sure the player name is handled before the split
 		playDes = IncomingPlayer(ActionPlay.getAttribute("player"), playDes);
+		LoadPitcher(ActionPlay.getAttribute("player")); //reload the pitchers' table
 		FieldingIdx = (AtBat.Index + 1) % 2;
-		LoadPitcher(FieldingIdx); //reload the pitchers' table
 		playDes = playDes.replace(PlayerName[FieldingIdx][10], PlayerID[FieldingIdx][10])
 		break;
 	}
@@ -839,6 +850,10 @@ function showAction(playDes, ActionPlay) {
 		case 'Pickoff Error 2B' :
 		case 'Pickoff Error 3B' :
 			SecondaryPlay(Plays[sIdx].slice(Plays[sIdx].indexOf(",") + 1), "POE ")
+			break;
+		case 'Pitch Challenge' :
+			//found this on 3/30/2019 CLE V. TWINS -- not sure what, if anything, to do with it
+			console.log("PITCH CHALLENGE");
 			break;
 		case 'Pitcher Switch' :
 			// this handles what hand the switch pitcher is using; not sure I can work this
@@ -987,18 +1002,6 @@ function PrimaryPlay(playDes, AtBatPlay) {
 		thePlay = "CI";
 		getSound(thePlay);
 		break;
-	case "Caught Stealing 2B":
-		SecondaryPlay(playDes, "CS");
-		getSound("CS 2B");
-		break;
-	case 'Caught Stealing 3B' :
-		SecondaryPlay(playDes, "CS");
-		getSound("CS 3B");
-		break;
-	case 'Caught Stealing Home' :
-		SecondaryPlay(playDes, "CS");
-		getSound("CS Home");
-		break;
 	case "Double" : 
 		if (playDes.indexOf("doubles") >= 0) {
 			Box.style.backgroundImage = 'url("2b.gif")';
@@ -1015,18 +1018,21 @@ function PrimaryPlay(playDes, AtBatPlay) {
 	case "Double Play" : 
 		// there are a variety of double plays that might be called differently
 		if (playDes.indexOf("grounds into") >=0) {
-			Box.style.backgroundImage = 'url("1out.gif")';	// out at 1st
 			thePlay = "GIDP " + Fielding(playDes);
-			theOut(Box, thePlay);
 		} else if (playDes.indexOf("lines") >=0 || playDes.indexOf("flies") >=0 || playDes.indexOf("pops") >=0 ) {
-			Box.style.backgroundImage = 'url("1out.gif")';	// out at 1st
 			thePlay = "DP " + Fielding(playDes);
-			theOut(Box, thePlay);
 		} else if (playDes.indexOf("choice") >=0 ) {	// gid_2018_04_04_lanmlb_arimlb_1
-			Box.style.backgroundImage = 'url("1out.gif")';	// out at 1st
 			thePlay = "DP " + Fielding(playDes);
+		} else { 
+			oy; 
+		}
+		if (AtBatPlay.getAttribute("des").indexOf("to 1st") >=0) {
+			//batter goes to first but there are two other outs
+			Box.style.backgroundImage = 'url("1b.gif")';	// out at 1st
+		} else {
+			Box.style.backgroundImage = 'url("1out.gif")';	// out at 1st
 			theOut(Box, thePlay);
-		} else { oy; }
+		}
 		break;
 	case "Fan interference" :
 	case "Fan Interference" :
@@ -1136,13 +1142,6 @@ function PrimaryPlay(playDes, AtBatPlay) {
 			thePlay = "L" + playerNumber(playDes);
 			theOut(Box, thePlay);
 		} else { oy; }
-		break;
-	case 'Pickoff 1B' :	// THESE SHOULD BE AN ACTION, NOT AN AT BAT -- MAY BE SPRING TRAINING ERROR
-	case 'Pickoff 2B' :
-	case 'Pickoff Caught Stealing 2B' :
-	case 'Pickoff 3B' :
-		SecondaryPlay(Plays[sIdx].slice(Plays[sIdx].indexOf(",") + 1), "PO ")
-		getSound("PO");
 		break;
 	case "Pop Out" : 
 	case "Bunt Pop Out" : 
@@ -2016,7 +2015,6 @@ function LoadPitches() {
 		if (selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des")) {
 			playDes = selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des");
 			playDes = FixNames(playDes);
-
 			//if play hasn't been called, look for a call
 			for (idx = 0; idx < 10; idx++) {
 				if (LastAction[idx] == playDes) { break; }
@@ -2292,6 +2290,9 @@ function ShowBatter(batterNode) {
 		document.getElementById(AtBat.id + "1").scrollIntoView();	//scroll to the top of the team
 	}
 	batterPic = batterNode.getAttribute("pid");
+	if (batterPic == "") { 
+		batterPic = selectNodes(PlaysXML[2], "//game/field/offense/man").snapshotItem(0).getAttribute("pid");
+	}
 	batterName = batterNode.getAttribute("boxname");
 	batterAvg = batterNode.getAttribute("avg");
 	batterAB = batterNode.getAttribute("ab");
