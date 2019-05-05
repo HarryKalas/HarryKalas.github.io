@@ -19,15 +19,16 @@ xhttp=new XMLHttpRequest();
 gameFolder="http://gd2.mlb.com/components/game/mlb";
 
 // GAME FILES: 0 = FILENAME; 1 = LASTMODIFIED; 2 = XML DATA
-MasterScoreboardXML = ['/master_scoreboard.xml', null, ''];
-PlayersXML = ['/players.xml', null, ''];
+LastCall = new Date(1/1/2000);			// holds the time that an xdLoad of a file was last performed?
+MasterScoreboardXML = ['/master_scoreboard.xml', LastCall, ''];
+PlayersXML = ['/players.xml', LastCall, ''];
 	var plyrSource; 			//keep this global; will be filled in LoadPlayers and never again
-BoxscoreXML = ['/boxscore.xml', null, ''];
-GameEventsXML = ['/game_events.xml', null, ''];
-PlaysXML = ['/plays.xml', null, ''];
+BoxscoreXML = ['/boxscore.xml', LastCall, ''];
+GameEventsXML = ['/game_events.xml', LastCall, ''];
+PlaysXML = ['/plays.xml', LastCall, ''];
 
 var TeamType = ['away','home']; 
-AtBat = new Object;		//the A tag for team at-bat, global because I'm tired of passing it
+AtBat = new Object;		// tag for team at-bat, global because I'm tired of passing it
 LastPlay = 0;
 var LastAction = ["","","","","","","","","",""];
 LastPitch = 0;
@@ -56,48 +57,49 @@ AudioQueue = new Array; 		// holds the list of calls and commercials to play
 
 function AfterLoad() {
 	//build the date URL, which gives the folder of the gameday
-	Today = new Date; 
-	if(Today.getHours() < 12) { Today.setDate(Today.getDate()-1); } 
+	LastCall = new Date;
+	Today = new Date;
+	if(Today.getHours() < 12) { Today.setDate(Today.getDate()-1); } 	// 15 APR 2019
 
-	if(location.search.indexOf("theYear=")>0) {
-		ptr = location.search.indexOf("theYear=");
-		theYear = location.search.substring(ptr+8, ptr+12);
+	if(location.search.indexOf("theYear=")>0) {			// 15 APR 2019
+		ptr = location.search.indexOf("theYear=");			// 15 APR 2019
+		theYear = location.search.substring(ptr+8, ptr+12);		// 15 APR 2019
 	} else {
-		theYear = Today.getFullYear();
+		theYear = Today.getFullYear();				// 15 APR 2019
 	}
 
-	if(location.search.indexOf("theMonth=")>0) {
-		ptr = location.search.indexOf("theMonth=");
-		theMonth = location.search.substring(ptr+9, ptr+11);
+	if(location.search.indexOf("theMonth=")>0) {			// 15 APR 2019
+		ptr = location.search.indexOf("theMonth=");		// 15 APR 2019
+		theMonth = location.search.substring(ptr+9, ptr+11);		// 15 APR 2019
 	} else {
-		theMonth = Today.getMonth() + 1;
-		if(theMonth < 10) {theMonth = "0" + theMonth}
+		theMonth = Today.getMonth() + 1;			// 15 APR 2019
+		if(theMonth < 10) {theMonth = "0" + theMonth}		// 15 APR 2019
 	}
 
-	if(location.search.indexOf("theDate=")>0) {
-		ptr = location.search.indexOf("theDate=");
-		theDate = location.search.substring(ptr+8, ptr+10);
+	if(location.search.indexOf("theDate=")>0) {			// 15 APR 2019
+		ptr = location.search.indexOf("theDate=");			// 15 APR 2019
+		theDate = location.search.substring(ptr+8, ptr+10);		// 15 APR 2019
 	} else {
-		theDate = Today.getDate(); 
-		if(theDate < 10) {theDate = "0" + theDate}
+		theDate = Today.getDate(); 				// 15 APR 2019
+		if(theDate < 10) {theDate = "0" + theDate}		// 15 APR 2019
 	}
 
-	if(location.search.indexOf("myTeam=")>0) {
-		ptr = location.search.indexOf("myTeam=");
-		myTeam = location.search.substring(ptr+7, ptr+10);
+	if(location.search.indexOf("myTeam=")>0) {			// 15 APR 2019
+		ptr = location.search.indexOf("myTeam=");		// 15 APR 2019
+		myTeam = location.search.substring(ptr+7, ptr+10);		// 15 APR 2019
 	} else {
 		//it uses the default
 	}
 
-	DateURL = "/year_" + theYear + "/month_" + theMonth + "/day_" + theDate;
-	gameFolder += DateURL;
+	DateURL = "/year_" + theYear + "/month_" + theMonth + "/day_" + theDate;	// 15 APR 2019
+	gameFolder += DateURL;					// 15 APR 2019
 
-	document.getElementById("myTeam").value = myTeam;
-	document.getElementById("theMonth").value = theMonth;
-	document.getElementById("theDate").value = theDate;
-	document.getElementById("theYear").value = theYear;
+	document.getElementById("myTeam").value = myTeam;		// 15 APR 2019
+	document.getElementById("theMonth").value = theMonth;		// 15 APR 2019
+	document.getElementById("theDate").value = theDate;		// 15 APR 2019
+	document.getElementById("theYear").value = theYear;		// 15 APR 2019
 
-	game = LoadGame(); //loaded if myTeam has a game on DateURL; empty if not
+	game = LoadGame(); //loaded if myTeam has a game on DateURL; empty if not	// 15 APR 2019 ... GO TO LOADGAME
 
 	// IF THERE IS NO GAME, WE'RE DONE
 	if (!game) {
@@ -105,11 +107,11 @@ function AfterLoad() {
 	}
 	
 	// IF THERE IS A GAME, LOAD THE PLAYERS
+
 	LoadPlayers();
 //********** CHECKED INTO LOADPLAYS
 	// LOAD THE PLAYS
 	LastPlay = LoadPlays(0);
-
 	AudioQueue.length = 0;
 	document.getElementById("Audio").src = "silence.mp3"; // so that the audio tag will be "ended" and ready for calls
 	clearMessage();
@@ -117,53 +119,53 @@ function AfterLoad() {
 
 	if (!GameOver) {
 		// SET UP TIMERS
-		playMonitor = setInterval("LastPlay = LoadPlays(LastPlay)", 60000); //check for missing plays every minute
-		pitchMonitor = setInterval("LoadPitches()", 2000); //check for pitches every 2 seconds
-	}	
+		playMonitor = setInterval("LastCall = new Date; LastPlay = LoadPlays(LastPlay)", 60000); //check for missing plays every minute
+		pitchMonitor = setInterval("LastCall = new Date; LoadPitches()", 2000); //check for pitches every 2 seconds
+	}
 }
 
 function LoadGame() {
 	//determines whether there is a game for myTeam on DateURL and builds the folder URL text for the game
 
 	//get list of games on the date
-	source = xdLoad(MasterScoreboardXML);
+	source = xdLoad(MasterScoreboardXML);				// 15 APR 2019
 
 	//get games for myTeam
-	games = selectNodes(source, "//games/game[@home_team_id = '" + myTeam + "' or @away_team_id = '" + myTeam + "']");
-
+	games = selectNodes(source, "//games/game[@home_team_id = '" + myTeam + "' or @away_team_id = '" + myTeam + "']");		// 15 APR 2019 
 	switch (games.snapshotLength) {
 	case 0 : // if there are no games for myTeam, alert
-		alert("No game today");
+		alert("No game today");				// 18 APR 2019
 		break;
 	case 1 : // if there is exactly one game for myTeam, use it
-		game = games.snapshotItem(0);
+		game = games.snapshotItem(0);				// 18 APR 2019
 		break;
-	default : // if there are more than one game for myTeam, pick one
+	default : // if there is more than one game for myTeam, pick one
 		for (Idx = 0; Idx < games.snapshotLength; Idx++) {
-			gameDetail = games.snapshotItem(Idx).getAttribute("home_team_name");
-			gameDetail += " v. " + games.snapshotItem(Idx).getAttribute("away_team_name");
-			gameDetail += " at " + games.snapshotItem(Idx).getAttribute("time");
-			gameDetail += " " + games.snapshotItem(Idx).getAttribute("ampm");
-			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);
+			gameDetail = games.snapshotItem(Idx).getAttribute("home_team_name");		// 18 APR 2019
+			gameDetail += " v. " + games.snapshotItem(Idx).getAttribute("away_team_name");	// 18 APR 2019
+			gameDetail += " at " + games.snapshotItem(Idx).getAttribute("time");		// 18 APR 2019
+			gameDetail += " " + games.snapshotItem(Idx).getAttribute("ampm");		// 18 APR 2019
+			Ans = confirm("Show this game? (click Cancel to pick another)\n" + gameDetail);	// 18 APR 2019
 			if (Ans) { break; }
 		}
 
 		if (Idx == games.snapshotLength) { // if nothing was picked ...
-			alert("Those are the only games for your team today.");
-			break;
+			alert("Those are the only games for your team today.");			// 18 APR 2019
+			break;								// 18 APR 2019
 		} else { // if something was picked, use it
-			game = games.snapshotItem(Idx);
+			game = games.snapshotItem(Idx);					// 18 APR 2019
 		}
 	}
 
 	if (typeof game !== 'undefined') { // if there is a game...
-		GameDay = game.getAttribute("gameday");
+		GameDay = game.getAttribute("gameday");			// 18 APR 2019
 	} else { // if there is not a game, hide the scoreboard
-		GameDay = "";
+		GameDay = "";						// 18 APR 2019
 		document.getElementById("GameDisplay").style.display = "none";
 	}
 	
-	OtherGames(GameDay);
+	OtherGames(GameDay);						// 18 APR 2019 ... GO TO OTHER GAMES
+
 	//fix the master scoreboard folder for future calls
 	MasterScoreboardXML[0] = '/../master_scoreboard.xml';
 
@@ -230,16 +232,15 @@ function LoadGame() {
 		return false;	// nothing to show; it will run when it reloads
 		break;
 	case "Postponed" :
-		document.getElementById("GameDisplay").innerHTML = "<font size='14px'>Game has been POSTPONED</font><br/><br/>";
-		return false; // nothing to show
-		break;
 	case "Suspended" :
-		document.getElementById("GameDisplay").innerHTML = "<font size='14px'>Game has been SUSPENDED</font><br/><br/>";
+		document.getElementById("GameDisplay").innerHTML = "<font size='14px'>Game has been POSTPONED</font><br/><br/>";
 		return false; // nothing to show
 		break;
 	case "Warmup" :
 	case "In Progress" :
+	case "Completed Early: Rain" :
 	case "Delayed Start" :
+	case "Delayed Start: Rain" :
 	case "Delayed" :
 	case "Final" :
 	case "Final: Tied" :
@@ -259,12 +260,21 @@ function LoadGame() {
 }
 
 function xdLoad(theFile) {
+if (theFile[1] == LastCall) { 
+//	console.log('do not load '+theFile[0]); 
+	return theFile[2]; 
+} else { 
+//	console.log('loading '+theFile[0], theFile[1], LastCall, theFile[1] == LastCall); 
+}
+
+// CHANGE 15 APR 2019: MLB NO LONGER ALLOWS RETRIEVING THE HEADER, SO SKIP THAT PART
 //theFile is an array with 0 = filename, 1 = LastModified, 2 = xmldata
 //first checks whether the file has been changed [1] since the last pull
 //	if not, it returns the data [2] from the last pull
 //	if it has, if updates the last date [1] and does a new pull [2]
-var time = new Date(); 
-//console.log(theFile[0], time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds());
+
+/*
+// var time = new Date(); 
 	// this avoids the problem that masterscoreboard.xml won't let me pull a header
 	if (theFile[1] != null) {
 		xhttp.open("HEAD", gameFolder + theFile[0], false);
@@ -283,35 +293,34 @@ var time = new Date();
 			return;
 		}
 	}
-
+*/
 	// this refreshes the data
-	xhttp.open("GET", gameFolder + theFile[0], false);
+	xhttp.open("GET", gameFolder + theFile[0], false);		// 15 APR 2019
 	try {
-		xhttp.send();
-		resp = xhttp.responseXML;
-		theFile[2] = resp;
-		return theFile[2];
+		xhttp.send();				// 15 APR 2019
+		resp = xhttp.responseXML;			// 15 APR 2019
+		theFile[2] = resp;				// 15 APR 2019
+		theFile[1] = LastCall;			//  5 MAY 2019
+		return theFile[2];				// 15 APR 2019
 	}
 	catch(e) {
-		console.log("xdLoad data error on File" + theFile[0]);
-		console.log(e);
-		return null;
+		console.log("xdLoad data error on File" + theFile[0]);		// 15 APR 2019
+		console.log(e);				// 15 APR 2019
+		return null;				// 15 APR 2019
 	}
 }
 
 function selectNodes(Doc, XPath, context) {
 //replaces the selectNodes feature that doesn't seem to be there
-
 	if(context) {
 		return Doc.evaluate(XPath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
 	} else if (Doc) {
-		return Doc.evaluate(XPath, Doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
+		return Doc.evaluate(XPath, Doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);	// 18 APR 2019
 	}
 }
 
 function OtherGames(GameDay) {
 	// show a list of all the other games
-
 	source = xdLoad(MasterScoreboardXML);
 
 	otherGames = selectNodes(source, "//games/game[@gameday != '" + GameDay + "']");
@@ -445,6 +454,7 @@ function LoadPitcher(PitcherID) {
 
 	//get pitcher
 	ptchSource = xdLoad(BoxscoreXML);
+
 	var ptchNode;
 	ptchNode = selectNodes(ptchSource, "boxscore/pitching/pitcher[@id='" + PitcherID + "']").snapshotItem(0);
 	Team = selectNodes(ptchSource, "..", ptchNode).snapshotItem(0).getAttribute("team_flag");
@@ -517,8 +527,9 @@ function LoadPlays(StartPlay) {
 		playDes = gamePlays.snapshotItem(pIdx).getAttribute("des");
 
 		if (playDes == "") {	//*** NODE IS THERE BUT PLAY IS NOT
-			return pIdx - 1;
+			if (pIdx <= 0) { return 0 } else { return pIdx - 1 }
 		}
+console.log("LoadPlays", playDes);
 		if (playDes.indexOf(" error ") >= 0) {
 			Errors++;
 		}
@@ -527,7 +538,7 @@ function LoadPlays(StartPlay) {
 			Challenge += ", Batter: " + document.getElementById(AtBat.id + AtBat.AB).cells[2].innerHTML;
 			Challenge += ", " + playDes;
 			document.getElementById("Challenges").innerHTML += Challenge + "<br/>";
-			playDes = playDes.split(": ")[1];
+			playDes = playDes.split(": ")[playDes.split(": ").length - 1];	//APR 2019: tweaked to handle a play in the 4/12 Rays-Cardinals game where the challenge part was doubled
 		} else if (playDes.indexOf("reviewed") >= 0) {
 			Challenge = "Inning " + AtBat.Inning;
 			Challenge += ", Batter: " + document.getElementById(AtBat.id + AtBat.AB).cells[2].innerHTML;
@@ -606,8 +617,8 @@ function showAtBat(playDes, AtBatPlay) {
 
 	//put the latest play in the already-called
 	if (playDes > "") {
-		LastAction.push(playDes);
-		LastAction.shift();
+		LastAction.unshift(playDes);
+		LastAction.pop();
 	} else {
 		console.log("No Description!");
 		console.log(AtBatPlay);
@@ -678,10 +689,10 @@ function showAtBat(playDes, AtBatPlay) {
 	document.getElementById("S").innerHTML = "0";	// reset strikes
 	
 // *** USE THIS TO TELL WHEN OUTS ARE OUT OF SYNC
-	if (gamePlays.snapshotItem(pIdx).getAttribute("o") != AtBat.Outs) { 
-console.log("Outs are incorrect: ", "At Bat: " + AtBat.id, "XML: "+gamePlays.snapshotItem(pIdx).getAttribute("o"), "AB: " + AtBat.Outs);
-console.log(gamePlays.snapshotItem(pIdx).getAttribute("des"));
-//			AtBat.Outs = gamePlays.snapshotItem(pIdx).getAttribute("o");
+	if (AtBatPlay.getAttribute("o") != AtBat.Outs) { 
+console.log("Outs are incorrect: ", "At Bat: " + AtBat.id, "Inning: " + AtBat.Inning, "Batter" + AtBat.AB, "XML: " + AtBatPlay.getAttribute("o"), "AB: " + AtBat.Outs);
+console.log(AtBatPlay.getAttribute("des"));
+//			AtBat.Outs = AtBatPlay.getAttribute("o");
 //		setTimeout("location.reload()", 1000); //reload because it's probably due to some replay review
 	}
 
@@ -702,8 +713,8 @@ function showAction(playDes, ActionPlay) {
 
 	//put the latest play in the already-called
 	if (playDes > "") {
-		LastAction.push(playDes);
-		LastAction.shift();
+		LastAction.unshift(playDes);
+		LastAction.pop();
 	} else {
 		console.log("No Description!");
 	}
@@ -918,10 +929,10 @@ function showAction(playDes, ActionPlay) {
 	}}
 
 // *** USE THIS TO TELL WHEN OUTS ARE OUT OF SYNC
-	if (gamePlays.snapshotItem(pIdx).getAttribute("o") != AtBat.Outs) { 
-console.log("Outs are incorrect: ", "At Bat: " + AtBat.id, "XML: "+gamePlays.snapshotItem(pIdx).getAttribute("o"), "AB: " + AtBat.Outs);
-console.log(gamePlays.snapshotItem(pIdx).getAttribute("des"));
-//			AtBat.Outs = gamePlays.snapshotItem(pIdx).getAttribute("o");
+	if (ActionPlay.getAttribute("o") != AtBat.Outs) { 
+console.log("Outs are incorrect: ", "At Bat: " + AtBat.id, "XML: "+ ActionPlay.getAttribute("o"), "AB: " + AtBat.Outs);
+console.log(ActionPlay.getAttribute("des"));
+//			AtBat.Outs = ActionPlay.getAttribute("o");
 			oy; 
 	}
 
@@ -1097,7 +1108,10 @@ function PrimaryPlay(playDes, AtBatPlay) {
 			Box.style.backgroundImage = 'url("1out.gif")';	// out at 1st
 			thePlay = "GIDP " + Fielding(playDes);
 			theOut(Box, thePlay);
-		} else { oy; }
+		} else { 
+			console.log(AtBatPlay);
+			oy; 
+		}
 		break;
 	case "Groundout" : 
 	case "Bunt Groundout" :
@@ -1215,7 +1229,7 @@ function PrimaryPlay(playDes, AtBatPlay) {
 	case "Strikeout Double Play" :
 		fullPlay = FixNames(AtBatPlay.getAttribute("des"));
 		if (fullPlay.indexOf(PlayerID[AtBat.Index][AtBat.AB] + " advances") >= 0 || fullPlay.indexOf(" to 1st") >= 0) { // gid_2018_05_11_bosmlb_tormlb_1; gid_2018_04_01_pitmlb_detmlb_2
-console.log("ADVANCES", AtBat.Inning, AtBat.AB);
+console.log("K ADVANCES", AtBat.Inning, AtBat.AB);
 			Box.style.backgroundImage = 'url("1b.gif")';
 			if (fullPlay.indexOf("Passed ball") >= 0) { 
 				thePlay = "K, PB";
@@ -1278,7 +1292,12 @@ console.log("ADVANCES", AtBat.Inning, AtBat.AB);
 //		break;
 	case 'Official Scorer Ruling Pending' :
 		console.log("UNHANDLED:" , AtBatPlay);
-		oy;
+		showMessage(AtBatPlay.getAttribute("des"));
+		break;
+	case 'Game Advisory' :
+	case 'Injury' :
+	case 'Offensive Substitution' :
+		//this is handled in Action
 		break;
 	default :
 		console.log("Unknown primary play", AtBatPlay.getAttribute("event"));
@@ -1451,6 +1470,7 @@ function SecondaryPlay(Play, Prefix) {
 }
 
 function getSound(SoundToGet) {
+console.log(SoundToGet);
 //if (SoundToGet == "PR") { console.log("pinch runner problem"); OY; }
 //console.log(SoundToGet);
    fldrTeam = "";
@@ -1470,30 +1490,35 @@ function getSound(SoundToGet) {
             if (SoundCounts[idx][1] > 0) {  //and there is a THEM file, then use it
                FileNum = Math.floor(Math.random() * SoundCounts[idx][1]);
                AudioQueue.push("THEM/" + SoundFiles[idx] + " (" + FileNum + ")");
-	       if (document.getElementById("Audio").ended) { playSound(); }
+               if (document.getElementById("Audio").ended) { playSound(); }
+               console.log("FOUND1");
                return;
             } else {  // if there is not a THEM file, just use the standard one
                FileNum = Math.floor(Math.random() * SoundCounts[idx][0]);
                AudioQueue.push(SoundFiles[idx] + " (" + FileNum + ")");
-	       if (document.getElementById("Audio").ended) { playSound(); }
+               if (document.getElementById("Audio").ended) { playSound(); }
+               console.log("FOUND2");
                return;
             }
          } else { // otherwise we are at bat
             if (SoundCounts[idx][2] > 0) {  //and there is an US file, then use it
                FileNum = Math.floor(Math.random() * SoundCounts[idx][2]);
                AudioQueue.push("US/" + SoundFiles[idx] + " (" + FileNum + ")");
-	       if (document.getElementById("Audio").ended) { playSound(); }
+               if (document.getElementById("Audio").ended) { playSound(); }
+               console.log("FOUND3");
                return;
             } else {  // if there is not an US file, just use the standard one
                FileNum = Math.floor(Math.random() * SoundCounts[idx][0]);
                AudioQueue.push(SoundFiles[idx] + " (" + FileNum + ")");
-	       if (document.getElementById("Audio").ended) { playSound(); }
+               if (document.getElementById("Audio").ended) { playSound(); }
+               console.log("FOUND4");
                return;
             }
          }
       }
       SoundArray.length--;
    }
+   console.log("NOTFOUND");
 }
 
 function playerNumber(Text) {
@@ -1732,7 +1757,7 @@ function BoxScore() {
 
 	gameStatus = selectNodes(source, "status", game).snapshotItem(0).getAttribute("status");
 	document.getElementById("GameStatus").innerHTML = "<B>Status: </B> " + gameStatus;
-	if (gameStatus == "Final" || gameStatus == "Suspended") {
+	if (gameStatus == "Final" || gameStatus == "Suspended" || gameStatus.indexOf("Completed") > -1) {
 		if (typeof playMonitor !== 'undefined') {
 			clearInterval(playMonitor);
 		}
@@ -2019,7 +2044,7 @@ function LoadPitches() {
 			for (idx = 0; idx < 10; idx++) {
 				if (LastAction[idx] == playDes) { break; }
 			}
-			if (idx == 10) {
+			if (idx >= 10) {
 				LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
 			}
 		}
@@ -2034,7 +2059,8 @@ function LoadPitches() {
 			for (idx = 0; idx < 10; idx++) {
 				if (LastAction[idx] == playDes) { break; }
 			}
-			if (idx == 10) {
+			if (idx >= 10) {
+console.log("Check for action...", playDes);
 				LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
 			}
 		}
@@ -2047,7 +2073,7 @@ function LoadPitches() {
 	document.getElementById("PitchTime").innerHTML = PlaysXML[1];
 
 	//reset pitch information
-	document.getElementById("PitchSpeed").innerHTML = "";
+//	document.getElementById("PitchSpeed").innerHTML = "";
 
 	//show the pitcher information
 	pitcherNodes = selectNodes(pitchSource, "game/players/pitcher");
@@ -2070,7 +2096,7 @@ function LoadPitches() {
 	batterNodes = selectNodes(pitchSource, "game/players/batter");
 	if (batterNodes.snapshotLength > 0) {
 		batterNode = batterNodes.snapshotItem(0);
-		if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) {
+		if ((batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) && (batterNode.getAttribute("boxname") > '')) {
 			LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
 
 			// clear the pitch count
