@@ -734,8 +734,8 @@ function showAction(playDes, ActionPlay) {
 		break;
 	case 'Pitching Substitution' :
 		// take care of this here, to make sure the player name is handled before the split
-		playDes = IncomingPlayer(ActionPlay.getAttribute("player"), playDes);
 		LoadPitcher(ActionPlay.getAttribute("player")); //reload the pitchers' table
+		playDes = IncomingPlayer(ActionPlay.getAttribute("player"), playDes);
 		FieldingIdx = (AtBat.Index + 1) % 2;
 		playDes = playDes.replace(PlayerName[FieldingIdx][10], PlayerID[FieldingIdx][10])
 		break;
@@ -1470,6 +1470,7 @@ function SecondaryPlay(Play, Prefix) {
 }
 
 function getSound(SoundToGet) {
+if (SoundToGet=="") { nosound;}
 console.log(SoundToGet);
 //if (SoundToGet == "PR") { console.log("pinch runner problem"); OY; }
 //console.log(SoundToGet);
@@ -2096,13 +2097,11 @@ console.log("Check for action...", playDes);
 	batterNodes = selectNodes(pitchSource, "game/players/batter");
 	if (batterNodes.snapshotLength > 0) {
 		batterNode = batterNodes.snapshotItem(0);
-		if ((batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) && (batterNode.getAttribute("boxname") > '')) {
+		if (batterNode.getAttribute("boxname") != document.getElementById("BatterName").innerHTML) {
 			LastPlay = LoadPlays(LastPlay); // catch any outstanding plays
 
-			// clear the pitch count
-			LastPitch = 0;
-			document.getElementById("B").innerHTML = 0;
-			document.getElementById("S").innerHTML = 0;
+			if (batterNode.getAttribute("pid") == selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("player")) {
+			ShowBatter(batterNode); // reset the batter box
 
 			//calculate the number of runners on base
 			Runners = 0;
@@ -2119,8 +2118,8 @@ console.log("Check for action...", playDes);
 			if (Runners > 0) {
 				getSound("Runners/" + Runners + " O" + AtBat.Outs + " I" + AtBat.Inning + " " + AtBat.id);
 			}
-			ShowBatter(batterNode); // reset the batter box
 			document.getElementById("BatterDiv").style.visibility = "visible";
+			}
 		}
 	}
 
@@ -2303,13 +2302,25 @@ console.log("Check for action...", playDes);
 		oy;
 	}
 	//console.log(theSound);
-	getSound(theSound);
+	if (theSound > "") { getSound(theSound); }
 }
 
 function ShowBatter(batterNode) {
+console.log("SHOW BATTER");
+	// clear the pitch count
+	LastPitch = 0;
+	document.getElementById("B").innerHTML = 0;
+	document.getElementById("S").innerHTML = 0;
+	document.getElementById("O").innerHTML = AtBat.Outs;
+	document.getElementById("PitchSpeed").innerHTML = "";
+
 	if (LeadOff > "") {
 		L = document.getElementById(AtBat.id + "1").cells[AtBat.Column].offsetLeft;
-		document.getElementById("BatterDiv").style.left = (L+66) + "px";
+		if (L + 250 < window.innerWidth) {
+			document.getElementById("BatterDiv").style.left = (L+66) + "px";
+		} else {
+			document.getElementById("BatterDiv").style.left = (window.innerWidth - 250) + "px";
+		}
 		document.getElementById(AtBat.id + AtBat.AB).scrollIntoView();
 	}
 	if (AtBat.AB == 1) {
@@ -2327,18 +2338,15 @@ function ShowBatter(batterNode) {
 	} else {
 		batterRec = "";
 	}
+	document.getElementById("InPlay").innerHTML = batterRec;
+	getSound("Batters/DanBaker/" + batterPic + " " + batterNode.getAttribute("current_position"));
+	getSound("Batters/" + batterPic + LeadOff);
 
 	document.getElementById("BatterPic").src = "http://mlb.mlb.com/images/players/mugshot/ph_" + batterPic + ".jpg";
 	document.getElementById("BatterName").innerHTML = batterName;
 	document.getElementById("BatterAvg").innerHTML = batterAvg;
-	document.getElementById("B").innerHTML = "0";
-	document.getElementById("S").innerHTML = "0";
-	document.getElementById("O").innerHTML = AtBat.Outs;
-	document.getElementById("PitchSpeed").innerHTML = "";
-	document.getElementById("InPlay").innerHTML = batterRec;
-	getSound("Batters/" + batterPic + LeadOff);
 	LeadOff = "";
-	getSound("Average/" + batterAvg);
+	getSound("Average/" + batterAvg.replace(".",""));
 
 /********** DEAL WITH THIS ***********
 	Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
