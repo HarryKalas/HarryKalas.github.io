@@ -1,3 +1,5 @@
+//BUG 25 MAY 2019: PITCHER IS NOT ALWAYS IN THE BOXSCORE AT THE TIME THE PITCHER COMES IN!
+
 // TESTED FROM 27 APR 2018 TO 26 MAY 2018, NO ERRORS 
 //	OUTS SOMETIMES GET OUT OF SYNC DURING LIVE GAMES; I DON'T KNOW WHY
 //	EXCEPT THE 14 MAY GAME ASTROS V. ANGELS THAT HAS A DOUBLE-PLAY IN THE 9TH THAT DOESN'T TELL THE SECOND OUT
@@ -2037,7 +2039,7 @@ function LoadPitches() {
 	// check the plays.xml file
 	pitchSource = xdLoad(PlaysXML);
 
-	if (selectNodes(pitchSource, "game/atbat").snapshotItem(0)) {
+	if (selectNodes(pitchSource, "game/atbat")) {
 		if (selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des")) {
 			playDes = selectNodes(pitchSource, "game/atbat").snapshotItem(0).getAttribute("des");
 			playDes = FixNames(playDes);
