@@ -150,9 +150,9 @@ DIV.BoxScore {
 }
 
 #BatterDiv {
-	position: fixed;
-	left: 600px;
-	top: 50px;
+	position: absolute;
+	left: 1px;
+	top: 1px;
 	width: 250px; 
 	font-family: Arial;
 	font-size: 10pt;

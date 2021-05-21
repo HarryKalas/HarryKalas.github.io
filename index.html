@@ -3,6 +3,7 @@
 <title>JSON Test</title>
 <link href="scoreboard.css" rel="stylesheet" type="text/css"/>
 <script>
+// DOES thisPlay.pitchIndex.length TELL YOU THE NUMBER OF PITCHES?
 //REPETITION ON CALLS AT 434 -- MOUND VISIT, PITCHING CHANGE
 //  IT'S A PLAY, NOT AN EVENT, AND IT'S PROBABLY NOT COMPLETE, DON'T KNOW IF THERE IS ANYTHING ELSE THAT CAN AVOID THE CALLS
 //WORK WITH .THISPLAY.ABOUT.ISCOMPLETE -- if it's false, that call is going to be replaced with a final call
@@ -23,6 +24,8 @@
     gameLink = '';
     datestring = '';
     Batter = '';
+    LastPlay = 0;
+    LastEvent = 0;
 
     //get parameters from URL
     urlParams = new URLSearchParams(location.search);
@@ -64,9 +67,9 @@ function initialize() {
                     scheduledInnings = itm.scheduledInnings;
 		        }
             }
-            temp =  '<a href="test.html?myTeam=' + itm.teams.away.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
+            temp =  '<a href="index.html?myTeam=' + itm.teams.away.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
             temp += itm.teams.away.team.name + '</a> at ';
-            temp += '<a href="test.html?myTeam=' + itm.teams.home.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
+            temp += '<a href="index.html?myTeam=' + itm.teams.home.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
             temp += itm.teams.home.team.name + '</a>' ;
             if (itm.doubleHeader == "S" || itm.doubleHeader == "Y") { temp += " - Game " + itm.gameNumber}
             OtherGames += "<br/>" + temp;
@@ -173,7 +176,6 @@ function initialize() {
 	Now = new Date();
 	if (GameDate < Now) {
         //LOAD THE PLAYS
-        LastEvent = 0;
         LastPlay = LoadPlays(0);
 	} else {
 	    TO = (GameDate - Now);
@@ -318,11 +320,43 @@ function LoadPlays(StartPlay) {
             Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
         }
         Box.id = thisPlay.matchup.batter.id;		//TO REMOVE THIS ID WHEN THE BATTER GETS HOME OR OUT: [HTMLnode].removeAttribute("id")
+        document.getElementById("BatterDiv").style.left = (Box.offsetLeft + 66) + "px";
+        document.getElementById("BatterDiv").style.top = Box.offsetTop + "px";
+
+        if (document.getElementById("BatterPic").src != "https://securea.mlb.com/mlb/images/players/head_shot/" + Batter + ".jpg") {
+            document.getElementById(AtBat.id).scrollIntoView();
+        
+            BatterData = data.gameData.players["ID"+Batter];
+            BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
+            document.getElementById("BatterDiv").style.visibility = "visible";
+
+            document.getElementById("BatterPic").src = "https://securea.mlb.com/mlb/images/players/head_shot/" + Batter + ".jpg";
+                
+            document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + "</span>";
+            document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName
+            document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
+        }
+        document.getElementById("B").innerHTML = thisPlay.count.balls;
+        document.getElementById("S").innerHTML = thisPlay.count.strikes;
+        document.getElementById("O").innerHTML = thisPlay.count.outs;
          		
+        RunnerCount = 0;
+        if (thisPlay.matchup.postOnFirst) {
+            RunnerCount += 1;
+        }
+        if (thisPlay.matchup.postOnSecond) {
+            RunnerCount += 2;
+        }
+        if (thisPlay.matchup.postOnThird) {
+            RunnerCount += 4;
+        }
+        document.getElementById("Runners").src = RunnerCount + ".gif";
+
 		//get the events leading up to the play
 		//deal with the not-pitches during the load; pitches will only be handled during the game
 		for (pidx=LastEvent; pidx < thisPlay.playEvents.length; pidx++) {
-		    console.log(pidx, thisPlay.playEvents[pidx].details.description, thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes);
+//		    console.log(pidx, thisPlay.playEvents[pidx].details.description, thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes);
+            document.getElementById("InPlay").innerHTML  = thisPlay.playEvents[pidx].details.description;
 //		    console.log(thisPlay.playEvents[pidx].count);
 //            console.log(pidx);
 //            Event = data.liveData.plays.currentPlay.playEvents[pidx];
@@ -440,6 +474,9 @@ function LoadPlays(StartPlay) {
 		case "Game Advisory" :
 		case "Pitching Substitution" :
 		case "Offensive Substitution" :
+        case "Defensive Switch" : 
+		case "Defensive Substitution" :
+		case "Defensive Sub" :
 		case "Wild Pitch" :
 		    //THESE ARE CALLED IN PLAYEVENTS
 		    thisPlay.result.description = null;
@@ -561,6 +598,9 @@ function LoadPlays(StartPlay) {
 		case "Runner Out" :
 		    //this is somebody other than the batter
 		    break;
+        case "Runner Placed On Base" :
+            //this is handled elsewhere
+            break;
 		case undefined :
 		    //NO EVENT YET
 		    //console.log(thisPlay.matchup.batter.fullName, thisPlay.count, thisPlay.playEvents[thisPlay.playEvents.length-2].details);
@@ -572,6 +612,7 @@ function LoadPlays(StartPlay) {
 		//the play
 		if (thisPlay.result.description) {
 				console.log(thisPlay.result.description);
+				document.getElementById("InPlay").innerHTML  = thisPlay.result.description;
 		}
 		
         // put the text in the box
@@ -603,13 +644,16 @@ function LoadPlays(StartPlay) {
             if (AtBat.AB == 10) { AtBat.AB = 1 }		// loop around
         }
 
-        if (thisPlay.count.outs == 3) { 
-            // if it's the third out, end the inning
-            EndOfInning(); 
-        }
         if (thisPlay.about.isComplete == true) {
             LastEvent = 0;
         }
+
+        if (thisPlay.count.outs == 3) { 
+            // if it's the third out, end the inning
+            EndOfInning(); 
+            document.getElementById("Runners").src = "0.gif";
+        }
+
 	}
 
 	LoadPitchers();
@@ -675,7 +719,7 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
         } else if (thisPlay.playEvents[thisPlay.playEvents.length-1].details.isInPlay == true && thisPlay.about.isComplete == false) {
             //checking for play after ball in play        
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            playMonitor = setTimeout("console.log('IP');LastPlay=LoadPlays(LastPlay)", 2000); //next check 2 seconds
+            playMonitor = setTimeout("console.log('In Play');LastPlay=LoadPlays(LastPlay)", 2000); //next check 2 seconds
         } else {
             //time to next pitch
             TO = 30000 - (Now - PlayTime);
@@ -921,9 +965,7 @@ function EndOfInning() {
     AtBat.Column++;
 
     // CHANGE TEAM AT BAT
-    AtBat = document.getElementById(TeamType[(AtBat.Index + 1) % 2]);
-    document.getElementById(AtBat.id + AtBat.AB).scrollIntoView();
-    
+    AtBat = document.getElementById(TeamType[(AtBat.Index + 1) % 2]);    
 }
 function InsertPlayer(Event, Half) {
     PlayerID = Event.player.id;
@@ -1064,7 +1106,10 @@ function LineScore() {
 </tr>
 </tbody></table>
 <div id="GameAlert" class="BoxScore" style="padding-left: 10px; padding-bottom: 10px;"></div>
-<audio id="Audio" autoplay="" onended="playSound();" controls="" style="padding-left: 10px; "></audio>
+<table style="border-style: none;"><tr>
+<td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" style="padding-left: 10px; "></audio></td>
+<td style="border-style: none;"><button type="button" onclick="LoadPlays(LastPlay);">Load Plays</button></td>
+</tr></table>
 
 <div id="GameDisplay" class="GameDisplay">
 <h3>Away Team: <a id="away"></a></h3>
@@ -1621,6 +1666,19 @@ function LineScore() {
 </div>
 <h3>All Games Today:</h3>
 <div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
+</div>
+<div id="BatterDiv" style="visibility: hidden;">
+<img id="BatterPic" src="spacer.gif" style="width: 90px; height: 135px; padding-right: 5px; float: left" alt="Batter" onclick="document.getElementById(AtBat.id + AtBat.AB). IntoView()"/>
+<span id="BatterName"></span><br/>
+Avg: <span id="BatterAvg"></span><br/>
+<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
+B: <span id="B"></span><br/>
+S: <span id="S"></span><br/>
+O: <span id="O"></span><br/>
+<span id="PitchSpeed" style="line-height: 35px;"></span><br/>
+<span id="InPlay"></span><br/>
+<p style="clear: left; margin: 15px 0px 0px 10px;">Pitcher: <span id="Pitcher"></span></p>
+<div id="MiniBox" class="BoxScore"></div>
 </div>
 </body>
 </html>
