@@ -309,7 +309,7 @@ function LoadPlays(StartPlay) {
 		thisPlay = data.liveData.plays.allPlays[i]
 
         if (thisPlay.matchup.batter.id != Batter){
-            console.log(thisPlay.matchup.batter.fullName)
+//            console.log(thisPlay.matchup.batter.fullName)
             Batter = thisPlay.matchup.batter.id
         }
 
@@ -339,7 +339,7 @@ function LoadPlays(StartPlay) {
             } else {
                         document.getElementById("BatterDiv").scrollIntoView(true);
             }
-                                
+            
             BatterData = data.gameData.players["ID"+Batter];
             BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
             document.getElementById("BatterDiv").style.visibility = "visible";
@@ -349,6 +349,28 @@ function LoadPlays(StartPlay) {
             document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + "</span>";
             document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName
             document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
+            
+            //get the batter sound
+            BatterSound = Batter;
+            if (thisPlay.playEvents[0] && thisPlay.playEvents[0].position) {
+                //if it's a newly added player
+                BatterSound += " " + thisPlay.playEvents[0].position.abbreviation;
+            } else {
+                //if it's an existing player
+                BatterPosition = document.getElementById(AtBat.id+AtBat.AB).cells[3].innerHTML;
+                thisRow = document.getElementById(AtBat.id+AtBat.AB).nextElementSibling;
+                while (thisRow.cells.length == 3) {
+                    if(thisRow.cells[2].innerHTML > "0") {
+                        BatterPosition = thisRow.cells[2].innerHTML;
+                    } else {
+                        break;
+                    }
+                    thisRow = thisRow.nextElementSibling;
+                }
+                BatterSound += " " + BatterPosition
+            }
+            getSound('Batters/' + BatterSound);
+            getSound("Average/" + BatterStats.avg);
         }
         document.getElementById("B").innerHTML = thisPlay.count.balls;
         document.getElementById("S").innerHTML = thisPlay.count.strikes;
@@ -372,9 +394,9 @@ function LoadPlays(StartPlay) {
             document.getElementById("InPlay").innerHTML  = thisPlay.playEvents[pidx].details.description;
   		    if (thisPlay.playEvents[pidx].type == "pitch") {
 		        //handle when doing calls
-		        console.log("ZONE: ", thisPlay.playEvents[pidx].pitchData.zone);
-		        console.log("Batter: ", thisPlay.playEvents[pidx].pitchData.strikeZoneBottom, thisPlay.playEvents[pidx].pitchData.strikeZoneTop);
-		        console.log("Pitch",thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y);
+//		        console.log("ZONE: ", thisPlay.playEvents[pidx].pitchData.zone);
+//		        console.log("Batter: ", thisPlay.playEvents[pidx].pitchData.strikeZoneBottom, thisPlay.playEvents[pidx].pitchData.strikeZoneTop);
+//		        console.log("Pitch",thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y);
 		    } else if (thisPlay.playEvents[pidx].type == "pickoff") {
 		        //pickoff attempt; handle when doing calls
 		    } else if (thisPlay.playEvents[pidx].type == "action" ) {
@@ -387,6 +409,9 @@ function LoadPlays(StartPlay) {
 		            //Mound Visit		            
 		            break;
                 case "Injury" :
+                    //will deal with this in calls; ***HARRY
+                    break;
+                case "Other Advance" :
                     //will deal with this in calls; ***HARRY
                     break;
                 case "Pitching Sub" :
@@ -584,7 +609,7 @@ function LoadPlays(StartPlay) {
 			thePlay = "P" + thisPlay.playEvents[thisPlay.playEvents.length-1].hitData.location;
 			break;
         case "Sac Bunt" :
-            thePlay = "SB " + Fielding(thisPlay.runners);
+            thePlay = "Sac B " + Fielding(thisPlay.runners);
             break;
         case "Sac Bunt Double Play" :
             thePlay = "SB DP" + Fielding(thisPlay.runners);
@@ -636,7 +661,7 @@ function LoadPlays(StartPlay) {
 		}
 		//the play
 		if (thisPlay.result.description) {
-				console.log(thisPlay.result.description);
+//				console.log(thisPlay.result.description);
 				document.getElementById("InPlay").innerHTML  = thisPlay.result.description;
 		}
 		
@@ -650,6 +675,18 @@ function LoadPlays(StartPlay) {
         Box.className = "PlayBox";
         Jersey = data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber;
         Movement(thisPlay.runners, Jersey);
+        RBI = thisPlay.result.rbi
+        if (RBI > 0) {
+            RBICall = "Runs/R" + (RBI);
+            if (thisPlay.result.description.indexOf("double") >= 0) { getSound(RBICall + " 2B"); 
+            } else if (thisPlay.result.description.indexOf("triple") >= 0) { getSound(RBICall + " 3B"); 
+            } else if (thisPlay.result.description.indexOf("homer") >= 0) { getSound(RBICall + " HR"); 
+            } else if (thisPlay.result.description.indexOf("grand slam") >= 0) { getSound(RBICall + " GS"); 
+            } else if (thisPlay.result.description.indexOf("walks") >= 0) { getSound(RBICall + " BB"); 
+            } else { getSound(RBICall); }
+            CallScore();
+        }
+        
         thePlay = '';
 
        // CHECK FOR REVIEW
@@ -981,6 +1018,11 @@ function EndOfInning() {
 	
     getSound(RHE);
 
+	if (data.gameData.status.statusCode == "F") { 
+	    console.log("Game Over");
+	    return;
+	}
+	
     Inning = "Inning/" + thisPlay.about.inning;
     if (thisPlay.about.isTopInning) {
         Inning += "away E";
@@ -994,6 +1036,11 @@ function EndOfInning() {
     	getSound("Score/" + Score);
     } else if(AudioQueue[AudioQueue.length-1].indexOf(Score.split(" ")[0]) == -1) {
     	getSound("Score/" + Score);
+    }
+    
+    //if it's the middle of the 7th, play the Stretch music
+    if (thisPlay.about.isTopInning && thisPlay.about.inning == 7) {
+        getSound("Stretch");
     }
     
     //TAKE IDs OFF ALL BOXES
@@ -1145,7 +1192,7 @@ function getScore() {
 }
 
 function getSound(SoundToGet) {
-console.log(SoundToGet);
+//console.log(SoundToGet);
    fldrTeam = "";
    if (AtBat.name == myTeam) { 
       // more excitement if a hit is by my team
@@ -1153,7 +1200,6 @@ console.log(SoundToGet);
    } else {
       fldrTeam = "THEM/";
    }
-
    SoundArray = (SoundToGet).split(" ");
    while (SoundArray.length > 0) {
       SoundFile = SoundArray.join(" ");
@@ -1199,6 +1245,20 @@ function playSound() {
 		document.getElementById("Audio").play();
 	}
 }
+
+function CallScore() {
+	if (thisPlay.result.homeScore > thisPlay.result.awayScore) {		// home leads
+		Score  = thisPlay.result.homeScore + "-" + thisPlay.result.awayScore + " ";
+		Score += document.getElementById("home").innerHTML  + " " + document.getElementById("away").innerHTML
+	} else if (thisPlay.result.homeScore == thisPlay.result.awayScore) {	//tie game
+		Score  = thisPlay.result.awayScore + "-" + thisPlay.result.homeScore + " ";
+		Score += document.getElementById("away").innerHTML  + " " + document.getElementById("home").innerHTML;
+	} else {				// away leads
+		Score  = thisPlay.result.awayScore + "-" + thisPlay.result.homeScore + " ";
+		Score += document.getElementById("away").innerHTML  + " " + document.getElementById("home").innerHTML;
+	}
+	getSound("Score/" + Score);
+}
 </script>
 </head>
 <body onload="initialize();">
@@ -1233,7 +1293,7 @@ function playSound() {
 </tbody></table>
 <div id="GameAlert" class="BoxScore" style="padding-left: 10px; padding-bottom: 10px;"></div>
 <table style="border-style: none;"><tr>
-<td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" muted="" onended="playSound();" controls="" 
+<td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" 
     style="padding-left: 10px; "></audio></td>
 <td style="border-style: none;"><button type="button" onclick="LoadPlays(LastPlay);">Load Plays</button></td>
 </tr></table>
