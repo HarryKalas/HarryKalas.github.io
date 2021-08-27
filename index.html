@@ -667,8 +667,8 @@ function LoadPlays(StartPlay) {
 		
         // put the text in the box
         if (Box.getElementsByTagName("p").length == 1) {
-            Box.getElementsByTagName("p")[0].innerHTML = thePlay+"&nbsp;";
-            Box.getElementsByTagName("p")[0].title = thisPlay.result.description;
+            Box.getElementsByTagName("p")[0].innerHTML = thePlay + "&nbsp;";
+            Box.getElementsByTagName("p")[0].title = thisPlay.atBatIndex + ": " + thisPlay.result.description;
         } else {
                 Box.innerHTML = thePlay + Box.innerHTML;
         }
@@ -938,9 +938,10 @@ end;
                      break; 
                  case "score" :
                      RunnerBox.removeAttribute("id");
-                     if(RunnerBox == Box) {
+                     if(RunnerBox == Box && RunnerBox.innerHTML.indexOf(" homers ") > 0) {
                          //this is the HR batter
                          RunnerBox.style.backgroundImage = 'url("hr.gif")';	
+                         console.log(RunnerBox.innerHTML.indexOf(" homers "));
                      } else {
                          RunnerBox.style.backgroundImage = 'url("home.gif")';	// runner scores
                          if (newDiv) { 
@@ -1018,11 +1019,6 @@ function EndOfInning() {
 	
     getSound(RHE);
 
-	if (data.gameData.status.statusCode == "F") { 
-	    console.log("Game Over");
-	    return;
-	}
-	
     Inning = "Inning/" + thisPlay.about.inning;
     if (thisPlay.about.isTopInning) {
         Inning += "away E";
