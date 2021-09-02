@@ -6,6 +6,12 @@
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script>
+//THIS IS KEY:
+/*
+data.liveData.plays.allPlays[51].playEvents[0].hitData.location
+location corresponds to a player's position number, for left-center it's 78 and for right-center it's 89
+*/
+//data.liveData.linescore -- may be good for telling whether the game is over, inning is over
 // DOES thisPlay.pitchIndex.length TELL YOU THE NUMBER OF PITCHES?
 //REPETITION ON CALLS AT 434 -- MOUND VISIT, PITCHING CHANGE
 //  IT'S A PLAY, NOT AN EVENT, AND IT'S PROBABLY NOT COMPLETE, DON'T KNOW IF THERE IS ANYTHING ELSE THAT CAN AVOID THE CALLS
@@ -303,7 +309,7 @@ function LoadPlays(StartPlay) {
     //get fresh data
     
 	GetIt('https://statsapi.mlb.com' + gameLink );
-
+	
 	thePlay = "";
 	for (i=StartPlay; i < data.liveData.plays.allPlays.length; i++){
 		thisPlay = data.liveData.plays.allPlays[i]
@@ -346,8 +352,8 @@ function LoadPlays(StartPlay) {
 
             document.getElementById("BatterPic").src = "https://securea.mlb.com/mlb/images/players/head_shot/" + Batter + ".jpg";
                 
-            document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + "</span>";
-            document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName
+            document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + " (" + thisPlay.matchup.batSide.code + ")</span>";
+            document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName + " (" + thisPlay.matchup.pitchHand.code + "HP)"
             document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
             
             //get the batter sound
@@ -433,6 +439,7 @@ function LoadPlays(StartPlay) {
                 case "Pickoff Caught Stealing 2B" :
                 case "Pickoff Caught Stealing 3B" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
+                    getSound("PO 2B");
                     break;
                 case "Ejection" :
                     document.getElementById("GameAlert").innerHTML += "<br/><b>EJECTION</b> - Inning " + AtBat.Inning + ", At Bat " + thisPlay.matchup.batter.fullName + ": ";
@@ -440,6 +447,7 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Pickoff 1B" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
+                    getSound("PO 1B");
                     break;
                 case "Passed Ball" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
@@ -525,6 +533,7 @@ function LoadPlays(StartPlay) {
 		case "Defensive Substitution" :
 		case "Defensive Sub" :
 		case "Defensive Indiff" :
+		case "Passed Ball" :
 		case "Wild Pitch" :
 		    //THESE ARE CALLED IN PLAYEVENTS
 		    thisPlay.result.description = null;
@@ -535,18 +544,22 @@ function LoadPlays(StartPlay) {
 		    break;
 		case "Bunt Groundout" : 
 			thePlay = "B " + Fielding(thisPlay.runners);
+			getSound(thePlay);
 			for (r=0; r<thisPlay.runners.length; r++) {
 			    if (thisPlay.runners[r].credits.length == 1) { thePlay += "U"; }
 			}
 			break;
 		case "Bunt Lineout" :
 		    thePlay = "BL" + Fielding(thisPlay.runners);
+			getSound(thePlay);
 		    break;
 		case "Bunt Pop Out" : 
 			thePlay = "BP" + thisPlay.playEvents[thisPlay.playEvents.length-1].hitData.location;
+			getSound(thePlay);
 			break;
 		case "Catcher Interference" :
 		    thePlay = "CI"
+			getSound(thePlay);
 		    break;
 		case "Caught Stealing 2B" :
 		case "Caught Stealing 3B" :
@@ -562,6 +575,7 @@ function LoadPlays(StartPlay) {
 		    } else {
                 thePlay = "2B";
 		    }
+		    getSound(thePlay + " " + HitDetail(thisPlay));
 		    break;
 		case "Double Play" :
 		    Fld = Fielding(thisPlay.runners)
@@ -578,27 +592,34 @@ function LoadPlays(StartPlay) {
 		case "Fielders Choice" :
 		case "Fielders Choice Out" :
 		    thePlay = "FC " + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 		    break;
 		case "Grounded Into DP" : 			
 		    thePlay = "GIDP " + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 			break;
 		case "Groundout" : 
 			thePlay = Fielding(thisPlay.runners);
 			for (r=0; r<thisPlay.runners.length; r++) {
 			    if (thisPlay.runners[r].credits.length == 1) { thePlay += "U"; }
 			}
+		    getSound(thePlay);
 			break;
         case "Hit By Pitch" : 
 			thePlay = "HBP";
+		    getSound(thePlay);
             break;
         case "Home Run" : 
             thePlay = "&nbsp;";
+		    getSound(thePlay + " " + HitDetail(thisPlay));
             break;
 		case "Intent Walk" : 
 			thePlay = "IW";
+		    getSound(thePlay);
 			break;
 		case "Lineout" :
 		    thePlay = "L" + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 		    break;
 		case "Pickoff Error 1B" :
 		case "Pickoff Error 2B" :
@@ -607,6 +628,7 @@ function LoadPlays(StartPlay) {
 		    break;
 		case "Pop Out" : 
 			thePlay = "P" + thisPlay.playEvents[thisPlay.playEvents.length-1].hitData.location;
+		    getSound(thePlay);
 			break;
         case "Sac Bunt" :
             thePlay = "Sac B " + Fielding(thisPlay.runners);
@@ -616,15 +638,19 @@ function LoadPlays(StartPlay) {
             break;
         case "Sac Fly Double Play" :
             thePlay = "SF " + Fielding(thisPlay.runners) + " DP";
+		    getSound(thePlay);
             break;
         case "Sac Fly" :
             thePlay = "SF " + Fielding(thisPlay.runners);
+		    getSound(thePlay);
             break;
 		case "Single" :
 		    thePlay = "1B";
+		    getSound(thePlay + " " + HitDetail(thisPlay));
 		    break;
 		case "Strikeout" : 
 			thePlay = "K";
+			getSound(thePlay);
 			if (thisPlay.result.description.indexOf(" called out ") > 0) { 
 			    thePlay = "&#xA7B0;";
 			}
@@ -637,12 +663,14 @@ function LoadPlays(StartPlay) {
 			break;
 		case "Triple" :
 		    thePlay = "3B";
+		    getSound(thePlay + " " + HitDetail(thisPlay));
 		    break;
 		case "Triple Play" : 			
 		    thePlay = "TP " + Fielding(thisPlay.runners);
 			break;
 		case "Walk" : 
 			thePlay = "BB";
+			getSound(thePlay);
 			break;
 		case "Runner Out" :
 		    //this is somebody other than the batter
@@ -756,13 +784,18 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
         }
     } else if (thisPlay.about.isComplete == true) {
         //time to next batter
-        TO = 45000 - (Now - PlayTime);
+        TO = 30000 - (Now - PlayTime);
         if (TO < 0) { TO = 5000; } else { console.log(TO); }
         if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
         playMonitor = setTimeout("console.log('Waiting for batter');LastPlay=LoadPlays(LastPlay)", TO); //next check 2 minutes 30 seconds
     } else if (thisPlay.playEvents.length > 0) {
         if (thisPlay.playEvents[thisPlay.playEvents.length-1].event == "Pitching Substitution") {
             // pitching change; lots of time 
+            if (AtBat.id == "away") { //home team changes pitcher
+                getSound("PC " + data.gameData.teams.home.name);
+            } else { //away team changes pitcher
+                getSound("PC " + data.gameData.teams.away.name);
+            }
             TO = 30000 - (Now - PlayTime);
             if (TO < 0) { TO = 10000; } else { console.log(TO); }
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
@@ -792,7 +825,7 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 	document.getElementById("status").innerHTML = data.gameData.status.detailedState;
     playSound();
 
-	if (data.gameData.status.statusCode == "F") { 
+if (data.gameData.status.statusCode == "F" || data.gameData.status.statusCode == "O") { 
 	    console.log("Game Over"); 
 	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
 	    return; 
@@ -806,6 +839,21 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 //      Low, Low Dirt, Low Inside, Low Outside, 
 //      Outside, Outside Very
     return LastPlay;
+}
+
+function HitDetail(playData) {
+  Result = "";
+  hitEvent = playData.playEvents.length - 1;
+  if (playData.playEvents[hitEvent].hitData) {
+    if (playData.result.event == "Home Run") { //leave it -- they're all line drives
+    } else {
+        Result = playData.playEvents[hitEvent].hitData.trajectory.substring(0,1).toUpperCase();
+    }
+    
+    Result += playData.playEvents[hitEvent].hitData.location;
+  }
+    
+  return Result;
 }
 
 function Movement(Runners, Batter) {
@@ -965,6 +1013,11 @@ end;
              } //out/not out
         } //RunnerBox
     } //for
+    if (thisPlay.about.hasOut) {   
+        theCall = "Out" + thisPlay.count.outs + " " + AtBat.innerText + " I" + thisPlay.about.inning;
+        console.log(theCall);
+        getSound(theCall);
+    }
 } //function
 
 function theOut(Box, thePlay, outNumber) {
@@ -1004,6 +1057,9 @@ function Fielding(Runners) {
 }
 
 function EndOfInning() {
+    if (data.liveData.linescore.scheduledInnings >= thisPlay.about.inning) {
+        console.log(data.gameData.status);
+    }
     RHE = "";
     LOB = 0;
 	if (I123 == 1) {	// if it's a 1-2-3 inning
