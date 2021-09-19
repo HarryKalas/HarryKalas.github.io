@@ -2,7 +2,6 @@
 <head>
 <title>JSON Test</title>
 <link href="scoreboard.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="wakelock.js"></script>
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script>
@@ -370,33 +369,38 @@ function LoadPlays(StartPlay) {
                         BatterPosition = thisRow.cells[2].innerHTML;
                     } else {
                         break;
-                    }
+                                    }
                     thisRow = thisRow.nextElementSibling;
                 }
                 BatterSound += " " + BatterPosition
             }
             getSound('Batters/' + BatterSound);
             getSound("Average/" + BatterStats.avg);
-        }
-        document.getElementById("B").innerHTML = thisPlay.count.balls;
-        document.getElementById("S").innerHTML = thisPlay.count.strikes;
-        document.getElementById("O").innerHTML = thisPlay.count.outs;
+        
+            document.getElementById("B").innerHTML = thisPlay.count.balls;
+            document.getElementById("S").innerHTML = thisPlay.count.strikes;
+            document.getElementById("O").innerHTML = thisPlay.count.outs;
 
-        RunnerCount = 0;
-        if (thisPlay.matchup.postOnFirst) {
-            RunnerCount += 1;
+            RunnerCount = 0;
+            if (thisPlay.matchup.postOnFirst) {
+                RunnerCount += 1;
+            }
+            if (thisPlay.matchup.postOnSecond) {
+                RunnerCount += 2;
+            }
+            if (thisPlay.matchup.postOnThird) {
+                RunnerCount += 4;
+            }
+            document.getElementById("Runners").src = RunnerCount + ".gif";
+            getSound("Runners/" + RunnerCount + " O" + thisPlay.count.outs);
         }
-        if (thisPlay.matchup.postOnSecond) {
-            RunnerCount += 2;
-        }
-        if (thisPlay.matchup.postOnThird) {
-            RunnerCount += 4;
-        }
-        document.getElementById("Runners").src = RunnerCount + ".gif";
-
+                
 		//get the events leading up to the play
 		//deal with the not-pitches during the load; pitches will only be handled during the game
 		for (pidx=LastEvent; pidx < thisPlay.playEvents.length; pidx++) {
+            document.getElementById("B").innerHTML = thisPlay.count.balls;
+            document.getElementById("S").innerHTML = thisPlay.count.strikes;
+            document.getElementById("O").innerHTML = thisPlay.count.outs;
             document.getElementById("InPlay").innerHTML  = thisPlay.playEvents[pidx].details.description;
   		    if (thisPlay.playEvents[pidx].type == "pitch") {
 		        //handle when doing calls
@@ -581,12 +585,15 @@ function LoadPlays(StartPlay) {
 		    Fld = Fielding(thisPlay.runners)
 		    if (Fld.length == 1) { Fld += "U"; }
 		    thePlay = "DP " + Fld;
+		    getSound(thePlay);
 			break;
 		case "Field Error" :
 		    thePlay = "E" + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 		    break;
 		case "Flyout" :
 		    thePlay = "F" + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 		    break;
 		case "Forceout" :
 		case "Fielders Choice" :
@@ -611,7 +618,7 @@ function LoadPlays(StartPlay) {
             break;
         case "Home Run" : 
             thePlay = "&nbsp;";
-		    getSound(thePlay + " " + HitDetail(thisPlay));
+		    getSound("HR " + HitDetail(thisPlay));
             break;
 		case "Intent Walk" : 
 			thePlay = "IW";
@@ -632,9 +639,11 @@ function LoadPlays(StartPlay) {
 			break;
         case "Sac Bunt" :
             thePlay = "Sac B " + Fielding(thisPlay.runners);
+		    getSound(thePlay);
             break;
         case "Sac Bunt Double Play" :
             thePlay = "SB DP" + Fielding(thisPlay.runners);
+		    getSound(thePlay);
             break;
         case "Sac Fly Double Play" :
             thePlay = "SF " + Fielding(thisPlay.runners) + " DP";
@@ -657,6 +666,7 @@ function LoadPlays(StartPlay) {
 			break;
 		case "Strikeout Double Play" : 
 			thePlay = "K, DP";
+		    getSound(thePlay);
 			if (thisPlay.result.description.indexOf(" called out ") > 0) { 
 			    thePlay = "&#xA7B0;, DP";
 			}
@@ -667,6 +677,7 @@ function LoadPlays(StartPlay) {
 		    break;
 		case "Triple Play" : 			
 		    thePlay = "TP " + Fielding(thisPlay.runners);
+		    getSound(thePlay);
 			break;
 		case "Walk" : 
 			thePlay = "BB";
@@ -861,15 +872,20 @@ function Movement(Runners, Batter) {
         RunnerID = Runners[r].details.runner.id;        //the batter ID of this runner
         RunnerBox = document.getElementById(RunnerID);  //the box for this runner
         if (RunnerBox != null) { //if it's null, everything has already been done
-            newDiv = document.createElement('div');
 
-            if (Runners[r].movement.start != null) {
-                //if it's not the batter, get the batter ID and any prefix for the movement 
+            if (Runners[r].movement.start != null && Runners[r].movement.end != null ) {
+                //if it's not the batter, and he got on base, get the batter ID and any prefix for the movement 
+                newDiv = document.createElement('div');
+                newDiv.className = "B" + Runners[r].movement.end; 
+
+                                                                                        
                 Prefix = "";
                 switch (Runners[r].details.movementReason) {    //if it's not the batter
                 case "r_stolen_base_2b" :
                 case "r_stolen_base_3b" :
                     Prefix = "SB ";
+            console.log(RunnerBox);
+//                    alert("With " + thisPlay.matchup.batter.fullName + " at bat, " + Runners[r].details.runner.fullName + " steals " + //Runners[r].movement.end);
                     break;
                 case "r_caught_stealing_2b" :
                     Prefix = "CS ";
@@ -901,7 +917,8 @@ function Movement(Runners, Batter) {
                     }
                     break;
                 }
-                newDiv.innerHTML = Prefix + Batter;
+                Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, advance on ' + Runners[r].details.event;
+                newDiv.innerHTML = '<span title="' + Comment + '">' + Prefix + Batter + "</span>";
                 RunnerBox.appendChild(newDiv);
             }
 
@@ -922,41 +939,42 @@ function Movement(Runners, Batter) {
                     break;
                 }
             
-                 switch (Runners[r].movement.outBase) {
-                 case "1B" :
-                     if (Runners[r].movement.originBase == "1B") { 
-                        newDiv.className = "B2"; 
-                        RunnerBox.style.backgroundImage = 'url("2out.gif")';	
-                     } else {
-                        RunnerBox.style.backgroundImage = 'url("1out.gif")';	// out at 1st
-                     }
-                     break; 
-                 case "2B" :
-                    if (Runners[r].movement.originBase < "2B") {  
-                        RunnerBox.style.backgroundImage = 'url("2out.gif")';	// out at 2nd
-                        newDiv.className = "B2";
+                if (Runners[r].movement.start != null) { //not the batter
+                    newDiv = document.createElement('div');
+                    newDiv.className = "B" + Runners[r].movement.outBase; 
+                    Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, out on ' + Runners[r].details.event;
+                    newDiv.innerHTML = '<span title="' + Comment + '">' + Batter + "</span>";
+                    RunnerBox.appendChild(newDiv);
+                 }
+                switch (Runners[r].movement.outBase) {
+                case "1B" :
+                    if (Runners[r].movement.originBase == "1B") { 
+                       RunnerBox.style.backgroundImage = 'url("2out.gif")';	
                     } else {
-                        RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
-                        newDiv.className = "B3";
+                       RunnerBox.style.backgroundImage = 'url("1out.gif")';	// out at 1st
                     }
                     break; 
-                 case "3B" :
-                    if (Runners[r].movement.originBase < "3B") {  
-                        RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
-                        newDiv.className = "B3";
-                    } else {
-                        RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 2nd
-                        newDiv.className = "B4";
-                    }
-                     break; 
-                 case "4B" :
-                     RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 3rd
-                     newDiv.className = "Home";
-                     break; 
-                 default :
-                    console.log("outBase NOT CATALOGUED", Runners[r].movement.outBase);
-                    end;
-                 }
+                case "2B" :
+                   if (Runners[r].movement.originBase < "2B") {  
+                       RunnerBox.style.backgroundImage = 'url("2out.gif")';	// out at 2nd
+                   } else {
+                       RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
+                   }
+                   break; 
+                case "3B" :
+                   if (Runners[r].movement.originBase < "3B") {  
+                       RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
+                   } else {
+                       RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 2nd
+                   }
+                    break; 
+                case "4B" :
+                    RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 3rd
+                    break; 
+                default :
+                   console.log("outBase NOT CATALOGUED", Runners[r].movement.outBase);
+                   end;
+                }                   
              } else {    //not out
                  switch (Runners[r].movement.end) {
                  case "1B" :
@@ -978,11 +996,9 @@ end;
                      break; 
                  case "2B" :
                      RunnerBox.style.backgroundImage = 'url("2b.gif")';	// safe at 2nd
-                     if (typeof(newDiv) != "undefined") { newDiv.className = "B2"; }
                      break; 
                  case "3B" :
                      RunnerBox.style.backgroundImage = 'url("3b.gif")';	// safe at 3rd
-                     if (typeof(newDiv) != "undefined") { newDiv.className = "B3"; }
                      break; 
                  case "score" :
                      RunnerBox.removeAttribute("id");
@@ -992,9 +1008,6 @@ end;
                          console.log(RunnerBox.innerHTML.indexOf(" homers "));
                      } else {
                          RunnerBox.style.backgroundImage = 'url("home.gif")';	// runner scores
-                         if (newDiv) { 
-                             newDiv.className = "Home"; 
-                         }
                      }
                      break;
                  case null :
@@ -1015,7 +1028,6 @@ end;
     } //for
     if (thisPlay.about.hasOut) {   
         theCall = "Out" + thisPlay.count.outs + " " + AtBat.innerText + " I" + thisPlay.about.inning;
-        console.log(theCall);
         getSound(theCall);
     }
 } //function
@@ -1057,7 +1069,7 @@ function Fielding(Runners) {
 }
 
 function EndOfInning() {
-    if (data.liveData.linescore.scheduledInnings >= thisPlay.about.inning) {
+    if (thisPlay.about.inning >= data.liveData.linescore.scheduledInnings) {
         console.log(data.gameData.status);
     }
     RHE = "";
