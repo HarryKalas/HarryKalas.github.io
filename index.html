@@ -917,7 +917,7 @@ function Movement(Runners, Batter) {
                     }
                     break;
                 }
-                Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, advance on ' + Runners[r].details.event;
+                Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, advances to '+ Runners[r].movement.end +' on ' + Runners[r].details.event;
                 newDiv.innerHTML = '<span title="' + Comment + '">' + Prefix + Batter + "</span>";
                 RunnerBox.appendChild(newDiv);
             }
