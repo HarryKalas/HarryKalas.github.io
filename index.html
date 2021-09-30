@@ -5,6 +5,9 @@
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script>
+//PITCH CALLS I NEED TO GET AUDIO FOR:
+//  
+
 //THIS IS KEY:
 /*
 data.liveData.plays.allPlays[51].playEvents[0].hitData.location
@@ -376,7 +379,7 @@ function LoadPlays(StartPlay) {
             }
             getSound('Batters/' + BatterSound);
             getSound("Average/" + BatterStats.avg);
-        
+
             document.getElementById("B").innerHTML = thisPlay.count.balls;
             document.getElementById("S").innerHTML = thisPlay.count.strikes;
             document.getElementById("O").innerHTML = thisPlay.count.outs;
@@ -407,8 +410,87 @@ function LoadPlays(StartPlay) {
 //		        console.log("ZONE: ", thisPlay.playEvents[pidx].pitchData.zone);
 //		        console.log("Batter: ", thisPlay.playEvents[pidx].pitchData.strikeZoneBottom, thisPlay.playEvents[pidx].pitchData.strikeZoneTop);
 //		        console.log("Pitch",thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y);
+                Call = "";
+                switch (thisPlay.playEvents[pidx].details.call.code) {
+                case "*B" :
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball Low Dirt ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "B" :
+                    PPos = PitchPosition(thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y); 
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball" + PPos + " ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "C" :
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Called ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "D" :
+                    Call = "InPlay NoOut";
+                    break;
+                case "E" :
+                    Call = "InPlay Run";
+                    break;
+                case "F" :
+                    console.log("F",thisPlay.matchup.batter.fullName, thisPlay.playEvents[pidx].pitchNumber, 
+                        "Speed:"+thisPlay.playEvents[pidx].pitchData.endSpeed,
+                        "Zone:"+thisPlay.playEvents[pidx].pitchData.zone,
+                        "BreakAngle:"+thisPlay.playEvents[pidx].pitchData.breaks.breakAngle,
+                        "PitchType:"+thisPlay.playEvents[pidx].details.type.description
+                        );
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul ";
+                    Pitches = thisPlay.playEvents[pidx].count.strikes + thisPlay.playEvents[pidx].count.balls
+                    if (thisPlay.playEvents[pidx].pitchNumber > Pitches) {
+                        Call += "X ";
+                    }                    
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "L" : //foul bunt
+                    console.log("B",thisPlay.matchup.batter.fullName, thisPlay.playEvents[pidx].pitchNumber, 
+                        "Speed:"+thisPlay.playEvents[pidx].pitchData.endSpeed,
+                        "Zone:"+thisPlay.playEvents[pidx].pitchData.zone,
+                        "BreakAngle:"+thisPlay.playEvents[pidx].pitchData.breaks.breakAngle,
+                        "PitchType:"+thisPlay.playEvents[pidx].details.type.description
+                        );
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Bunt ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "M" : //missed bunt
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging Missed ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "S" :
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "T" : //foul tip
+                    console.log("T",thisPlay.matchup.batter.fullName, thisPlay.playEvents[pidx].pitchNumber, 
+                        "Speed:"+thisPlay.playEvents[pidx].pitchData.endSpeed,
+                        "Zone:"+thisPlay.playEvents[pidx].pitchData.zone,
+                        "BreakAngle:"+thisPlay.playEvents[pidx].pitchData.breaks.breakAngle,
+                        "PitchType:"+thisPlay.playEvents[pidx].details.type.description
+                        );
+                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Tip ";
+                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    break;
+                case "V" :  //INTENTIONAL WALK; this is handled on the play
+                    break;
+                case "X" :
+                    Call = thisPlay.playEvents[pidx].details.call.description;
+                    break;
+                default :
+                    console.log(thisPlay.playEvents[pidx].details.call);
+                }
+                if (Call > "") { getSound("Count/" + Call);}
 		    } else if (thisPlay.playEvents[pidx].type == "pickoff") {
 		        //pickoff attempt; handle when doing calls
+		        if (thisPlay.playEvents[pidx].details.description == "Pickoff Attempt 1B") {
+                    getSound("POA 1B");
+		        } else if (thisPlay.playEvents[pidx].details.description == "Pickoff Attempt 2B") {
+                    getSound("POA 2B");
+		        } else {
+                    getSound("POA");
+		        }
 		    } else if (thisPlay.playEvents[pidx].type == "action" ) {
                 switch  (thisPlay.playEvents[pidx].details.event) {
 		        case "Game Advisory" :
@@ -468,6 +550,7 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Wild Pitch" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
+                    getSound("WP");
                     break;
                 case "Defensive Indiff" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
@@ -621,7 +704,7 @@ function LoadPlays(StartPlay) {
 		    getSound("HR " + HitDetail(thisPlay));
             break;
 		case "Intent Walk" : 
-			thePlay = "IW";
+			thePlay = "IBB";
 		    getSound(thePlay);
 			break;
 		case "Lineout" :
@@ -836,12 +919,12 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 	document.getElementById("status").innerHTML = data.gameData.status.detailedState;
     playSound();
 
-if (data.gameData.status.statusCode == "F" || data.gameData.status.statusCode == "O") { 
+	if (IsGameOver()) {
 	    console.log("Game Over"); 
 	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
 	    return; 
-	}    //exit if the game is over
-
+	}
+	
 //console.log("Count/" + thisPlay.count.balls + "-" thisPlay.count.strikes);
 //called | Foul | Foul Bunt | Foul Tip | Swinging | Ball X if foul after second;  pitch type (FT, SI), 
 //Balls: 
@@ -850,6 +933,57 @@ if (data.gameData.status.statusCode == "F" || data.gameData.status.statusCode ==
 //      Low, Low Dirt, Low Inside, Low Outside, 
 //      Outside, Outside Very
     return LastPlay;
+}
+
+function PitchPosition(x,y) {
+     //Y
+     if (y > 190) {
+         Y = " Low";
+     } else if (y < 120) {
+         Y = " High Very";
+     } else if (y < 150) {
+         Y = " High";
+     } else {
+         Y = "";
+     }
+                
+     //X
+     if (x < 70) {
+         if (thisPlay.matchup.batSide.code == "L") {
+             X = " Inside Very";
+         } else {
+             X = " Outside Very";
+         }
+     } else if (x < 95) {
+         if (thisPlay.matchup.batSide.code == "L") {
+             X = " Inside";
+         } else {
+             X = " Outside";
+         }
+     } else if (x > 165) {
+         if (thisPlay.matchup.batSide.code == "L") {
+             X = " Outside Very";
+         } else {
+             X = " Inside Very";
+         }
+     } else if (x > 140) {
+         if (thisPlay.matchup.batSide.code == "L") {
+             X = " Outside";
+         } else {
+             X = " Inside";
+         }
+     } else {
+         X = "";
+     }
+     
+     if (X != "" && Y.indexOf(" Very") > 0) {
+        Y.replace(" Very","");
+        if (X.indexOf(" Very") < 0) {
+            X += " Very";
+        }
+     }
+     
+     return (Y + X);
 }
 
 function HitDetail(playData) {
@@ -980,7 +1114,6 @@ function Movement(Runners, Batter) {
                  case "1B" :
                      RunnerBox.style.backgroundImage = 'url("1b.gif")';	// safe at 1st
                      if (thePlay == "K" || thePlay == "&#xA7B0;") {
-end;
                         //strikeout on first
                         if (Runners[r].details.event == "Passed Ball") {
                             thePlay = thePlay + ", PB";
@@ -1003,17 +1136,15 @@ end;
                  case "score" :
                      RunnerBox.removeAttribute("id");
                      if(RunnerBox == Box && RunnerBox.innerHTML.indexOf(" homers ") > 0) {
-                         //this is the HR batter
-                         RunnerBox.style.backgroundImage = 'url("hr.gif")';	
-                         console.log(RunnerBox.innerHTML.indexOf(" homers "));
+                         RunnerBox.style.backgroundImage = 'url("hr.gif")';	    //this is the HR batter
                      } else {
                          RunnerBox.style.backgroundImage = 'url("home.gif")';	// runner scores
                      }
                      break;
-                 case null :
-                    //I THINK THIS ONLY HAPPENS ON A STRIKEOUT WITH AN ERROR, BUT NOT SURE HOW TO LOG IT
-                    console.log("NULL END BASE", r, i, thePlay, Runners[r]);
-                    end;
+                 case null : // Runners[r].movement.end
+                    //I THINK THIS ONLY HAPPENS ON A STRIKEOUT WITH AN ERROR, THE ERROR SHOULD BE CAUGHT IN ANOTHER MOVEMENT
+                    console.log("NULL END BASE", thisPlay.result.description);
+//                    end;
                     break;
                  default :
                      console.log("movement.end  NOT CATALOGUED", Runners[r].movement.end, Runners[r] );
@@ -1069,9 +1200,6 @@ function Fielding(Runners) {
 }
 
 function EndOfInning() {
-    if (thisPlay.about.inning >= data.liveData.linescore.scheduledInnings) {
-        console.log(data.gameData.status);
-    }
     RHE = "";
     LOB = 0;
 	if (I123 == 1) {	// if it's a 1-2-3 inning
@@ -1102,8 +1230,8 @@ function EndOfInning() {
     	getSound("Score/" + Score);
     }
     
-    //if it's the middle of the 7th, play the Stretch music
-    if (thisPlay.about.isTopInning && thisPlay.about.inning == 7) {
+    if (thisPlay.about.isTopInning && thisPlay.about.inning == 7 && scheduledInnings > 7) {
+        //if it's the middle of the 7th, play the Stretch music
         getSound("Stretch");
     }
     
@@ -1322,6 +1450,66 @@ function CallScore() {
 		Score += document.getElementById("away").innerHTML  + " " + document.getElementById("home").innerHTML;
 	}
 	getSound("Score/" + Score);
+}
+
+function IsGameOver() {
+	//if it's marked as over, we're done 
+    if (data.gameData.status.statusCode == "O") { 
+        console.log("status code");
+	    return true; 
+	}
+
+	//if we're not in the last inning, we're not done yet
+    if (thisPlay.about.inning < data.liveData.linescore.scheduledInnings) {
+        return false;
+    }
+
+    //if away is at bat in last inning or later and there are less than 3 outs, we're not done yet
+    if (thisPlay.about.isTopInning && thisPlay.count.outs < 3) {
+        return false;
+    }
+
+	//if home is at bat in the 9th or later, check the score
+	awayScore = thisPlay.result.awayScore;
+	awayTeam = document.getElementById("away").innerHTML;
+	homeScore = thisPlay.result.homeScore;
+	homeTeam = document.getElementById("home").innerHTML;
+    
+	// if home has more runs than away in the bottom of the last or later inning, then game is over
+	if (+homeScore > +awayScore) {
+		theScore = homeScore + "-" + awayScore ;
+		getSound("GameOver " + homeTeam + " " + theScore + " " + awayTeam);
+		if (homeTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
+		console.log("Game Over", homeTeam + " win (1)");
+		return true;
+	}
+
+	// if home team is at bat in last or later inning...
+    if (AtBat.id == 'home') {
+        //if home team is ahead, game is over, home team wins
+		if (+homeScore > +awayScore) {
+			theScore = homeScore + "-" + awayScore ;
+			getSound("GameOver " + homeTeam + " " + theScore + " " + awayTeam);
+			if (homeTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
+			console.log("Game Over", homeTeam + " wins (2)");
+			return true;
+		} else if (thisPlay.count.outs == 3) {        
+            // if away team has more runs than home team at this point, game is over
+            if (+awayScore > +homeScore) {
+                theScore = awayScore + "-" + homeScore ;
+                getSound("GameOver " + awayTeam + " " + theScore + " " + homeTeam);
+                if (awayTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
+                console.log("Game Over", awayTeam + " wins (3)");
+                return true;
+            } else {
+                //home team couldn't have more runs at this point -- if they did, it would be before 3 outs
+                return false;
+            }
+		}
+	}
+	
+	// otherwise game is not over
+	return false;
 }
 </script>
 </head>

@@ -50,17 +50,17 @@ DIV {
 		left: 30px;
 		text-align: right;
 }
-.B2 {
-		top: 2px;
-		left: 30px;
-		text-align: right;
+DIV.B2B {
+	top: 2px;
+	left: 30px;
+	text-align: right;
 }
-.B3 {
+DIV.B3B {
 		top: 2px;
 		left: 2px;
 		text-align: left;
 }
-.Home {
+DIV.Bscore {
 		top: 48px;
 		left: 2px;
 		text-align: left;
@@ -83,8 +83,8 @@ DIV {
 	color: Red;
 	text-align: left;
 	position: absolute;
-	left: 47px;
-	top: 44px;
+	left: 48px;
+	top: 40px;
 }
 
 DIV.BoxScore {
