@@ -1,0 +1,17 @@
+I HAVE CODED SO BAT AROUND CAN GIVE THE NAME OF THE TEAM -- NEED AUDIO FOR IT
+
+
+call RBIs -- that's found at thisPlay.result.rbi
+		RBICall = "Runs/R" + (RBI);
+		if (playDes.indexOf("double") >= 0) { getSound(RBICall + " 2B"); 
+		} else if (playDes.indexOf("triple") >= 0) { getSound(RBICall + " 3B"); 
+		} else if (playDes.indexOf("homer") >= 0) { getSound(RBICall + " HR"); 
+		} else if (playDes.indexOf("grand slam") >= 0) { getSound(RBICall + " GS"); 
+		} else if (playDes.indexOf("walks") >= 0) { getSound(RBICall + " BB"); 
+		} else { getSound(RBICall); }
+		CallScore();
+
+SOUNDS NOT HANDLED YET:
+	NOTHING IN SHOWACTION FUNCTION
+	ALSO SKIPPED PRIMARYPLAY AND SECONDARYPLAY
+	THERE'S SOMETHING ELSE FOR OUTS

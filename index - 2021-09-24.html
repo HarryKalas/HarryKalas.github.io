@@ -5,9 +5,6 @@
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script>
-//PITCH CALLS I NEED TO GET AUDIO FOR:
-//  swinging strike blocked (that's a ball in the dirt that they nevertheless swung at)
-
 //THIS IS KEY:
 /*
 data.liveData.plays.allPlays[51].playEvents[0].hitData.location
@@ -36,8 +33,6 @@ location corresponds to a player's position number, for left-center it's 78 and 
     gameLink = '';
     datestring = '';
     Batter = '';
-    LeadOff = "Lead";   //first batter is leadoff hitter
-    var I123 = 1;		//inning is initially assumed 123
     LastPlay = 0;
     LastEvent = 0;
 
@@ -63,6 +58,7 @@ location corresponds to a player's position number, for left-center it's 78 and 
 	var TeamType = ['away','home']; //useful for rotating through teams
 	var scheduledInnings; //the number of innings expected to be played; anything higher than that is extra innings
 	AtBat = new Object; //pointer to the team header that holds variables to track for the team
+    var I123 = 1;		// game starts with 123 inning true
 
 function initialize() {
 	GetIt('https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1' + dateString); //today's schedules
@@ -150,14 +146,14 @@ function initialize() {
 	document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
 
 	// ... DISPLAY THE LOGOS
-	awayLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
-	awayLogo += data.gameData.teams.away.id;
-	awayLogo += '.svg" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
+	awayLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
+	awayLogo += data.gameData.teams.away.fileCode;
+	awayLogo += '@2x.png" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
 	document.getElementById("AwayLogo").innerHTML = awayLogo;
 
-	homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
-	homeLogo += data.gameData.teams.home.id;
-	homeLogo += '.svg" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
+	homeLogo = '<img width="62" align="top" src="https://securea.mlb.com/mlb/images/team_logos/124x150/'
+	homeLogo += data.gameData.teams.home.fileCode;
+	homeLogo += '@2x.png" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
 	document.getElementById("HomeLogo").innerHTML = homeLogo;
 
 	//remove the extra innings if it's a short game
@@ -188,6 +184,7 @@ function initialize() {
 	    console.log("Scheduled"); 
 	    return; 
 	} 
+
 	Now = new Date();
 	if (GameDate < Now) {
         //LOAD THE PLAYS
@@ -309,6 +306,7 @@ function LoadPitchers() {
 
 function LoadPlays(StartPlay) {
     //get fresh data
+    
 	GetIt('https://statsapi.mlb.com' + gameLink );
 	
 	thePlay = "";
@@ -329,9 +327,7 @@ function LoadPlays(StartPlay) {
             AddColumn();
             Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
         }
-        if (Box.className != 'PlayBox') {
-            console.log("BAT AROUND");
-            stop;
+        if (Box.style.backgroundImage != 'url("0b.gif")') {
             //if the batter's cell has already been used, bat around
             AtBat.Column = AtBat.Column + 1;
             getSound("BA" + AtBat.innerText);            
@@ -342,8 +338,7 @@ function LoadPlays(StartPlay) {
         document.getElementById("BatterDiv").style.left = (Box.offsetLeft + 66) + "px";
         document.getElementById("BatterDiv").style.top = Box.offsetTop + "px";
 
-        if (document.getElementById("BatterPic").src != "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/135") {
-            //batter changed
+        if (document.getElementById("BatterPic").src != "https://securea.mlb.com/mlb/images/players/head_shot/" + Batter + ".jpg") {
             if (AtBat.AB > 1) {
                         document.getElementById("BatterDiv").scrollIntoView(false);
             } else {
@@ -353,22 +348,15 @@ function LoadPlays(StartPlay) {
             BatterData = data.gameData.players["ID"+Batter];
             BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
             document.getElementById("BatterDiv").style.visibility = "visible";
-            document.getElementById("BatterPic").src = "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/135";                
+
+            document.getElementById("BatterPic").src = "https://securea.mlb.com/mlb/images/players/head_shot/" + Batter + ".jpg";
+                
             document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + " (" + thisPlay.matchup.batSide.code + ")</span>";
             document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName + " (" + thisPlay.matchup.pitchHand.code + "HP)"
             document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
             
             //get the batter sound
             BatterSound = Batter;
-            if (LeadOff == "Lead") {
-                //get inning call
-                Inning = "Inning/" + thisPlay.about.inning + thisPlay.about.halfInning + " B";
-                Score = getScore();
-                getSound(Inning + " " + Score);
-                //call batter as leadoff and reset leadoff
-                BatterSound += " " + LeadOff;
-                LeadOff = "";
-            }
             if (thisPlay.playEvents[0] && thisPlay.playEvents[0].position) {
                 //if it's a newly added player
                 BatterSound += " " + thisPlay.playEvents[0].position.abbreviation;
@@ -384,10 +372,11 @@ function LoadPlays(StartPlay) {
                                     }
                     thisRow = thisRow.nextElementSibling;
                 }
+                BatterSound += " " + BatterPosition
             }
             getSound('Batters/' + BatterSound);
             getSound("Average/" + BatterStats.avg);
-
+        
             document.getElementById("B").innerHTML = thisPlay.count.balls;
             document.getElementById("S").innerHTML = thisPlay.count.strikes;
             document.getElementById("O").innerHTML = thisPlay.count.outs;
@@ -402,7 +391,7 @@ function LoadPlays(StartPlay) {
             if (thisPlay.matchup.postOnThird) {
                 RunnerCount += 4;
             }
-            document.getElementById("Runners").src = RunnerCount + ".png";
+            document.getElementById("Runners").src = RunnerCount + ".gif";
             getSound("Runners/" + RunnerCount + " O" + thisPlay.count.outs);
         }
                 
@@ -418,75 +407,8 @@ function LoadPlays(StartPlay) {
 //		        console.log("ZONE: ", thisPlay.playEvents[pidx].pitchData.zone);
 //		        console.log("Batter: ", thisPlay.playEvents[pidx].pitchData.strikeZoneBottom, thisPlay.playEvents[pidx].pitchData.strikeZoneTop);
 //		        console.log("Pitch",thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y);
-                Call = "";
-                switch (thisPlay.playEvents[pidx].details.call.code) {
-                case "*B" :
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball Low Dirt ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "B" :
-                    PPos = PitchPosition(thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y); 
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball" + PPos + " ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "C" :
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Called ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "D" :
-                    Call = "InPlay NoOut";
-                    break;
-                case "E" :
-                    Call = "InPlay Run";
-                    break;
-                case "F" :
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul ";
-                    Pitches = thisPlay.playEvents[pidx].count.strikes + thisPlay.playEvents[pidx].count.balls
-                    if (thisPlay.playEvents[pidx].pitchNumber > Pitches) {
-                        Call += "X ";
-                    }                    
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "H" : // HIT BY PITCH -- this is handled on the play
-                    break;
-                case "L" : //foul bunt
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Bunt ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "M" : //missed bunt
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging Missed ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "S" :
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "T" : //foul tip
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Tip ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "V" :  //INTENTIONAL WALK; this is handled on the play
-                    break;
-                case "W" : // Swinging Strike (Blocked) -- this is a ball in the dirt that the player nevertheless swings at and gets a strike
-                    Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging Blocked";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
-                    break;
-                case "X" :
-                    Call = thisPlay.playEvents[pidx].details.call.description;
-                    break;
-                default :
-                    console.log(thisPlay.playEvents[pidx].details.call);
-                }
-                if (Call > "") { getSound("Count/" + Call);}
 		    } else if (thisPlay.playEvents[pidx].type == "pickoff") {
 		        //pickoff attempt; handle when doing calls
-		        if (thisPlay.playEvents[pidx].details.description == "Pickoff Attempt 1B") {
-                    getSound("POA 1B");
-		        } else if (thisPlay.playEvents[pidx].details.description == "Pickoff Attempt 2B") {
-                    getSound("POA 2B");
-		        } else {
-                    getSound("POA");
-		        }
 		    } else if (thisPlay.playEvents[pidx].type == "action" ) {
                 switch  (thisPlay.playEvents[pidx].details.event) {
 		        case "Game Advisory" :
@@ -494,10 +416,7 @@ function LoadPlays(StartPlay) {
 		            //Pre-Game
 		            //Warmup
 		            //In Progress
-		            //Mound Visit
-		            if (thisPlay.playEvents[pidx].details.description == "Injury Delay") {
-		                getSound("Injury");
-		            }
+		            //Mound Visit		            
 		            break;
                 case "Injury" :
                     //will deal with this in calls; ***HARRY
@@ -507,11 +426,6 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Pitching Sub" :
                 case "Pitching Substitution" :
-                    if (AtBat.id == "away") { //home team changes pitcher
-                        getSound("PC " + data.gameData.teams.home.name);
-                    } else { //away team changes pitcher
-                        getSound("PC " + data.gameData.teams.away.name);
-                    }                
                 case "Offensive Substitution" :
                 case "Offensive Substitution" :
                 case "Defensive Sub" :
@@ -548,19 +462,12 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Stolen Base 2B" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
-                    getSound("SB");
                     break;
                 case "Stolen Base 3B" :
                     Movement  (thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
-                    getSound("SB");
-                    break;
-                case "Stolen Base Home" :
-                    Movement  (thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
-                    getSound("SB");
                     break;
                 case "Wild Pitch" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
-                    getSound("WP");
                     break;
                 case "Defensive Indiff" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
@@ -572,10 +479,11 @@ function LoadPlays(StartPlay) {
                     onBase = thisPlay.playEvents[pidx].player.id;
                     onBaseAB = data.liveData.boxscore.teams[AtBat.id].players["ID" + onBase].battingOrder.substring(0,1)
                     RunnerBox = document.getElementById(AtBat.id + onBaseAB).cells[AtBat.Column];
-                    RunnerBox.className.add("PlayBox At2B");
+                    RunnerBox.style.backgroundImage = 'url("2b.gif")';
                     RunnerBox.style.backgroundColor="#FFFFCC";
                     RunnerBox.id = onBase;
                     RunnerBox.innerHTML = "ROB";
+                    RunnerBox.className = "PlayBox";
                     break;
                 case undefined :
                     switch (thisPlay.playEvents[pidx].details.description) {
@@ -594,13 +502,10 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Error" :
                     //looks like it has no effect on the play
-                    console.log("ERROR with no effect on play");
-                    if (thisPlay.playEvents[pidx].details.description.indexOf('foul pop error') > 0) {
-                        console.log("POP!");
-                    } else {
-                        console.log(thisPlay.playEvents[pidx]);
-                        console.log(thisPlay);
-                    }
+                    console.log("ERROR");
+                    console.log(thisPlay.playEvents[pidx]);
+                    console.log(thisPlay);
+                    end;
                     break;
                 case "Umpire Substitution" :
                     document.getElementById("GameAlert").innerHTML += "<br/><b>UMPIRE SUBSTITUTION</b> - Inning " 
@@ -623,7 +528,7 @@ function LoadPlays(StartPlay) {
 		    }
 		}
 		LastEvent = pidx;
-		
+				
 		switch (thisPlay.result.event) {
 		case "Game Advisory" :
 		case "Pitching Substitution" :
@@ -683,7 +588,7 @@ function LoadPlays(StartPlay) {
 		    getSound(thePlay);
 			break;
 		case "Field Error" :
-		    thePlay = "E " + Fielding(thisPlay.runners);
+		    thePlay = "E" + Fielding(thisPlay.runners);
 		    getSound(thePlay);
 		    break;
 		case "Flyout" :
@@ -713,14 +618,10 @@ function LoadPlays(StartPlay) {
             break;
         case "Home Run" : 
             thePlay = "&nbsp;";
-            if (thisPlay.result.rbi == 4) {
-                getSound("GS");
-            } else {
-                getSound("HR " + HitDetail(thisPlay));
-            }
+		    getSound("HR " + HitDetail(thisPlay));
             break;
 		case "Intent Walk" : 
-			thePlay = "IBB";
+			thePlay = "IW";
 		    getSound(thePlay);
 			break;
 		case "Lineout" :
@@ -738,7 +639,7 @@ function LoadPlays(StartPlay) {
 			break;
         case "Sac Bunt" :
             thePlay = "Sac B " + Fielding(thisPlay.runners);
-		    getSound("SAC_B " + Fielding(thisPlay.runners));
+		    getSound(thePlay);
             break;
         case "Sac Bunt Double Play" :
             thePlay = "SB DP" + Fielding(thisPlay.runners);
@@ -757,12 +658,10 @@ function LoadPlays(StartPlay) {
 		    getSound(thePlay + " " + HitDetail(thisPlay));
 		    break;
 		case "Strikeout" : 
+			thePlay = "K";
+			getSound(thePlay);
 			if (thisPlay.result.description.indexOf(" called out ") > 0) { 
 			    thePlay = "&#xA7B0;";
-			    getSound("K Called");
-			} else {
-			    thePlay = "K";
-			    getSound("K Swinging");
 			}
 			break;
 		case "Strikeout Double Play" : 
@@ -812,6 +711,7 @@ function LoadPlays(StartPlay) {
         } else {
                 Box.innerHTML = thePlay + Box.innerHTML;
         }
+        Box.className = "PlayBox";
         Jersey = data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber;
         Movement(thisPlay.runners, Jersey);
         RBI = thisPlay.result.rbi
@@ -844,7 +744,7 @@ function LoadPlays(StartPlay) {
        } 
         
         // move to the next batter
-        if (thisPlay.about.isComplete == true && Box.className != 'PlayBox') {
+        if (thisPlay.about.isComplete == true && Box.style.backgroundImage != 'url("0b.gif")') {
             //make sure a play shows for the batter, otherwise he's still at bat
             AtBat.AB++;					// next batter
             if (AtBat.AB == 10) { AtBat.AB = 1 }		// loop around
@@ -856,15 +756,12 @@ function LoadPlays(StartPlay) {
 
         if (thisPlay.count.outs < 3) {
             // if this batter was not out at first, it's not 123
-            if (!Box.classList.contains('OutAt1B')) { I123 = 0; }
+            if (Box.style.backgroundImage != 'url("1out.gif")') { I123 = 0; }
         } else if (thisPlay.count.outs == 3) { 
             // if it's the third out, end the inning
             EndOfInning(); 
-            document.getElementById("Runners").src = "0.png";
+            document.getElementById("Runners").src = "0.gif";
         }
-        // if batter was not out at first, it's not 123
-		if (!Box.classList.contains('OutAt1B')) { I123 = 0; }
-
 	}
 
 	LoadPitchers();
@@ -905,6 +802,11 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
     } else if (thisPlay.playEvents.length > 0) {
         if (thisPlay.playEvents[thisPlay.playEvents.length-1].event == "Pitching Substitution") {
             // pitching change; lots of time 
+            if (AtBat.id == "away") { //home team changes pitcher
+                getSound("PC " + data.gameData.teams.home.name);
+            } else { //away team changes pitcher
+                getSound("PC " + data.gameData.teams.away.name);
+            }
             TO = 30000 - (Now - PlayTime);
             if (TO < 0) { TO = 10000; } else { console.log(TO); }
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
@@ -934,12 +836,12 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 	document.getElementById("status").innerHTML = data.gameData.status.detailedState;
     playSound();
 
-	if (IsGameOver()) {
+if (data.gameData.status.statusCode == "F" || data.gameData.status.statusCode == "O") { 
 	    console.log("Game Over"); 
 	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
 	    return; 
-	}
-	
+	}    //exit if the game is over
+
 //console.log("Count/" + thisPlay.count.balls + "-" thisPlay.count.strikes);
 //called | Foul | Foul Bunt | Foul Tip | Swinging | Ball X if foul after second;  pitch type (FT, SI), 
 //Balls: 
@@ -948,57 +850,6 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 //      Low, Low Dirt, Low Inside, Low Outside, 
 //      Outside, Outside Very
     return LastPlay;
-}
-
-function PitchPosition(x,y) {
-     //Y
-     if (y > 190) {
-         Y = " Low";
-     } else if (y < 120) {
-         Y = " High Very";
-     } else if (y < 150) {
-         Y = " High";
-     } else {
-         Y = "";
-     }
-                
-     //X
-     if (x < 70) {
-         if (thisPlay.matchup.batSide.code == "L") {
-             X = " Inside Very";
-         } else {
-             X = " Outside Very";
-         }
-     } else if (x < 95) {
-         if (thisPlay.matchup.batSide.code == "L") {
-             X = " Inside";
-         } else {
-             X = " Outside";
-         }
-     } else if (x > 165) {
-         if (thisPlay.matchup.batSide.code == "L") {
-             X = " Outside Very";
-         } else {
-             X = " Inside Very";
-         }
-     } else if (x > 140) {
-         if (thisPlay.matchup.batSide.code == "L") {
-             X = " Outside";
-         } else {
-             X = " Inside";
-         }
-     } else {
-         X = "";
-     }
-     
-     if (X != "" && Y.indexOf(" Very") > 0) {
-        Y.replace(" Very","");
-        if (X.indexOf(" Very") < 0) {
-            X += " Very";
-        }
-     }
-     
-     return (Y + X);
 }
 
 function HitDetail(playData) {
@@ -1021,80 +872,61 @@ function Movement(Runners, Batter) {
         RunnerID = Runners[r].details.runner.id;        //the batter ID of this runner
         RunnerBox = document.getElementById(RunnerID);  //the box for this runner
         if (RunnerBox != null) { //if it's null, everything has already been done
-            if (Runners[r].movement.start != null) {
-                //if it's not the batter
-                EndBase = Runners[r].movement.end;
-                if (Runners[r].movement.end == null) {
-                    EndBase = Runners[r].movement.outBase;
-                    if (EndBase == "1B") { EndBase = "2B"; }
+
+            if (Runners[r].movement.start != null && Runners[r].movement.end != null ) {
+                //if it's not the batter, and he got on base, get the batter ID and any prefix for the movement 
+                newDiv = document.createElement('div');
+                newDiv.className = "B" + Runners[r].movement.end; 
+
+                                                                                        
+                Prefix = "";
+                switch (Runners[r].details.movementReason) {    //if it's not the batter
+                case "r_stolen_base_2b" :
+                case "r_stolen_base_3b" :
+                    Prefix = "SB ";
+            console.log(RunnerBox);
+//                    alert("With " + thisPlay.matchup.batter.fullName + " at bat, " + Runners[r].details.runner.fullName + " steals " + //Runners[r].movement.end);
+                    break;
+                case "r_caught_stealing_2b" :
+                    Prefix = "CS ";
+                    break;
+                case "defensive_indiff" :
+                    Prefix = "I ";
+                    break;
+                case "r_hbr" :
+                    Prefix = "RI";
+                    break;
+                case "r_pickoff_1b" :
+                case "r_pickoff_2b" :
+                case "r_pickoff_caught_stealing_2b" :
+                    Prefix = "PO ";
+                    break;
+                case "r_pickoff_error_1b" :
+                case "r_pickoff_error_2b" :
+                    Prefix = "POE ";
+                    break;
+                default :
+                    if (Runners[r].details.event == "Wild Pitch") { 
+                        Prefix = "WP"; 
+                    } else if (Runners[r].details.event == "Passed Ball") { 
+                        Prefix = "PB"; 
+                    } else if (Runners[r].details.event == "Balk") { 
+                        Prefix = "BK"; 
+                    } else if (Runners[r].details.event == "Defensive Indiff") { 
+                        Prefix = "DI"; 
+                    }
+                    break;
                 }
-                if (RunnerBox.getElementsByClassName("B" + EndBase).length > 0) {
-                    //there is already something in this corner
-                    console.log("  *** HAS THE PLAY BEEN DISPLAYED? ", Runners[r].details.event, AtBat.id, AtBat.Inning, AtBat.AB );
-                } else {                
-                   newDiv = document.createElement('div');
-                   newDiv.className = "B" + EndBase; 
-                   Prefix = "";
-                   switch (Runners[r].details.movementReason) {    //if it's not the batter
-                   case "r_stolen_base_2b" :
-                   case "r_stolen_base_3b" :
-                       Prefix = "SB ";
-                       break;
-                   case "r_caught_stealing_2b" :
-                       Prefix = "CS ";
-                       break;
-                   case "defensive_indiff" :
-                       Prefix = "I ";
-                       break;
-                   case "r_hbr" :
-                       Prefix = "RI";
-                       break;
-                   case "r_pickoff_1b" :
-                   case "r_pickoff_2b" :
-                   case "r_pickoff_3b" :
-                       Prefix = "PO ";
-                       break;
-                   case "r_pickoff_error_1b" :
-                   case "r_pickoff_error_2b" :
-                   case "r_pickoff_error_3b" :
-                       Prefix = "POE ";
-                       break;
-                   default :
-                       if (Runners[r].details.event == "Wild Pitch") { 
-                           Prefix = "WP"; 
-                       } else if (Runners[r].details.event == "Passed Ball") { 
-                           Prefix = "PB"; 
-                       } else if (Runners[r].details.event == "Balk") { 
-                           Prefix = "BK"; 
-                       } else if (Runners[r].details.event == "Error") { 
-                           Prefix = "E"; 
-                       } else if (Runners[r].details.event == "Field Error") { 
-                           Prefix = "E"; 
-                       } else if (Runners[r].details.event == "Defensive Indiff") { 
-                           Prefix = "DI"; 
-                       }
-                       break;
-                   }
-                   Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat,';
-                   if (Runners[r].movement.end != null) {
-                        Comment += ' advances to '+ EndBase ;
-                   } else if (Runners[r].movement.outBase != null) {
-                        Comment += ' out at '+ EndBase ;
-                   }
-                   Comment +=' on ' + Runners[r].details.event;
-                   newDiv.innerHTML = '<span title="' + Comment + '">' + Prefix + Batter + "</span>";
-                   RunnerBox.appendChild(newDiv);
-                }
+                Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, advances to '+ Runners[r].movement.end +' on ' + Runners[r].details.event;
+                newDiv.innerHTML = '<span title="' + Comment + '">' + Prefix + Batter + "</span>";
+                RunnerBox.appendChild(newDiv);
             }
 
             if (Runners[r].movement.isOut) {
                 RunnerBox.removeAttribute("id"); 
-                RunnerBox.className = "PlayBox"; //reset the RunnerBox
-
                 outDiv = document.createElement('div');		// create a new DIV for the out
                 RunnerBox.appendChild(outDiv);			    // put it on the current batter's box
                 outDiv.className = "Out";			        // set the DIV's characteristics
-                
                 switch (Runners[r].movement.outNumber) {
                 case 1 :
                     outDiv.innerHTML = "&#x2460;";		// put a circled 1 in the out div
@@ -1107,44 +939,48 @@ function Movement(Runners, Batter) {
                     break;
                 }
             
-                if (Runners[r].movement.start != null) { //not the batter -- add a div to tell who was batting and what happened
-                    if (RunnerBox.getElementsByClassName("B" + Runners[r].movement.outBase).length == 0) { //not already there
-                       newDiv = document.createElement('div');
-                       if (Runners[r].movement.outBase == '1B') {
-                            newDiv.className = "B2B"
-                       } else {
-                            newDiv.className = "B" + Runners[r].movement.outBase; 
-                       }
-                       Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, out on ' + Runners[r].details.event;
-                       newDiv.innerHTML = '<span title="' + Comment + '">' + Batter + "</span>";
-                       RunnerBox.appendChild(newDiv);
-                    }
+                if (Runners[r].movement.start != null) { //not the batter
+                    newDiv = document.createElement('div');
+                    newDiv.className = "B" + Runners[r].movement.outBase; 
+                    Comment = 'With ' + thisPlay.matchup.batter.fullName + ' at bat, out on ' + Runners[r].details.event;
+                    newDiv.innerHTML = '<span title="' + Comment + '">' + Batter + "</span>";
+                    RunnerBox.appendChild(newDiv);
                  }
-                 if (Runners[r].movement.outBase != Runners[r].movement.originBase) {
-                    RunnerBox.classList.add("OutAt" + Runners[r].movement.outBase);
-                 } else {
-                    //Out at starting point, use next base
-                    switch (Runners[r].movement.outBase) {
-                    case "1B" :
-                        RunnerBox.classList.add("OutAt2B");
-                        break; 
-                    case "2B" :
-                        RunnerBox.classList.add("OutAt3B");
-                        break; 
-                    case "3B" :
-                        RunnerBox.classList.add("OutAt3B");
-                        break; 
-                    default :
-                       console.log("outBase NOT CATALOGUED", Runners[r].movement.outBase);
-                       end;
+                switch (Runners[r].movement.outBase) {
+                case "1B" :
+                    if (Runners[r].movement.originBase == "1B") { 
+                       RunnerBox.style.backgroundImage = 'url("2out.gif")';	
+                    } else {
+                       RunnerBox.style.backgroundImage = 'url("1out.gif")';	// out at 1st
                     }
-                 }      
+                    break; 
+                case "2B" :
+                   if (Runners[r].movement.originBase < "2B") {  
+                       RunnerBox.style.backgroundImage = 'url("2out.gif")';	// out at 2nd
+                   } else {
+                       RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
+                   }
+                   break; 
+                case "3B" :
+                   if (Runners[r].movement.originBase < "3B") {  
+                       RunnerBox.style.backgroundImage = 'url("3out.gif")';	// out at 2nd
+                   } else {
+                       RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 2nd
+                   }
+                    break; 
+                case "4B" :
+                    RunnerBox.style.backgroundImage = 'url("hout.gif")';	// out at 3rd
+                    break; 
+                default :
+                   console.log("outBase NOT CATALOGUED", Runners[r].movement.outBase);
+                   end;
+                }                   
              } else {    //not out
-                 RunnerBox.className = "PlayBox";
-                 RunnerBox.classList.add("At" + Runners[r].movement.end);
                  switch (Runners[r].movement.end) {
                  case "1B" :
+                     RunnerBox.style.backgroundImage = 'url("1b.gif")';	// safe at 1st
                      if (thePlay == "K" || thePlay == "&#xA7B0;") {
+end;
                         //strikeout on first
                         if (Runners[r].details.event == "Passed Ball") {
                             thePlay = thePlay + ", PB";
@@ -1159,20 +995,25 @@ function Movement(Runners, Batter) {
                      }
                      break; 
                  case "2B" :
+                     RunnerBox.style.backgroundImage = 'url("2b.gif")';	// safe at 2nd
+                     break; 
                  case "3B" :
-                     break;
+                     RunnerBox.style.backgroundImage = 'url("3b.gif")';	// safe at 3rd
+                     break; 
                  case "score" :
                      RunnerBox.removeAttribute("id");
                      if(RunnerBox == Box && RunnerBox.innerHTML.indexOf(" homers ") > 0) {
-                         RunnerBox.classList.add("HR");	                        //this is the HR batter
-                     } else if(RunnerBox == Box && RunnerBox.innerHTML.indexOf("grand slam") > 0) {
-                         RunnerBox.classList.add("GS");	                        //this is the grand slam batter
+                         //this is the HR batter
+                         RunnerBox.style.backgroundImage = 'url("hr.gif")';	
+                         console.log(RunnerBox.innerHTML.indexOf(" homers "));
+                     } else {
+                         RunnerBox.style.backgroundImage = 'url("home.gif")';	// runner scores
                      }
                      break;
-                 case null : // Runners[r].movement.end
-                    //I THINK THIS ONLY HAPPENS ON A STRIKEOUT WITH AN ERROR, THE ERROR SHOULD BE CAUGHT IN ANOTHER MOVEMENT
-                    console.log("NULL END BASE", thisPlay.result.description);
-//                    end;
+                 case null :
+                    //I THINK THIS ONLY HAPPENS ON A STRIKEOUT WITH AN ERROR, BUT NOT SURE HOW TO LOG IT
+                    console.log("NULL END BASE", r, i, thePlay, Runners[r]);
+                    end;
                     break;
                  default :
                      console.log("movement.end  NOT CATALOGUED", Runners[r].movement.end, Runners[r] );
@@ -1228,10 +1069,13 @@ function Fielding(Runners) {
 }
 
 function EndOfInning() {
+    if (thisPlay.about.inning >= data.liveData.linescore.scheduledInnings) {
+        console.log(data.gameData.status);
+    }
     RHE = "";
     LOB = 0;
 	if (I123 == 1) {	// if it's a 1-2-3 inning
-	    RHE = "RHE/I123";
+	    RHE = "I123";
 	} else {		// otherwise call the runs, hits and errors
         R = data.liveData.linescore.innings[AtBat.Inning-1][AtBat.id].runs;
         H = data.liveData.linescore.innings[AtBat.Inning-1][AtBat.id].hits;
@@ -1240,15 +1084,15 @@ function EndOfInning() {
         RHE = "RHE/" + R + H + E + LOB;
 	}
 	RHE += " " + AtBat.innerHTML + " I" + AtBat.Inning
+	
     getSound(RHE);
 
-	if (IsGameOver()) {
-	    console.log("Game Over"); 
-	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-	    return; 
-	}
-
-    Inning = "Inning/" + thisPlay.about.inning + thisPlay.about.halfInning + " E";
+    Inning = "Inning/" + thisPlay.about.inning;
+    if (thisPlay.about.isTopInning) {
+        Inning += "away E";
+    } else {
+        Inning += "home E";
+    }    
     Score = getScore();
     getSound(Inning + " " + Score);
 
@@ -1258,8 +1102,8 @@ function EndOfInning() {
     	getSound("Score/" + Score);
     }
     
-    if (thisPlay.about.isTopInning && thisPlay.about.inning == 7 && scheduledInnings > 7) {
-        //if it's the middle of the 7th, play the Stretch music
+    //if it's the middle of the 7th, play the Stretch music
+    if (thisPlay.about.isTopInning && thisPlay.about.inning == 7) {
         getSound("Stretch");
     }
     
@@ -1282,7 +1126,6 @@ function EndOfInning() {
     // SET UP CURRENT TEAM FOR NEXT INNING
     AtBat.Inning++;
     AtBat.Column++;
-    LeadOff = "Lead"; //next inning first batter is leadoff
 	I123 = 1;		// reset 1-2-3 status
 
     // CHANGE TEAM AT BAT
@@ -1362,7 +1205,7 @@ function AddColumn() {
 		newCell = Row.insertCell(AtBat.Column);
 		newCell.rowSpan = 3;
 		newCell.style.position = "relative";
-		newCell.className = "PlayBox";
+		newCell.style.backgroundImage = 'url("0b.gif")';
 		newCell.style.backgroundColor="#EEEEEE"
 		newCell.width=60;
 		newCell.height=60;
@@ -1371,7 +1214,7 @@ function AddColumn() {
 	newCell = document.getElementById(AtBat.id + "Footer").insertCell(AtBat.Column);
 	newCell.outerHTML = "<th>" + AtBat.Inning + "</th>";
 	newCell = document.getElementById(AtBat.id + "SpaceIt").insertCell(AtBat.Column);
-	newCell.innerHTML = '<img src="spacer.png" width="60" height="1"><br/>';
+	newCell.innerHTML = '<img src="spacer.gif" width="60" height="1"><br/>';
 }
 
 function LineScore() {
@@ -1480,112 +1323,6 @@ function CallScore() {
 	}
 	getSound("Score/" + Score);
 }
-
-function IsGameOver() {
-	//if it's marked as over, we're done 
-    if (data.gameData.status.statusCode == "O") { 
-        console.log("status code");
-        if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-	    return true; 
-	}
-
-	//if we're not up to the last inning, we're not done yet
-    if (thisPlay.about.inning < data.liveData.linescore.scheduledInnings) {
-        return false;
-    }
-
-	//check the score
-	awayScore = thisPlay.result.awayScore;
-	awayTeam = document.getElementById("away").innerHTML;
-	homeScore = thisPlay.result.homeScore;
-	homeTeam = document.getElementById("home").innerHTML;
-    
-	//in the last scheduled inning or later...
-    if (thisPlay.about.isTopInning) {
-        //if we're in the top of the inning...
-        if (thisPlay.count.outs < 3) {
-            //not over yet; top of last inning in progress
-            return false;
-        } else {
-            //top of the inning is over...
-            if (+homeScore > +awayScore) {
-            	// if the home team has more runs than away team
-            	//game over, home wins
-                console.log("Game Over", homeTeam + " win (1)");
-                theScore = homeScore + "-" + awayScore ;
-                getSound("GameOver " + homeTeam + " " + theScore + " " + awayTeam);
-                if (homeTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
-                if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-                return true;
-            } else {
-                //not over yet, home could take the lead in the bottom
-                return false;
-            }
-        } 
-    } else { //bottom of last inning
-        if (+homeScore > +awayScore) {
-            // if the home team has the lead
-            //game over, home wins
-            console.log("Game Over", homeTeam + " win (2)");
-            theScore = homeScore + "-" + awayScore ;
-            getSound("GameOver " + homeTeam + " " + theScore + " " + awayTeam);
-            if (homeTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
-            if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            return true;
-        } else if (thisPlay.count.outs < 3) {
-            //inning not over yet, home could still take the lead
-            return false;
-        } else if (+homeScore < +awayScore) {
-            //three outs, away has the lead, away wins
-            console.log("Game Over", awayTeam + " win (3)");
-            theScore = awayScore + "-" + homeScore ;
-            getSound("GameOver " + awayTeam + " " + theScore + " " + homeTeam);
-            if (awayTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
-            if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            return true;
-        } else {
-            //tie game
-            return false;
-        }
-    }
-/*    	
-    //if it's the top of the last inning or later and there are less than 3 outs, we're not done yet
-    if (thisPlay.about.isTopInning && thisPlay.count.outs < 3) {
-        return false;
-    }
-
-	console.log("is game over 1?");
-	// if home has more runs than away in the bottom of the last or later inning, then game is over
-	if (+homeScore > +awayScore) {
-		theScore = homeScore + "-" + awayScore ;
-		getSound("GameOver " + homeTeam + " " + theScore + " " + awayTeam);
-		if (homeTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
-		console.log("Game Over", homeTeam + " win (4)");
-		if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-		return true;
-    } else if (thisPlay.count.outs == 3) {        
-        // if away team has more runs than home team at this point, game is over
-        if (+awayScore > +homeScore) {
-            theScore = awayScore + "-" + homeScore ;
-            getSound("GameOver " + awayTeam + " " + theScore + " " + homeTeam);
-            if (awayTeam == "Philadelphia Phillies") { getSound("HighHopes"); }
-            console.log("Game Over", awayTeam + " wins (3)");
-            if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            return true;
-        } else if (+awayScore == +homeScore) {
-            //tie game, not over
-            return false;
-        } else {
-            //this would only happen if the home team was ahead in an end of game situation and it wasn't caught before
-            console.log("PROBLEM!");
-            end;
-        }
-	}
-	
-	// otherwise game is not over
-	return false;
-*/
-}
 </script>
 </head>
 <body onload="initialize();">
@@ -1641,15 +1378,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1666,15 +1403,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1691,15 +1428,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1716,15 +1453,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1741,15 +1478,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1766,15 +1503,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1791,15 +1528,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1816,15 +1553,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1841,15 +1578,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1869,19 +1606,19 @@ function IsGameOver() {
 <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 </tr>
 <tr id="awaySpaceIt" style="visibility: collapse;">
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
@@ -1917,15 +1654,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1942,15 +1679,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1967,15 +1704,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -1992,15 +1729,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2017,15 +1754,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2042,15 +1779,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2067,15 +1804,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2092,15 +1829,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2117,15 +1854,15 @@ function IsGameOver() {
 <td class="Number">&nbsp;</td>
 <td class="Player">&nbsp;</td>
 <td class="Number">&nbsp;</td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
-<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
+<td rowspan="3" class="PlayBox" style="background-image: url(0b.gif)"><p></p></td>
 </tr>
 <tr>
 <td class="Number Bottom">&nbsp;</td>
@@ -2144,19 +1881,19 @@ function IsGameOver() {
 <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 </tr>
 <tr id="homeSpaceIt" style="visibility: collapse;">
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
@@ -2182,10 +1919,11 @@ function IsGameOver() {
 <div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
 </div>
 <div id="BatterDiv" style="visibility: hidden;">
-<img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
+<img id="BatterPic" src="spacer.gif" style="width: 90px; height: 135px; padding-right: 5px; float: left" alt="Batter" 
+    onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
-<img id="Runners" src="7.png" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
+<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>

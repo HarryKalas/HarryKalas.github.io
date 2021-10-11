@@ -36,6 +36,7 @@ TD.PlayBox {
 	color: blue;
 	width: 60px; 
 	height: 60px;
+ //	background-image: url(0b.gif);
 }
 DIV {
 	font-size: 8px; 
@@ -45,10 +46,10 @@ DIV {
 	position: absolute; 
 	width: 30px;
 }
-.B1 {
-		top: 48px;
-		left: 30px;
-		text-align: right;
+DIV.B1B {
+	top: 48px;
+	left: 30px;
+	text-align: right;
 }
 DIV.B2B {
 	top: 2px;
@@ -56,11 +57,11 @@ DIV.B2B {
 	text-align: right;
 }
 DIV.B3B {
-		top: 2px;
-		left: 2px;
-		text-align: left;
+	top: 2px;
+	left: 2px;
+	text-align: left;
 }
-DIV.Bscore {
+DIV.Bscore, DIV.B4B {
 		top: 48px;
 		left: 2px;
 		text-align: left;
@@ -159,9 +160,15 @@ DIV.BoxScore {
 	font-weight: bold;
 	color: black;
 	z-index: 1000;
-	background-color: #EEEEEE;
+	background-color: #CCCCCC;
 }
-
+#BatterPic {
+	float: left;
+	padding-right: 5px; 
+	width:90px;
+	height:135px;
+	object-fit:cover;
+}
 #MessageDiv {
 	position: fixed;
 	top: 30%;
@@ -183,4 +190,34 @@ DIV.BoxScore {
 	width: 910px;
 	border: none;
 	vertical-align: top;
+}
+.At1B {
+ 	background-image: url(1b.png);
+}
+.At2B {
+ 	background-image: url(2b.png);
+}
+.At3B {
+ 	background-image: url(3b.png);
+}
+.Atscore {
+ 	background-image: url(home.png);
+}
+.HR {
+ 	background-image: url(hr.png);
+}
+.GS {
+ 	background-image: url(gs.png);
+}
+.OutAt1B {
+ 	background-image: url(1out.png);
+}
+.OutAt2B {
+ 	background-image: url(2out.png);
+}
+.OutAt3B {
+ 	background-image: url(3out.png);
+}
+.OutAt4B {
+ 	background-image: url(hout.png);
 }

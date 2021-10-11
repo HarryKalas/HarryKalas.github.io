@@ -329,6 +329,7 @@ function LoadPlays(StartPlay) {
             AddColumn();
             Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
         }
+//        if (Box.style.backgroundImage != 'url("0b.gif")') {
         if (Box.className != 'PlayBox') {
             console.log("BAT AROUND");
             stop;
@@ -353,7 +354,7 @@ function LoadPlays(StartPlay) {
             BatterData = data.gameData.players["ID"+Batter];
             BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
             document.getElementById("BatterDiv").style.visibility = "visible";
-            document.getElementById("BatterPic").src = "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/135";                
+            document.getElementById("BatterPic").src = "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/180";                
             document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + " (" + thisPlay.matchup.batSide.code + ")</span>";
             document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName + " (" + thisPlay.matchup.pitchHand.code + "HP)"
             document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
@@ -402,7 +403,7 @@ function LoadPlays(StartPlay) {
             if (thisPlay.matchup.postOnThird) {
                 RunnerCount += 4;
             }
-            document.getElementById("Runners").src = RunnerCount + ".png";
+            document.getElementById("Runners").src = RunnerCount + ".gif";
             getSound("Runners/" + RunnerCount + " O" + thisPlay.count.outs);
         }
                 
@@ -507,11 +508,6 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Pitching Sub" :
                 case "Pitching Substitution" :
-                    if (AtBat.id == "away") { //home team changes pitcher
-                        getSound("PC " + data.gameData.teams.home.name);
-                    } else { //away team changes pitcher
-                        getSound("PC " + data.gameData.teams.away.name);
-                    }                
                 case "Offensive Substitution" :
                 case "Offensive Substitution" :
                 case "Defensive Sub" :
@@ -572,7 +568,7 @@ function LoadPlays(StartPlay) {
                     onBase = thisPlay.playEvents[pidx].player.id;
                     onBaseAB = data.liveData.boxscore.teams[AtBat.id].players["ID" + onBase].battingOrder.substring(0,1)
                     RunnerBox = document.getElementById(AtBat.id + onBaseAB).cells[AtBat.Column];
-                    RunnerBox.className.add("PlayBox At2B");
+                    RunnerBox.style.backgroundImage = 'url("2b.gif")';
                     RunnerBox.style.backgroundColor="#FFFFCC";
                     RunnerBox.id = onBase;
                     RunnerBox.innerHTML = "ROB";
@@ -738,7 +734,7 @@ function LoadPlays(StartPlay) {
 			break;
         case "Sac Bunt" :
             thePlay = "Sac B " + Fielding(thisPlay.runners);
-		    getSound("SAC_B " + Fielding(thisPlay.runners));
+		    getSound(thePlay);
             break;
         case "Sac Bunt Double Play" :
             thePlay = "SB DP" + Fielding(thisPlay.runners);
@@ -757,12 +753,10 @@ function LoadPlays(StartPlay) {
 		    getSound(thePlay + " " + HitDetail(thisPlay));
 		    break;
 		case "Strikeout" : 
+			thePlay = "K";
+			getSound(thePlay);
 			if (thisPlay.result.description.indexOf(" called out ") > 0) { 
 			    thePlay = "&#xA7B0;";
-			    getSound("K Called");
-			} else {
-			    thePlay = "K";
-			    getSound("K Swinging");
 			}
 			break;
 		case "Strikeout Double Play" : 
@@ -848,6 +842,8 @@ function LoadPlays(StartPlay) {
             //make sure a play shows for the batter, otherwise he's still at bat
             AtBat.AB++;					// next batter
             if (AtBat.AB == 10) { AtBat.AB = 1 }		// loop around
+        } else {
+            console.log("Not finished:", AtBat.id, AtBat.AB);
         }
 
         if (thisPlay.about.isComplete == true) {
@@ -860,7 +856,7 @@ function LoadPlays(StartPlay) {
         } else if (thisPlay.count.outs == 3) { 
             // if it's the third out, end the inning
             EndOfInning(); 
-            document.getElementById("Runners").src = "0.png";
+            document.getElementById("Runners").src = "0.gif";
         }
         // if batter was not out at first, it's not 123
 		if (!Box.classList.contains('OutAt1B')) { I123 = 0; }
@@ -905,6 +901,11 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
     } else if (thisPlay.playEvents.length > 0) {
         if (thisPlay.playEvents[thisPlay.playEvents.length-1].event == "Pitching Substitution") {
             // pitching change; lots of time 
+            if (AtBat.id == "away") { //home team changes pitcher
+                getSound("PC " + data.gameData.teams.home.name);
+            } else { //away team changes pitcher
+                getSound("PC " + data.gameData.teams.away.name);
+            }
             TO = 30000 - (Now - PlayTime);
             if (TO < 0) { TO = 10000; } else { console.log(TO); }
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
@@ -1371,7 +1372,7 @@ function AddColumn() {
 	newCell = document.getElementById(AtBat.id + "Footer").insertCell(AtBat.Column);
 	newCell.outerHTML = "<th>" + AtBat.Inning + "</th>";
 	newCell = document.getElementById(AtBat.id + "SpaceIt").insertCell(AtBat.Column);
-	newCell.innerHTML = '<img src="spacer.png" width="60" height="1"><br/>';
+	newCell.innerHTML = '<img src="spacer.gif" width="60" height="1"><br/>';
 }
 
 function LineScore() {
@@ -1869,19 +1870,19 @@ function IsGameOver() {
 <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 </tr>
 <tr id="awaySpaceIt" style="visibility: collapse;">
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
@@ -2144,19 +2145,19 @@ function IsGameOver() {
 <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 </tr>
 <tr id="homeSpaceIt" style="visibility: collapse;">
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
-<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.gif" alt="" width="60" height="1"><br/></td>
 </tr>
 </table>
 <p></p>
@@ -2182,10 +2183,10 @@ function IsGameOver() {
 <div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
 </div>
 <div id="BatterDiv" style="visibility: hidden;">
-<img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
+<img id="BatterPic" src="spacer.gif" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
 <span id="BatterName"></span><br/>
 Avg: <span id="BatterAvg"></span><br/>
-<img id="Runners" src="7.png" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
+<img id="Runners" src="7.gif" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>
