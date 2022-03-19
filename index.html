@@ -444,8 +444,10 @@ function LoadPlays(StartPlay) {
                     Pitches = thisPlay.playEvents[pidx].count.strikes + thisPlay.playEvents[pidx].count.balls
                     if (thisPlay.playEvents[pidx].pitchNumber > Pitches) {
                         Call += "X ";
-                    }                    
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    }
+                    if (thisPlay.playEvents[pidx].details.type) {
+                        Call += thisPlay.playEvents[pidx].details.type.code;
+                    }
                     break;
                 case "H" : // HIT BY PITCH -- this is handled on the play
                     break;
