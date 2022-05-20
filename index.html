@@ -256,19 +256,19 @@ function LoadPitchers() {
 		PitchRow.cells[0].innerHTML = data.gameData.players[key].fullName;
 		PitchRow.cells[1].innerHTML = data.gameData.players[key].pitchHand.code + 'HP';
 		PitchRow.cells[2].innerHTML = data.liveData.boxscore.teams.home.players[key].seasonStats.pitching.era
-		PitchRow.cells[3].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.balls;
-		PitchRow.cells[4].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.strikes;
-		PitchRow.cells[5].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.pitchesThrown;
-		PitchRow.cells[6].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.battersFaced;
-		PitchRow.cells[7].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.hits;
-		PitchRow.cells[8].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.baseOnBalls;
-		PitchRow.cells[9].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.strikeOuts;
-		PitchRow.cells[9].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.strikeOuts;
-		PitchRow.cells[10].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.runs;
-		PitchRow.cells[11].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.earnedRuns;
-		PitchRow.cells[12].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.homeRuns;
+		PitchRow.cells[3].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.inningsPitched;
+		PitchRow.cells[4].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.balls;
+		PitchRow.cells[5].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.strikes;
+		PitchRow.cells[6].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.pitchesThrown;
+		PitchRow.cells[7].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.battersFaced;
+		PitchRow.cells[8].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.hits;
+		PitchRow.cells[9].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.baseOnBalls;
+		PitchRow.cells[10].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.strikeOuts;
+		PitchRow.cells[11].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.runs;
+		PitchRow.cells[12].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.earnedRuns;
+		PitchRow.cells[13].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.homeRuns;
 		if (data.liveData.boxscore.teams.home.players[key].stats.pitching.note) {
-			PitchRow.cells[13].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.note;
+			PitchRow.cells[14].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.note;
 		}
 
 	}
@@ -291,18 +291,19 @@ function LoadPitchers() {
 		PitchRow.cells[0].innerHTML = data.gameData.players[key].fullName;
 		PitchRow.cells[1].innerHTML = data.gameData.players[key].pitchHand.code + 'HP';
 		PitchRow.cells[2].innerHTML = data.liveData.boxscore.teams.away.players[key].seasonStats.pitching.era
-		PitchRow.cells[3].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.balls;
-		PitchRow.cells[4].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.strikes;
-		PitchRow.cells[5].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.pitchesThrown;
-		PitchRow.cells[6].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.battersFaced;
-		PitchRow.cells[7].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.hits;
-		PitchRow.cells[8].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.baseOnBalls;
-		PitchRow.cells[9].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.strikeOuts;
-		PitchRow.cells[10].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.runs;
-		PitchRow.cells[11].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.earnedRuns;
-		PitchRow.cells[12].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.homeRuns;
+		PitchRow.cells[3].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.inningsPitched;
+		PitchRow.cells[4].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.balls;
+		PitchRow.cells[5].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.strikes;
+		PitchRow.cells[6].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.pitchesThrown;
+		PitchRow.cells[7].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.battersFaced;
+		PitchRow.cells[8].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.hits;
+		PitchRow.cells[9].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.baseOnBalls;
+		PitchRow.cells[10].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.strikeOuts;
+		PitchRow.cells[11].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.runs;
+		PitchRow.cells[12].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.earnedRuns;
+		PitchRow.cells[13].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.homeRuns;
 		if (data.liveData.boxscore.teams.away.players[key].stats.pitching.note) {
-			PitchRow.cells[13].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.note;
+			PitchRow.cells[14].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.note;
 		}
 	}
 }
@@ -422,16 +423,16 @@ function LoadPlays(StartPlay) {
                 switch (thisPlay.playEvents[pidx].details.call.code) {
                 case "*B" :
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball Low Dirt ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "B" :
                     PPos = PitchPosition(thisPlay.playEvents[pidx].pitchData.coordinates.x, thisPlay.playEvents[pidx].pitchData.coordinates.y); 
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Ball" + PPos + " ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "C" :
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Called ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "D" :
                     Call = "InPlay NoOut";
@@ -445,33 +446,31 @@ function LoadPlays(StartPlay) {
                     if (thisPlay.playEvents[pidx].pitchNumber > Pitches) {
                         Call += "X ";
                     }
-                    if (thisPlay.playEvents[pidx].details.type) {
-                        Call += thisPlay.playEvents[pidx].details.type.code;
-                    }
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "H" : // HIT BY PITCH -- this is handled on the play
                     break;
                 case "L" : //foul bunt
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Bunt ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "M" : //missed bunt
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging Missed ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "S" :
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "T" : //foul tip
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Foul Tip ";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "V" :  //INTENTIONAL WALK; this is handled on the play
                     break;
                 case "W" : // Swinging Strike (Blocked) -- this is a ball in the dirt that the player nevertheless swings at and gets a strike
                     Call = thisPlay.playEvents[pidx].count.balls + "-" + thisPlay.playEvents[pidx].count.strikes + " Swinging Blocked";
-                    Call += thisPlay.playEvents[pidx].details.type.code;
+                    Call += PitchType(thisPlay.playEvents[pidx].details);
                     break;
                 case "X" :
                     Call = thisPlay.playEvents[pidx].details.call.description;
@@ -1483,6 +1482,16 @@ function CallScore() {
 	getSound("Score/" + Score);
 }
 
+function PitchType(Detail) {
+   result = "";
+   if (Detail.type) {
+      if (Detail.type.code) {
+         result += Detail.type.code; 
+      }
+   }
+   return result;
+}
+
 function IsGameOver() {
 	//if it's marked as over, we're done 
     if (data.gameData.status.statusCode == "O") { 
@@ -1891,6 +1900,7 @@ function IsGameOver() {
 <tr class="PitchingHead">
 <th colspan="2" style="text-align: left; min-width: 200px;">Home Pitching</th>
 <th style="min-width: 50px">ERA</th>
+<th style="min-width: 50px">IP</th>
 <th style="min-width: 40px">B</th>
 <th style="min-width: 40px">S</th>
 <th style="min-width: 50px">NP</th>
@@ -2164,8 +2174,9 @@ function IsGameOver() {
 <p></p>
 <table id="awayPitching">
 <tr class="PitchingHead">
-<th colspan="2" style="text-align: left; min-width: 200px;">Away Pitching</th>
+<th colspan="2" style="text-align: left; min-width: 200px;">Home Pitching</th>
 <th style="min-width: 50px">ERA</th>
+<th style="min-width: 50px">IP</th>
 <th style="min-width: 40px">B</th>
 <th style="min-width: 40px">S</th>
 <th style="min-width: 50px">NP</th>
