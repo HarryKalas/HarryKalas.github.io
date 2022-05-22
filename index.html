@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>JSON Test</title>
+<title>Phillies Scorecard</title>
 <link href="scoreboard.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
@@ -573,7 +573,7 @@ function LoadPlays(StartPlay) {
                     onBase = thisPlay.playEvents[pidx].player.id;
                     onBaseAB = data.liveData.boxscore.teams[AtBat.id].players["ID" + onBase].battingOrder.substring(0,1)
                     RunnerBox = document.getElementById(AtBat.id + onBaseAB).cells[AtBat.Column];
-                    RunnerBox.className.add("PlayBox At2B");
+                    RunnerBox.classList.add("At2B");
                     RunnerBox.style.backgroundColor="#FFFFCC";
                     RunnerBox.id = onBase;
                     RunnerBox.innerHTML = "ROB";
