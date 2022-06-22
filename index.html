@@ -270,7 +270,9 @@ function LoadPitchers() {
 		if (data.liveData.boxscore.teams.home.players[key].stats.pitching.note) {
 			PitchRow.cells[14].innerHTML = data.liveData.boxscore.teams.home.players[key].stats.pitching.note;
 		}
-
+		if (data.liveData.plays.currentPlay.about.isTopInning == true) {
+            document.getElementById("Pitches").innerHTML = " (" + data.liveData.boxscore.teams.home.players[key].stats.pitching.pitchesThrown + ")";
+        }
 	}
 
 	//AWAY
@@ -305,6 +307,9 @@ function LoadPitchers() {
 		if (data.liveData.boxscore.teams.away.players[key].stats.pitching.note) {
 			PitchRow.cells[14].innerHTML = data.liveData.boxscore.teams.away.players[key].stats.pitching.note;
 		}
+		if (data.liveData.plays.currentPlay.about.isTopInning == false) {
+            document.getElementById("Pitches").innerHTML = " (" + data.liveData.boxscore.teams.away.players[key].stats.pitching.pitchesThrown + ")";
+        }
 	}
 }
 
@@ -1633,7 +1638,7 @@ function IsGameOver() {
 <table style="border-style: none;"><tr>
 <td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" 
     style="padding-left: 10px; "></audio></td>
-<td style="border-style: none;"><button type="button" onclick="LoadPlays(LastPlay);">Load Plays</button></td>
+<td style="border-style: none;"><button type="button" onclick="LoadPlays(LastPlay);">Refresh Plays</button></td>
 </tr></table>
 
 <div id="GameDisplay" class="GameDisplay">
@@ -2204,7 +2209,7 @@ S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>
 <span id="PitchSpeed" style="line-height: 35px;"></span><br/>
 <span id="InPlay"></span><br/>
-<p style="clear: left; margin: 15px 0px 0px 10px;">Pitcher: <span id="Pitcher"></span></p>
+<p style="clear: left; margin: 15px 0px 0px 10px;">Pitcher: <span id="Pitcher"></span><span id="Pitches"></span></p>
 <div id="MiniBox" class="BoxScore"></div>
 </div>
 </body>
