@@ -65,7 +65,6 @@ location corresponds to a player's position number, for left-center it's 78 and 
 	AtBat = new Object; //pointer to the team header that holds variables to track for the team
 
 function initialize() {
-
 	GetIt('https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1' + dateString); //today's schedules
 	OtherGames = "";
 	//find myTeam's game for the day and also get the broadcast information
@@ -120,75 +119,6 @@ function initialize() {
 		}
 	);
 	document.getElementById("broadcast").innerHTML = Broadcast.substring(2);
-	
-	//8 JUL 2022 - SET UP THE BOXES
-    document.getElementById("GameDisplay").innerHTML = "";
-	for (TeamIdx = 0; TeamIdx <=1; TeamIdx++) {
-	    document.getElementById("GameDisplay").innerHTML += "<h3>"+ TeamType[TeamIdx].toUpperCase() + ' TEAM: <a id="' + TeamType[TeamIdx] + '"></a></h3>';
-	    TblName = TeamType[TeamIdx] + "Table";
-	    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '" style="width: 850px;"></table>';
-	    
-	    RowName = TeamType[TeamIdx] + "Header";
-	    document.getElementById(TblName).innerHTML = '<tr id="' + RowName + '"></tr>';
-	    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
-	    document.getElementById(RowName).innerHTML += '<th>Player</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
-	    document.getElementById(RowName).innerHTML += '<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>';
-	    for (R = 1; R <= 9; R++){   //batting order
-	        RowName = TeamType[TeamIdx] + R;
-	        document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
-	        document.getElementById(RowName).innerHTML += '<td class="Order" rowspan="3">' + R + '</td>';
-	        document.getElementById(RowName).innerHTML += '<td class="Number">&nbsp;</td><td class="Player">&nbsp;</td><td class="Number">&nbsp;</td>';
-	        for (i = 1; i <= 9; i++) {  //inning for batter
-	            document.getElementById(RowName).innerHTML += '<td rowspan="3" class="PlayBox"><p onclick="alert(this.title)"></p></td>';
-	        }
-            for (i = 2; i <= 3; i++) { //space for replacement batters
-                subRow = '<tr><td class="Number Bottom">&nbsp;</td><td class="Player Bottom">&nbsp;</td><td class="Number Bottom">&nbsp;</td></tr>';
-                document.getElementById(TblName).childNodes[0].innerHTML += subRow;
-
-            }
-	    }
-	    RowName = TeamType[TeamIdx] + "Footer";
-	    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
-	    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
-	    document.getElementById(RowName).innerHTML += '<th>Player</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
-	    document.getElementById(RowName).innerHTML += '<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>';
-	    
-	    RowName = TeamType[TeamIdx] + "SpaceIt";
-	    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"  style="visibility: collapse;"></tr>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-
-	    document.getElementById("GameDisplay").innerHTML += '<p></p>';
-
-	    TblName = TeamType[(TeamIdx + 1) % 2] + "Pitching";
-	    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '"></table>';
-
-	    PitchingHeader = (TeamType[(TeamIdx + 1) % 2] + " PITCHING").toUpperCase();
-	    document.getElementById(TblName).innerHTML = '<tr class="PitchingHead"></tr>';
-	    theRow = document.getElementById(TblName).childNodes[0].childNodes[0];
-	    theRow.innerHTML += '<th colspan="2" style="text-align: left; min-width: 200px;">' + PitchingHeader + '</th>';
-   	    theRow.innerHTML += '<th style="min-width: 50px">ERA</th><th style="min-width: 50px">IP</th><th style="min-width: 40px">B</th><th style="min-width: 40px">S</th>';
-	    theRow.innerHTML += '<th style="min-width: 50px">NP</th><th style="min-width: 40px">BF</th><th style="min-width: 40px">H</th><th style="min-width: 40px">BB</th>';
-	    theRow.innerHTML += '<th style="min-width: 40px">SO</th><th style="min-width: 40px">R</th><th style="min-width: 40px">ER</th><th style="min-width: 40px">HR</th>';
-	    theRow.innerHTML += '<th style="min-width: 60px">NOTES</th>';   
-	    document.getElementById("GameDisplay").innerHTML += '<p></p>';
-	}	
-	//END OF 8 JUL 2022 UPDATE
 	
     //set up team variables to keep track of status
 	for (TeamIdx = 0; TeamIdx <= 1; TeamIdx++) {
@@ -268,11 +198,7 @@ function initialize() {
 	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
 	    playMonitor = setTimeout("LastPlay=LoadPlays(LastPlay)", TO); //next check 
 	}
-    if (urlParams.get("PlayAll") == 1) {
-	//don't clear the audio queue
-    } else {
-    	AudioQueue.length = 0;  //don't play any audio
-    }
+    AudioQueue.length = 0;  //don't play any audio
     document.getElementById("Audio").src = "silence.mp3"; // so that the audio tag will be "ended" and ready for calls
     
 	if (data.gameData.status.statusCode == "F") { 
@@ -591,9 +517,8 @@ function LoadPlays(StartPlay) {
                         getSound("PC " + data.gameData.teams.home.name);
                     } else { //away team changes pitcher
                         getSound("PC " + data.gameData.teams.away.name);
-                    }
-		    getSound("Pitchers/" + thisPlay.playEvents[pidx].player.id);
-		case "Offensive Substitution" :
+                    }                
+                case "Offensive Substitution" :
                 case "Offensive Substitution" :
                 case "Defensive Sub" :
                 case "Defensive Substitution" :
@@ -1233,9 +1158,6 @@ function Movement(Runners, Batter) {
                         } else if (Runners[r].details.event == "Wild Pitch") {
                             thePlay = thePlay + ", WP";
                             RunnerBox.innerHTML = thePlay;
-                        } else if (Runners[r].details.event == 'Error') {
-                            thePlay = thePlay + ", E";
-                            RunnerBox.innerHTML = thePlay;
                         } else {
                             console.log("ON BASE AFTER K");
                             end;
@@ -1720,6 +1642,559 @@ function IsGameOver() {
 </tr></table>
 
 <div id="GameDisplay" class="GameDisplay">
+<h3>Away Team: <a id="away"></a></h3>
+
+<table id="awayTable" style="width: 850px;">
+<tr id="awayHeader">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
+<tr id="away1">
+<td class="Order" rowspan="3">1</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away2">
+<td class="Order" rowspan="3">2</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away3">
+<td class="Order" rowspan="3">3</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away4">
+<td class="Order" rowspan="3">4</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away5">
+<td class="Order" rowspan="3">5</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away6">
+<td class="Order" rowspan="3">6</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away7">
+<td class="Order" rowspan="3">7</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away8">
+<td class="Order" rowspan="3">8</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="away9">
+<td class="Order" rowspan="3">9</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="awayFooter">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
+<tr id="awaySpaceIt" style="visibility: collapse;">
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+</tr>
+</table>
+<p></p>
+<table id="homePitching">
+<tr class="PitchingHead">
+<th colspan="2" style="text-align: left; min-width: 200px;">Home Pitching</th>
+<th style="min-width: 50px">ERA</th>
+<th style="min-width: 50px">IP</th>
+<th style="min-width: 40px">B</th>
+<th style="min-width: 40px">S</th>
+<th style="min-width: 50px">NP</th>
+<th style="min-width: 40px">BF</th>
+<th style="min-width: 40px">H</th>
+<th style="min-width: 40px">BB</th>
+<th style="min-width: 40px">SO</th>
+<th style="min-width: 40px">R</th>
+<th style="min-width: 40px">ER</th>
+<th style="min-width: 40px">HR</th>
+<th style="min-width: 60px">NOTES</th>
+</tr>
+</table>
+<p></p>
+<h3>Home Team: <a id="home"></a></h3>
+<table id="homeTable" style="width: 850px;">
+<tr id="homeHeader">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
+<tr id="home1">
+<td class="Order" rowspan="3">1</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home2">
+<td class="Order" rowspan="3">2</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home3">
+<td class="Order" rowspan="3">3</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home4">
+<td class="Order" rowspan="3">4</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home5">
+<td class="Order" rowspan="3">5</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home6">
+<td class="Order" rowspan="3">6</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home7">
+<td class="Order" rowspan="3">7</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home8">
+<td class="Order" rowspan="3">8</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="home9">
+<td class="Order" rowspan="3">9</td>
+<td class="Number">&nbsp;</td>
+<td class="Player">&nbsp;</td>
+<td class="Number">&nbsp;</td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+<td rowspan="3" class="PlayBox"><p></p></td>
+</tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td></tr>
+<tr>
+<td class="Number Bottom">&nbsp;</td>
+<td class="Player Bottom">&nbsp;</td>
+<td class="Number Bottom">&nbsp;</td>
+</tr>
+<tr id="homeFooter">
+<th style="width: 30px;">&nbsp;Ord&nbsp;</th>
+<th style="width: 30px;">#</th>
+<th>Player</th>
+<th style="width: 30px;">Pos</th>
+<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+</tr>
+<tr id="homeSpaceIt" style="visibility: collapse;">
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>
+</tr>
+</table>
+<p></p>
+<table id="awayPitching">
+<tr class="PitchingHead">
+<th colspan="2" style="text-align: left; min-width: 200px;">Home Pitching</th>
+<th style="min-width: 50px">ERA</th>
+<th style="min-width: 50px">IP</th>
+<th style="min-width: 40px">B</th>
+<th style="min-width: 40px">S</th>
+<th style="min-width: 50px">NP</th>
+<th style="min-width: 40px">BF</th>
+<th style="min-width: 40px">H</th>
+<th style="min-width: 40px">BB</th>
+<th style="min-width: 40px">SO</th>
+<th style="min-width: 40px">R</th>
+<th style="min-width: 40px">ER</th>
+<th style="min-width: 40px">HR</th>
+<th style="min-width: 60px">NOTES</th>
+</tr>
+</table>
 </div>
 <h3>All Games Today:</h3>
 <div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
