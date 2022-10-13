@@ -270,6 +270,7 @@ function initialize() {
 	}
     if (urlParams.get("PlayAll") == 1) {
 	//don't clear the audio queue
+	playSound();
     } else {
     	AudioQueue.length = 0;  //don't play any audio
     }
