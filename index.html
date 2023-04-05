@@ -5,6 +5,8 @@
 <script type="text/javascript" src="Commercials.js"></script>
 <script type="text/javascript" src="Sound_Files.js"></script>
 <script>
+//3 APR 2023: FIRST SWITCH GETS THISPLAY FROM thisPlay = data.liveData.plays.allPlays[i]
+
 //PITCH CALLS I NEED TO GET AUDIO FOR:
 //  swinging strike blocked (that's a ball in the dirt that they nevertheless swung at)
 
@@ -689,6 +691,12 @@ function LoadPlays(StartPlay) {
                     document.getElementById("GameAlert").innerHTML += AtBat.Inning + ", ";
                     document.getElementById("GameAlert").innerHTML += thisPlay.playEvents[pidx].details.description;
                     break;
+                case "Mound Visit" :
+		console.log("Mound Visit" , i , pidx, thisPlay.playEvents[pidx].details.event); 
+		break;
+	case "Batter Timeout":
+		console.log("Batter Timeout - don't know what to do with this" , i , pidx, thisPlay.playEvents[pidx].details.event); 
+		break;
 		        default :
 		            console.log("playEvent not catalogued: " , i , pidx, thisPlay.playEvents[pidx].details.event);
 		            LastEvent = pidx;
@@ -866,6 +874,10 @@ function LoadPlays(StartPlay) {
 			thePlay = "BB";
 			getSound(thePlay);
 			break;
+		case "Balk" : 
+			thePlay = "BK";
+			getSound(thePlay);
+			break;
 		case "Runner Out" :
 		    //this is somebody other than the batter
 		    break;
@@ -875,6 +887,12 @@ function LoadPlays(StartPlay) {
 		case undefined :
 		    //NO EVENT YET
 		    //console.log(thisPlay.matchup.batter.fullName, thisPlay.count, thisPlay.playEvents[thisPlay.playEvents.length-2].details);
+		    break;
+		case "Mound Visit" :
+		    console.log("HANDLE MOUND VISIT");
+		    break;
+		case "Batter Timeout" :
+		    console.log("HANDLE BATTER TIMEOUT");
 		    break;
 		default :
 		    console.log("RESULT.EVENT NOT CATALOGUED", thisPlay.result.event);
@@ -1113,6 +1131,7 @@ function Movement(Runners, Batter) {
                 if (RunnerBox.getElementsByClassName("B" + EndBase).length > 0) {
                     //there is already something in this corner
                     console.log("  *** HAS THE PLAY BEEN DISPLAYED? ", Runners[r].details.event, AtBat.id, AtBat.Inning, AtBat.AB );
+		//DON'T KNOW ABOUT BALK HOME
                 } else {                
                    newDiv = document.createElement('div');
                    newDiv.className = "B" + EndBase; 
