@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Stats Decoding</title>
+<script>
+
+pair=[];
+
+function GetIt(FileName) {
+	xhttp=new XMLHttpRequest();
+	xhttp.open("GET",FileName,false);
+	try {
+		xhttp.send(null);
+		data = JSON.parse(xhttp.responseText);
+	} catch(e) {
+		console.log("Error");
+	}
+}
+
+function loadGame(ID) {
+    gameLink = "/api/v1.1/game/" + ID + "/feed/live";
+    GetIt('https://statsapi.mlb.com' + gameLink );
+}
+
+function getCalls() {
+    Types=[];
+	for (i=0; i < data.liveData.plays.allPlays.length; i++){
+		thisPlay = data.liveData.plays.allPlays[i]
+		for (pidx=0; pidx < thisPlay.playEvents.length; pidx++) {
+		    if (Types.includes(thisPlay.playEvents[pidx].type)) {} 
+		        else {Types.push(thisPlay.playEvents[pidx].type);}
+		}
+	}
+	Types.forEach(
+	    function(item) {
+	        document.getElementById("Types").innerHTML+="<tr><td>"+item+"</td></tr>"
+	    }
+	)
+
+    Results=[];
+    Calls=[];
+    Events=[];
+    Pickoffs=[];
+    NoPitch=[];
+    StepOff=[];
+	for (i=0; i < data.liveData.plays.allPlays.length; i++){
+		thisPlay = data.liveData.plays.allPlays[i]
+        pair=[thisPlay.result.type, thisPlay.result.event, thisPlay.result.eventType];
+        match=0;
+        for (c=0; c < Results.length; c++){
+            if (Results[c][0] === pair[0] && Results[c][1] === pair[1] && Results[c][2] === pair[2]) { match = 1; break;} 
+        }
+        if (match == 0) {Results.push(pair);}
+		
+		for (pidx=0; pidx < thisPlay.playEvents.length; pidx++) {
+		    if (thisPlay.playEvents[pidx].type == "pitch") {
+                pair=[thisPlay.playEvents[pidx].details.call.code, thisPlay.playEvents[pidx].details.call.description];
+                match=0;
+                for (c=0; c < Calls.length; c++){
+                    if (Calls[c][0] === pair[0] && Calls[c][1] === pair[1]) { match = 1; break;} 
+                }
+                if (match == 0) {Calls.push(pair);}
+		    } else if (thisPlay.playEvents[pidx].type == "action") {
+                pair=[thisPlay.playEvents[pidx].details.event, thisPlay.playEvents[pidx].details.eventType];
+                match=0;
+                for (c=0; c < Events.length; c++){
+                    if (Events[c][0] === pair[0] && Events[c][1] === pair[1]) { match = 1; break;} 
+                }
+                if (match == 0) {Events.push(pair);}
+		    } else if (thisPlay.playEvents[pidx].type == "pickoff") {
+                pair=[thisPlay.playEvents[pidx].details.code, thisPlay.playEvents[pidx].details.description];
+                match=0;
+                for (c=0; c < Pickoffs.length; c++){
+                    if (Pickoffs[c][0] === pair[0] && Pickoffs[c][1] === pair[1]) { match = 1; break;} 
+                }
+                if (match == 0) {Pickoffs.push(pair);}
+		    } else if (thisPlay.playEvents[pidx].type == "no_pitch") {
+                pair=[thisPlay.playEvents[pidx].details.code, thisPlay.playEvents[pidx].details.description];
+                if (thisPlay.playEvents[pidx].details.violation) {
+                    pair[1] = thisPlay.playEvents[pidx].details.violation.description;
+                }
+                match=0;
+                for (c=0; c < NoPitch.length; c++){
+                    if (NoPitch[c][0] === pair[0] && NoPitch[c][1] === pair[1]) { match = 1; break;} 
+                }
+                if (match == 0) {NoPitch.push(pair);}
+		    } else if (thisPlay.playEvents[pidx].type == "stepoff") {
+                pair=[thisPlay.playEvents[pidx].details.code, thisPlay.playEvents[pidx].details.description];
+                if (thisPlay.playEvents[pidx].details.violation) {
+                    pair[1] = thisPlay.playEvents[pidx].details.violation.description;
+                }
+                match=0;
+                for (c=0; c < StepOff.length; c++){
+                    if (StepOff[c][0] === pair[0] && StepOff[c][1] === pair[1]) { match = 1; break;} 
+                }
+                if (match == 0) {StepOff.push(pair);}
+		    } else {
+		        console.log(thisPlay.playEvents[pidx]);
+		        end;
+		    }
+		}
+	}
+	Calls.forEach(
+	    function(item) {
+	        document.getElementById("Calls").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td></tr>"
+	    }
+	)
+	Events.forEach(
+	    function(item) {
+	        document.getElementById("Events").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td></tr>"
+	    }
+	)
+	Pickoffs.forEach(
+	    function(item) {
+	        document.getElementById("Pickoffs").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td></tr>"
+	    }
+	)
+	NoPitch.forEach(
+	    function(item) {
+	        document.getElementById("NoPitch").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td></tr>";
+	    }
+	)
+	StepOff.forEach(
+	    function(item) {
+	        document.getElementById("StepOff").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td></tr>";
+	    }
+	)
+	Results.forEach(
+	    function(item) {
+	        document.getElementById("Results").innerHTML+="<tr><td>"+item[0]+"</td><td>"+item[1]+"</td><td>"+item[2]+"</td></tr>"
+	    }
+	)
+}
+
+</script>
+</head>
+<body>
+<b>playEvent Types</b>
+<table id="Types">
+</table>
+<br/>
+<b>Pitch Calls</b>
+<table id="Calls">
+</table>
+<br/>
+
+<b>Action Events</b>
+<table id="Events">
+</table>
+<br/>
+
+<b>Pickoffs</b>
+<table id="Pickoffs">
+</table>
+<br/>
+
+<b>No-Pitches</b>
+<table id="NoPitch">
+</table>
+<br/>
+
+<b>Step Off</b>
+<table id="StepOff">
+</table>
+<br/>
+
+<b>Results</b>
+<table id="Results">
+</table>
+<br/>
+
+<b>End of Data</b>
+</body>
+</html>
