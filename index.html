@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Permissions-Policy" content="interest-cohort=()">
 <title>Phillies Scorecard</title>
 <link href="scoreboard.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="Commercials.js"></script>
@@ -319,7 +320,6 @@ function LoadPitchers() {
 		Pitcher = data.liveData.boxscore.teams.home.players[key];
 		PitchRow.cells[0].innerHTML = Pitcher.person.fullName;
 		PitchRow.cells[1].innerHTML = data.gameData.players[key].pitchHand.code + 'HP';
-		PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
 		PitchRow.cells[3].innerHTML = Pitcher.stats.pitching.inningsPitched;
 		PitchRow.cells[4].innerHTML = Pitcher.stats.pitching.balls;
 		PitchRow.cells[5].innerHTML = Pitcher.stats.pitching.strikes;
@@ -331,6 +331,9 @@ function LoadPitchers() {
 		PitchRow.cells[11].innerHTML = Pitcher.stats.pitching.runs;
 		PitchRow.cells[12].innerHTML = Pitcher.stats.pitching.earnedRuns;
 		PitchRow.cells[13].innerHTML = Pitcher.stats.pitching.homeRuns; 
+		if (Pitcher.seasonStats) {
+		    PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
+		}
 		if (data.liveData.plays.currentPlay.about.isTopInning == true) {
             document.getElementById("Pitches").innerHTML = " (" + Pitcher.stats.pitching.pitchesThrown + ")";
         }
@@ -354,7 +357,6 @@ function LoadPitchers() {
 		Pitcher = data.liveData.boxscore.teams.away.players[key];
 		PitchRow.cells[0].innerHTML = Pitcher.person.fullName;
 		PitchRow.cells[1].innerHTML = data.gameData.players[key].pitchHand.code + 'HP';
-		PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
 		PitchRow.cells[3].innerHTML = Pitcher.stats.pitching.inningsPitched;
 		PitchRow.cells[4].innerHTML = Pitcher.stats.pitching.balls;
 		PitchRow.cells[5].innerHTML = Pitcher.stats.pitching.strikes;
@@ -366,6 +368,9 @@ function LoadPitchers() {
 		PitchRow.cells[11].innerHTML = Pitcher.stats.pitching.runs;
 		PitchRow.cells[12].innerHTML = Pitcher.stats.pitching.earnedRuns;
 		PitchRow.cells[13].innerHTML = Pitcher.stats.pitching.homeRuns;
+		if (Pitcher.seasonStats) {
+		    PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
+		}
 		if (Pitcher.stats.pitching.note) {
 			PitchRow.cells[14].innerHTML = Pitcher.stats.pitching.note;
 		}
@@ -391,13 +396,11 @@ function LoadPlays(StartPlay) {
                         document.getElementById("BatterDiv").scrollIntoView(true);
             }
             
-            BatterData = data.gameData.players["ID"+Batter];
-            BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
+            BatterData = data.gameData.players["ID"+Batter];            
             document.getElementById("BatterDiv").style.visibility = "visible";
             document.getElementById("BatterPic").src = "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/135";                
             document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + " (" + thisPlay.matchup.batSide.code + ")</span>";
             document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName + " (" + thisPlay.matchup.pitchHand.code + "HP)"
-            document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
             
             //get the batter sound
             BatterSound = Batter;
@@ -427,8 +430,12 @@ function LoadPlays(StartPlay) {
                 }
             }
             getSound('Batters/' + BatterSound);
-            getSound("Average/" + BatterStats.avg);
-
+            if (data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats) {
+                BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
+                document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
+                getSound("Average/" + BatterStats.avg);
+            }
+            
             document.getElementById("B").innerHTML = thisPlay.count.balls;
             document.getElementById("S").innerHTML = thisPlay.count.strikes;
             document.getElementById("O").innerHTML = thisPlay.count.outs;
@@ -457,8 +464,6 @@ function LoadPlays(StartPlay) {
             Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
         }
         if (Box.className != 'PlayBox') {
-            console.log("BAT AROUND");
-            stop;
             //if the batter's cell has already been used, bat around
             AtBat.Column = AtBat.Column + 1;
             getSound("BA" + AtBat.innerText);            
@@ -689,6 +694,9 @@ function LoadPlays(StartPlay) {
 		        //these are the new rules violations
 		        if (thisPlay.playEvents[pidx].details.code == "AC") { //Automatic Strike - Batter Pitch Timer Violation
 		            getSound("AC");
+		        } else if (thisPlay.playEvents[pidx].details.code == "VB") { //Automatic Ball - Intentional"
+		            //this is covered as a play?
+		            console.log("*** WAS THE INTENTIONAL WALK CALLED? (hits 4 times for each ball)");
 		        } else if (thisPlay.playEvents[pidx].details.code == "VP") { //Automatic Ball - Pitcher Pitch Timer Violation
 		            getSound("VP");
 		        } else {
@@ -803,7 +811,7 @@ function LoadPlays(StartPlay) {
             }
             break;
 		case "Intent Walk" : 
-			thePlay = "IBB";
+			thePlay = "";
 		    getSound(thePlay);
 			break;
 		case "Lineout" :
@@ -882,10 +890,10 @@ function LoadPlays(StartPlay) {
 		    //console.log(thisPlay.matchup.batter.fullName, thisPlay.count, thisPlay.playEvents[thisPlay.playEvents.length-2].details);
 		    break;
 		case "Mound Visit" :
-		    console.log("HANDLE MOUND VISIT");
+		    console.log("HANDLE MOUND VISIT", pidx);
 		    break;
 		case "Batter Timeout" :
-		    console.log("HANDLE BATTER TIMEOUT");
+		    console.log("HANDLE BATTER TIMEOUT", pidx);
 		    break;
 		default :
 		    console.log("RESULT.EVENT NOT CATALOGUED", thisPlay.result.event);
@@ -1123,8 +1131,7 @@ function Movement(Runners, Batter) {
                 }
                 if (RunnerBox.getElementsByClassName("B" + EndBase).length > 0) {
                     //there is already something in this corner
-                    console.log("  *** HAS THE PLAY BEEN DISPLAYED? ", Runners[r].details.event, AtBat.id, AtBat.Inning, AtBat.AB );
-		//DON'T KNOW ABOUT BALK HOME
+                    //the movement was already captured by a playEvent;
                 } else {                
                    newDiv = document.createElement('div');
                    newDiv.className = "B" + EndBase; 
