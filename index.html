@@ -331,7 +331,7 @@ function LoadPitchers() {
 		PitchRow.cells[11].innerHTML = Pitcher.stats.pitching.runs;
 		PitchRow.cells[12].innerHTML = Pitcher.stats.pitching.earnedRuns;
 		PitchRow.cells[13].innerHTML = Pitcher.stats.pitching.homeRuns; 
-		if (Pitcher.seasonStats) {
+		if (Pitcher.seasonStats !== 'undefined') {
 		    PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
 		}
 		if (data.liveData.plays.currentPlay.about.isTopInning == true) {
@@ -368,7 +368,7 @@ function LoadPitchers() {
 		PitchRow.cells[11].innerHTML = Pitcher.stats.pitching.runs;
 		PitchRow.cells[12].innerHTML = Pitcher.stats.pitching.earnedRuns;
 		PitchRow.cells[13].innerHTML = Pitcher.stats.pitching.homeRuns;
-		if (Pitcher.seasonStats) {
+		if (Pitcher.seasonStats !== 'undefined') {
 		    PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
 		}
 		if (Pitcher.stats.pitching.note) {
@@ -430,7 +430,7 @@ function LoadPlays(StartPlay) {
                 }
             }
             getSound('Batters/' + BatterSound);
-            if (data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats) {
+            if (data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats !== 'undefined') {
                 BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
                 document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
                 getSound("Average/" + BatterStats.avg);
@@ -700,7 +700,7 @@ function LoadPlays(StartPlay) {
 		        } else if (thisPlay.playEvents[pidx].details.code == "VP") { //Automatic Ball - Pitcher Pitch Timer Violation
 		            getSound("VP");
 		        } else {
-		            console.log("UNKNOWN NO_PITCH");
+		            console.log("UNKNOWN NO_PITCH", thisPlay.playEvents[pidx].details);
 		        }
 		    } else if (thisPlay.playEvents[pidx].type == "stepoff" ) {
 		        if (thisPlay.playEvents[pidx].details.code == "PSO") { //Pitcher Step Off
