@@ -681,7 +681,7 @@ function LoadPlays(StartPlay) {
                     document.getElementById("GameAlert").innerHTML += thisPlay.playEvents[pidx].details.description;
                     break;
                 case "Mound Visit" :
-		console.log("Mound Visit" , i , pidx, thisPlay.playEvents[pidx].details.event); 
+                    getSound("MV");
 		break;
 		        default :
 		            console.log("playEvent not catalogued: " , i , pidx, thisPlay.playEvents[pidx].details.event);
@@ -811,7 +811,7 @@ function LoadPlays(StartPlay) {
             }
             break;
 		case "Intent Walk" : 
-			thePlay = "";
+			thePlay = "IBB";
 		    getSound(thePlay);
 			break;
 		case "Lineout" :
@@ -1739,7 +1739,8 @@ function IsGameOver() {
 <table style="border-style: none;"><tr>
 <td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" 
     style="padding-left: 10px; "></audio></td>
-<td style="border-style: none;"><button type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
+<td style="border-style: none;"><button style="margin-right:20px;" type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
+<td style="border-style: none;"><button type="button" onclick="if (AudioQueue.length > 0) {AudioQueue[0]=AudioQueue[AudioQueue.length-1];AudioQueue.length=1;}document.getElementById('Audio').play();">Play Audio</button></td>
 </tr></table>
 
 <div id="GameDisplay" class="GameDisplay">

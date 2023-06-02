@@ -1351,7 +1351,7 @@ SoundCounts.push([3, 2, 1]);
 SoundFiles.push('L9');
 SoundCounts.push([2, 1, 0]);
 SoundFiles.push('MV');
-SoundCounts.push([3, 0, 0]);
+SoundCounts.push([2, 0, 0]);
 SoundFiles.push('NEUTRAL/Batters/2016Altherr');
 SoundCounts.push([1, 0, 0]);
 SoundFiles.push('NEUTRAL/Batters/2016Altherr Lead');
