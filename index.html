@@ -406,6 +406,7 @@ function LoadPlays(StartPlay) {
             BatterSound = Batter;
             if (LeadOff == "Lead") {
                 //get inning call
+                location.hash = "#" + AtBat.id;
                 Inning = "Inning/" + thisPlay.about.inning + thisPlay.about.halfInning + " B";
                 Score = getScore();
                 getSound(Inning + " " + Score);

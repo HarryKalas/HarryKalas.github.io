@@ -931,7 +931,7 @@ SoundCounts.push([1, 0, 0]);
 SoundFiles.push('Count/3-0 Ball Inside');
 SoundCounts.push([1, 0, 0]);
 SoundFiles.push('Count/3-0 Ball Low');
-SoundCounts.push([2, 0, 0]);
+SoundCounts.push([1, 0, 1]);
 SoundFiles.push('Count/3-0 Ball Low Outside');
 SoundCounts.push([1, 0, 0]);
 SoundFiles.push('Count/3-1');

@@ -1,5 +1,5 @@
 '   CurrentFolder = "HarryKalas.github.io\"
-   CurrentFolder = ".\"
+   CurrentFolder = "C:\Users\trace\Documents\GitHub\HK2022\"
    set fso = CreateObject("Scripting.FileSystemObject")
 
    savefile = CurrentFolder + "Sound_Files.js"
