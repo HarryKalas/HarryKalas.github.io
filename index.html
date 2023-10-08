@@ -390,18 +390,46 @@ function LoadPlays(StartPlay) {
 
         if (thisPlay.matchup.batter.id != Batter){
             Batter = thisPlay.matchup.batter.id
-            if (AtBat.AB > 1) {
-                        document.getElementById("BatterDiv").scrollIntoView(false);
-            } else {
-                        document.getElementById("BatterDiv").scrollIntoView(true);
+
+            // get the batter's box
+            Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
+            if (!Box && AtBat.Inning > scheduledInnings) {
+                if (AtBat.Inning == scheduledInnings + 1) {
+                    getSound("Inning/extra innings");
+                }
+                AddColumn();
+                Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
             }
+            if (Box.className != 'PlayBox') {
+                //if the batter's cell has already been used, bat around
+                AtBat.Column = AtBat.Column + 1;
+                getSound("BA" + AtBat.innerText);            
+                AddColumn();
+                Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
+            }
+            Box.id = thisPlay.matchup.batter.id;		//TO REMOVE THIS ID WHEN THE BATTER GETS HOME OR OUT: [HTMLnode].removeAttribute("id")
             
+
+            //get the batter information in BatterDiv
             BatterData = data.gameData.players["ID"+Batter];            
             document.getElementById("BatterDiv").style.visibility = "visible";
             document.getElementById("BatterPic").src = "https://midfield.mlbstatic.com/v1/people/" + Batter + "/wheadshot/135";                
             document.getElementById("BatterName").innerHTML = "<span title='" + BatterData.pronunciation + "'>" + thisPlay.matchup.batter.fullName + " (" + thisPlay.matchup.batSide.code + ")</span>";
             document.getElementById("Pitcher").innerHTML = thisPlay.matchup.pitcher.fullName + " (" + thisPlay.matchup.pitchHand.code + "HP)"
             
+            //position BatterDiv
+            document.getElementById("BatterDiv").style.left = (Box.offsetLeft + 66) + "px";
+            if (Box.parentElement.rowIndex < 7) {
+                document.getElementById("BatterDiv").style.top = Box.offsetTop + "px";
+            } else {
+                //hide inplay info until position is set
+                Txt = document.getElementById("InPlay").innerHTML;
+                document.getElementById("InPlay").innerHTML = "";
+                document.getElementById("BatterDiv").style.top = Box.offsetTop + Box.offsetHeight - document.getElementById("BatterDiv").offsetHeight + "px"
+                document.getElementById("InPlay").innerHTML = Txt;
+            }
+            document.getElementById("BatterDiv").scrollIntoView(true);        
+        
             //get the batter sound
             BatterSound = Batter;
             if (LeadOff == "Lead") {
@@ -454,27 +482,7 @@ function LoadPlays(StartPlay) {
             document.getElementById("Runners").src = RunnerCount + ".png";
             getSound("Runners/" + RunnerCount + " O" + thisPlay.count.outs);
         }
-
-		// get the batter's box
-        Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
-        if (!Box && AtBat.Inning > scheduledInnings) {
-            if (AtBat.Inning == scheduledInnings + 1) {
-                getSound("Inning/extra innings");
-            }
-            AddColumn();
-            Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
-        }
-        if (Box.className != 'PlayBox') {
-            //if the batter's cell has already been used, bat around
-            AtBat.Column = AtBat.Column + 1;
-            getSound("BA" + AtBat.innerText);            
-            AddColumn();
-            Box = document.getElementById(AtBat.id + AtBat.AB).cells[AtBat.Column];
-        }
-        Box.id = thisPlay.matchup.batter.id;		//TO REMOVE THIS ID WHEN THE BATTER GETS HOME OR OUT: [HTMLnode].removeAttribute("id")
-        document.getElementById("BatterDiv").style.left = (Box.offsetLeft + 66) + "px";
-        document.getElementById("BatterDiv").style.top = Box.offsetTop + "px";
-
+        
 		//get the events leading up to the play
 		//deal with the not-pitches during the load; pitches will only be handled during the game
 		for (pidx=LastEvent; pidx < thisPlay.playEvents.length; pidx++) {
@@ -757,6 +765,7 @@ function LoadPlays(StartPlay) {
 		case "Pickoff 1B" :
 		case "Pickoff 2B" :
 		case "Pickoff Caught Stealing 2B" :
+		case "Pickoff Caught Stealing 3B" :
 		case "Stolen Base 2B" :
 		    //not the batter's play; this will be handled in the movement at the end
 		    break;
