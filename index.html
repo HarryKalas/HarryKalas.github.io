@@ -220,9 +220,11 @@ function initialize() {
 	//team names
 	document.getElementById("away").innerHTML = data.gameData.teams.away.name;
 	document.getElementById("away").name = data.gameData.teams.away.id;
+	document.getElementById("aCity").innerHTML = data.gameData.teams.away.name.substring(0, 3).toUpperCase();
 	document.getElementById("awayScore").cells[0].innerHTML = data.gameData.teams.away.teamName;
 	document.getElementById("home").innerHTML = data.gameData.teams.home.name;
 	document.getElementById("home").name = data.gameData.teams.home.id;
+	document.getElementById("hCity").innerHTML = data.gameData.teams.home.name.substring(0, 3).toUpperCase();
 	document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
 
 	// ... DISPLAY THE LOGOS
@@ -1505,10 +1507,12 @@ function LineScore() {
     
     cols = document.getElementById("awayScore").cells.length;
     document.getElementById("awayScore").cells[cols-3].innerHTML = data.liveData.linescore.teams.away.runs;
+    document.getElementById("aScore").innerHTML = data.liveData.linescore.teams.away.runs;
     document.getElementById("awayScore").cells[cols-2].innerHTML = data.liveData.linescore.teams.away.hits;
     document.getElementById("awayScore").cells[cols-1].innerHTML = data.liveData.linescore.teams.away.errors;
 
     document.getElementById("homeScore").cells[cols-3].innerHTML = data.liveData.linescore.teams.home.runs;
+    document.getElementById("hScore").innerHTML = data.liveData.linescore.teams.home.runs;
     document.getElementById("homeScore").cells[cols-2].innerHTML = data.liveData.linescore.teams.home.hits;
     document.getElementById("homeScore").cells[cols-1].innerHTML = data.liveData.linescore.teams.home.errors;
 }
@@ -1760,12 +1764,23 @@ function IsGameOver() {
 </div>
 <div id="BatterDiv" style="visibility: hidden;">
 <img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
-<span id="BatterName"></span><br/>
-Avg: <span id="BatterAvg"></span><br/>
-<img id="Runners" src="7.png" style="float: right; margin-top: 10px; margin-right: 75px;" alt="Runners">
+<table>
+<tr><td colspan="3" style="border:transparent;"><span id="BatterName"></span></td></tr>
+<tr><td colspan="3" style="border:transparent;">Avg: <span id="BatterAvg"></span></td></tr>
+<tr>
+<td style="border:transparent;padding-right:20px;">
 B: <span id="B"></span><br/>
 S: <span id="S"></span><br/>
 O: <span id="O"></span><br/>
+</td>
+<td style="border:transparent;padding-right:20px;">
+<img id="Runners" src="7.png" alt="Runners">
+</td>
+<td style="border:transparent;">
+<span id="aCity"></span>: <span id="aScore"></span><br/>
+<span id="hCity"></span>: <span id="hScore"></span><br/>
+</td>
+</tr></table>
 <span id="PitchSpeed" style="line-height: 35px;"></span><br/>
 <span id="InPlay"></span><br/>
 <p style="clear: left; margin: 15px 0px 0px 10px;">Pitcher: <span id="Pitcher"></span><span id="Pitches"></span></p>

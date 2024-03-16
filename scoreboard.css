@@ -162,6 +162,7 @@ DIV.BoxScore {
 	z-index: 1000;
 	background-color: #CCCCCC;
 }
+#BatterDiv > table {border:transparent;}
 #BatterPic {
 	float: left;
 	padding-right: 5px; 
