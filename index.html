@@ -220,11 +220,11 @@ function initialize() {
 	//team names
 	document.getElementById("away").innerHTML = data.gameData.teams.away.name;
 	document.getElementById("away").name = data.gameData.teams.away.id;
-	document.getElementById("aCity").innerHTML = data.gameData.teams.away.name.substring(0, 3).toUpperCase();
+	document.getElementById("aCity").innerHTML = data.gameData.teams.away.abbreviation;
 	document.getElementById("awayScore").cells[0].innerHTML = data.gameData.teams.away.teamName;
 	document.getElementById("home").innerHTML = data.gameData.teams.home.name;
 	document.getElementById("home").name = data.gameData.teams.home.id;
-	document.getElementById("hCity").innerHTML = data.gameData.teams.home.name.substring(0, 3).toUpperCase();
+	document.getElementById("hCity").innerHTML = data.gameData.teams.home.abbreviation;
 	document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
 
 	// ... DISPLAY THE LOGOS
