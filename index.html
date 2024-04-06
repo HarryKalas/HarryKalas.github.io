@@ -11,6 +11,9 @@
 <script>
 //3 APR 2023: FIRST SWITCH GETS THISPLAY FROM thisPlay = data.liveData.plays.allPlays[i]
 
+//30 MAR 2024: THIS IS FANTASTIC! IT GETS ME SPECIFIC PIECES QUICKLY AT ONE TIME! I MAY HAVE TO REWRITE IT ALL!
+//https://statsapi.mlb.com/api/v1.1/game/746168/feed/live?fields=liveData,plays,currentPlay,count,outs,result,awayScore,homeScore,about,inning,halfInning,matchup,postOnFirst,postOnSecond,postOnThird,id
+
 //PITCH CALLS I NEED TO GET AUDIO FOR:
 //  swinging strike blocked (that's a ball in the dirt that they nevertheless swung at)
 
@@ -35,6 +38,8 @@ location corresponds to a player's position number, for left-center it's 78 and 
 //BATTING ORDER: data.liveData.boxscore.teams.away.players.[ID].battingOrder=100, 200, 300, 400, 500 etc
 //CURRENTTIME: data.liveData.plays.currentPlay.about.endTime
 
+const starttime = performance.now();
+
     myTeam = 143; //Phillies
     AudioFolder = "Audio/" //where the files reside -- *** CALCULATE THIS ***
     AudioQueue = new Array; 		// holds the list of calls and commercials to play
@@ -56,11 +61,13 @@ location corresponds to a player's position number, for left-center it's 78 and 
     gamePk = urlParams.get("gamePk");
     if (gamePk > "") {
 		gameLink = "/api/v1.1/game/" + gamePk + "/feed/live"
+	} else {
+	    gamePk = "";
 	}
 
 	dateString = urlParams.get("date");	
 	if(dateString > "") {
-		dateString = "&startDate=" + dateString + "&endDate=" + dateString;
+		dateString = "&date=" + dateString;
 	} else {
 	    dateString = "";
 	}
@@ -72,206 +79,189 @@ location corresponds to a player's position number, for left-center it's 78 and 
 
 function initialize() {
 
-	GetIt('https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1' + dateString); //today's schedules
-	OtherGames = "";
-	//find myTeam's game for the day and also get the broadcast information
-	data.dates[0].games.forEach(
-		function(itm) {
-		    if (itm.gamePk == gamePk) {
-                gameLink = itm.link; 
-		    	scheduledInnings = itm.scheduledInnings;
-		    } else if (itm.teams.away.team.id==myTeam || itm.teams.home.team.id==myTeam ) {
-		        if (gamePk > "") { //if a gamePk is already out there, don't get game by team
-		        } else {
-                    gamePk = itm.gamePk;
-                    gameLink = itm.link; 
-                    scheduledInnings = itm.scheduledInnings;
-		        }
-            }
-            temp =  '<a href="index.html?myTeam=' + itm.teams.away.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
-            temp += itm.teams.away.team.name + '</a> at ';
-            temp += '<a href="index.html?myTeam=' + itm.teams.home.team.id + '&gamePk=' + itm.gamePk + '&date=' + data.dates[0].date + '">';
-            temp += itm.teams.home.team.name + '</a>' ;
-            if (itm.doubleHeader == "S" || itm.doubleHeader == "Y") { temp += " - Game " + itm.gameNumber}
-            OtherGames += "<br/>" + temp;
-		}
-	)
-	
-	document.getElementById("OtherGames").innerHTML = OtherGames;
+  if (gamePk > '') {    // if the game is specified, use it to get the date and the broadcast information, date and time
+    BroadcastInfo();
+  }
 
-	// IF THERE IS NO GAME, WE'RE DONE
-	if (gameLink=='') {
-		return false;
+  //get all of the game data for Out of Town Scoreboard and current game if unknown
+  
+  GetIt('https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1' + dateString + '&fields=dates,date,games,gamePk,link,scheduledInnings,teams,away,home,team,id,name'); //schedule
+console.log(gamePk);
+  //out of town scoreboard
+  OtherGames = "";
+  document.getElementById("OtherGames").innerHTML = "";
+  document.getElementById("OtherGames").setAttribute("date", data.dates[0].date);
+
+  //find myTeam's game for the day and also get the broadcast information
+  data.dates[0].games.forEach(
+    function(itm) {
+	  if (itm.gamePk == gamePk) {
+	    gameLink = itm.link; 
+	    scheduledInnings = itm.scheduledInnings;
+	  } else if (itm.teams.away.team.id==myTeam || itm.teams.home.team.id==myTeam ) {
+	    gamePk = itm.gamePk;
+	    gameLink = itm.link; 
+	    scheduledInnings = itm.scheduledInnings;
+	    BroadcastInfo();
+	  } else {
+	    temp =  '<table class="otherGame" id="' + itm.gamePk + '">\n';
+	    temp += '</table>';
+	    document.getElementById("OtherGames").innerHTML += temp;
+	  }
 	}
+  )
 
-	//get the content file to get the broadcast information
-    GetIt('https://statsapi.mlb.com/api/v1/game/' + gamePk + '/content'); 
-    Broadcast="";
-	data.media.epg.forEach(
-		function(itm) {
-		    if (itm.title=="MLBTV") {
-		        for (i=0; i < itm.items.length; i++) {
-		            if (itm.items[i].mediaFeedSubType == myTeam) {
-		                Broadcast += ", "+itm.items[i].callLetters; 
-		            }
-		        }
-		    }
-		    if (itm.title=="Audio") {
-		        for (i=0; i < itm.items.length; i++) {
-		            if (itm.items[i].mediaFeedSubType == myTeam) {
-		                Broadcast += ", "+itm.items[i].callLetters; 
-		            }
-		        }
-		    }
-		}
-	);
-	document.getElementById("broadcast").innerHTML = Broadcast.substring(2);
-	
-	//8 JUL 2022 - SET UP THE BOXES
-    document.getElementById("GameDisplay").innerHTML = "";
-	for (TeamIdx = 0; TeamIdx <=1; TeamIdx++) {
-	    document.getElementById("GameDisplay").innerHTML += "<h3>"+ TeamType[TeamIdx].toUpperCase() + ' TEAM: <a id="' + TeamType[TeamIdx] + '"></a></h3>';
-	    TblName = TeamType[TeamIdx] + "Table";
-	    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '" style="width: 850px;"></table>';
+  updateOthers();
+
+  // IF THERE IS NO GAME, WE'RE DONE
+  if (gameLink=='') {
+    return;
+  }
+
+  //BUILD OUT THE GAME DISPLAY
+  document.getElementById("GameDisplay").innerHTML = "";
+  for (TeamIdx = 0; TeamIdx <=1; TeamIdx++) {
+    document.getElementById("GameDisplay").innerHTML += "<h3>"+ TeamType[TeamIdx].toUpperCase() + ' TEAM: <a id="' + TeamType[TeamIdx] + '"></a></h3>';
+    TblName = TeamType[TeamIdx] + "Table";
+    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '" style="width: 850px;"></table>';
 	    
-	    RowName = TeamType[TeamIdx] + "Header";
-	    document.getElementById(TblName).innerHTML = '<tr id="' + RowName + '"></tr>';
-	    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
-	    document.getElementById(RowName).innerHTML += '<th>Player</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
-	    document.getElementById(RowName).innerHTML += '<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>';
-	    for (R = 1; R <= scheduledInnings; R++){   //batting order
-	        RowName = TeamType[TeamIdx] + R;
-	        document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
-	        document.getElementById(RowName).innerHTML += '<td class="Order" rowspan="3">' + R + '</td>';
-	        document.getElementById(RowName).innerHTML += '<td class="Number">&nbsp;</td><td class="Player">&nbsp;</td><td class="Number">&nbsp;</td>';
-	        for (i = 1; i <= 9; i++) {  //inning for batter
-	            document.getElementById(RowName).innerHTML += '<td rowspan="3" class="PlayBox"><p onclick="alert(this.title)"></p></td>';
-	        }
-            for (i = 2; i <= 3; i++) { //space for replacement batters
-                subRow = '<tr><td class="Number Bottom">&nbsp;</td><td class="Player Bottom">&nbsp;</td><td class="Number Bottom">&nbsp;</td></tr>';
-                document.getElementById(TblName).childNodes[0].innerHTML += subRow;
-
-            }
-	    }
-	    RowName = TeamType[TeamIdx] + "Footer";
-	    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
-	    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
-	    document.getElementById(RowName).innerHTML += '<th>Player</th>';
-	    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
-	    document.getElementById(RowName).innerHTML += '<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>';
-	    
-	    RowName = TeamType[TeamIdx] + "SpaceIt";
-	    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"  style="visibility: collapse;"></tr>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-	    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
-
-	    document.getElementById("GameDisplay").innerHTML += '<p></p>';
-
-	    TblName = TeamType[(TeamIdx + 1) % 2] + "Pitching";
-	    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '"></table>';
-
-	    PitchingHeader = (TeamType[(TeamIdx + 1) % 2] + " PITCHING").toUpperCase();
-	    document.getElementById(TblName).innerHTML = '<tr class="PitchingHead"></tr>';
-	    theRow = document.getElementById(TblName).childNodes[0].childNodes[0];
-	    theRow.innerHTML += '<th colspan="2" style="text-align: left; min-width: 200px;">' + PitchingHeader + '</th>';
-   	    theRow.innerHTML += '<th style="min-width: 50px">ERA</th><th style="min-width: 50px">IP</th><th style="min-width: 40px">B</th><th style="min-width: 40px">S</th>';
-	    theRow.innerHTML += '<th style="min-width: 50px">NP</th><th style="min-width: 40px">BF</th><th style="min-width: 40px">H</th><th style="min-width: 40px">BB</th>';
-	    theRow.innerHTML += '<th style="min-width: 40px">SO</th><th style="min-width: 40px">R</th><th style="min-width: 40px">ER</th><th style="min-width: 40px">HR</th>';
-	    theRow.innerHTML += '<th style="min-width: 60px">NOTES</th>';   
-	    document.getElementById("GameDisplay").innerHTML += '<p></p>';
-	}	
-	//END OF 8 JUL 2022 UPDATE
-	
-    //set up team variables to keep track of status
-	for (TeamIdx = 0; TeamIdx <= 1; TeamIdx++) {
-		AtBat = document.getElementById(TeamType[TeamIdx]);	//THE PAGE NODE FOR THE TEAM
-		AtBat.Inning = 1;
-		AtBat.Column = 4;
-		AtBat.AB = 1;
-		AtBat.Index = TeamIdx;
-	}
-
-	//set at-bat team at beginning of game to AWAY
-	AtBat = document.getElementById("away");
-
-	//get the game information
-	GetIt('https://statsapi.mlb.com' + gameLink );
-	document.getElementById("status").innerHTML = data.gameData.status.detailedState;
-
-	//game date/time
-	GameDate = new Date(data.gameData.datetime.dateTime);
-	document.getElementById("gameDate").innerHTML = GameDate.toLocaleDateString();	
-	document.getElementById("start").innerHTML = GameDate.toLocaleTimeString();
-
-	//team names
-	document.getElementById("away").innerHTML = data.gameData.teams.away.name;
-	document.getElementById("away").name = data.gameData.teams.away.id;
-	document.getElementById("aCity").innerHTML = data.gameData.teams.away.abbreviation;
-	document.getElementById("awayScore").cells[0].innerHTML = data.gameData.teams.away.teamName;
-	document.getElementById("home").innerHTML = data.gameData.teams.home.name;
-	document.getElementById("home").name = data.gameData.teams.home.id;
-	document.getElementById("hCity").innerHTML = data.gameData.teams.home.abbreviation;
-	document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
-
-	// ... DISPLAY THE LOGOS
-	awayLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/';
-	awayLogo += data.gameData.teams.away.id;
-	awayLogo += '.svg" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
-	document.getElementById("AwayLogo").innerHTML = awayLogo;
-
-	homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
-	homeLogo += data.gameData.teams.home.id;
-	homeLogo += '.svg" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
-	document.getElementById("HomeLogo").innerHTML = homeLogo;
-
-	// LOAD THE PLAYERS
-	LoadPlayers();
-	LoadPitchers();
-
-    if (data.gameData.status.detailedState == "Postponed") { 
-	    console.log("Postponed"); 
-	    return; 
-    } else if (data.gameData.status.detailedState == "Scheduled") { 
-	    console.log("Scheduled"); 
-	    return; 
-	} 
-	Now = new Date();
-	if (GameDate < Now) {
-        //LOAD THE PLAYS
-        LastPlay = LoadPlays(0);
-	} else {
-	    TO = (GameDate - Now);
-	    console.log(TO);
-	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-	    playMonitor = setTimeout("LastPlay=LoadPlays(LastPlay)", TO); //next check 
-	}
-    if (urlParams.get("PlayAll") == 1) {
-        //don't clear the audio queue
-	    playSound();
-    } else {
-    	AudioQueue.length = 0;  //don't play any audio
+    RowName = TeamType[TeamIdx] + "Header";
+    document.getElementById(TblName).innerHTML = '<tr id="' + RowName + '"></tr>';
+    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
+    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
+    document.getElementById(RowName).innerHTML += '<th>Player</th>';
+    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
+    for (C=1; C<=scheduledInnings; C++) { document.getElementById(RowName).innerHTML += '<th>' + C + '</th>'} //innings
+    for (R = 1; R <= 9; R++){   //batting order
+      RowName = TeamType[TeamIdx] + R;
+      document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
+      document.getElementById(RowName).innerHTML += '<td class="Order" rowspan="3">' + R + '</td>';
+      document.getElementById(RowName).innerHTML += '<td class="Number">&nbsp;</td><td class="Player">&nbsp;</td><td class="Number">&nbsp;</td>';
+      for (i = 1; i <= scheduledInnings; i++) {  //inning for batter
+        document.getElementById(RowName).innerHTML += '<td rowspan="3" class="PlayBox"><p onclick="alert(this.title)"></p></td>';
+      }
+      for (i = 2; i <= 3; i++) { //space for replacement batters
+        subRow = '<tr><td class="Number Bottom">&nbsp;</td><td class="Player Bottom">&nbsp;</td><td class="Number Bottom">&nbsp;</td></tr>';
+        document.getElementById(TblName).childNodes[0].innerHTML += subRow;
+      }
     }
-    document.getElementById("Audio").src = "silence.mp3"; // so that the audio tag will be "ended" and ready for calls
+    RowName = TeamType[TeamIdx] + "Footer";
+    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"></tr>';
+    document.getElementById(RowName).innerHTML = '<th style="width: 30px;">&nbsp;Ord&nbsp;</th>';
+    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">#</th>';
+    document.getElementById(RowName).innerHTML += '<th>Player</th>';
+    document.getElementById(RowName).innerHTML += '<th style="width: 30px;">Pos</th>';
+    for (C=1; C<=scheduledInnings; C++) { document.getElementById(RowName).innerHTML += '<th>' + C + '</th>'} //innings
+	    
+    RowName = TeamType[TeamIdx] + "SpaceIt";
+    document.getElementById(TblName).childNodes[0].innerHTML += '<tr id="' + RowName + '"  style="visibility: collapse;"></tr>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="220" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="30" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+    document.getElementById(RowName).innerHTML += '<td><img src="spacer.png" alt="" width="60" height="1"><br/></td>';
+
+    document.getElementById("GameDisplay").innerHTML += '<p></p>';
+
+    TblName = TeamType[(TeamIdx + 1) % 2] + "Pitching";
+    document.getElementById("GameDisplay").innerHTML += '<table id="' + TblName + '"></table>';
+
+    PitchingHeader = (TeamType[(TeamIdx + 1) % 2] + " PITCHING").toUpperCase();
+    document.getElementById(TblName).innerHTML = '<tr class="PitchingHead"></tr>';
+    theRow = document.getElementById(TblName).childNodes[0].childNodes[0];
+    theRow.innerHTML += '<th colspan="2" style="text-align: left; min-width: 200px;">' + PitchingHeader + '</th>';
+    theRow.innerHTML += '<th style="min-width: 50px">ERA</th><th style="min-width: 50px">IP</th><th style="min-width: 40px">B</th><th style="min-width: 40px">S</th>';
+    theRow.innerHTML += '<th style="min-width: 50px">NP</th><th style="min-width: 40px">BF</th><th style="min-width: 40px">H</th><th style="min-width: 40px">BB</th>';
+    theRow.innerHTML += '<th style="min-width: 40px">SO</th><th style="min-width: 40px">R</th><th style="min-width: 40px">ER</th><th style="min-width: 40px">HR</th>';
+    theRow.innerHTML += '<th style="min-width: 60px">NOTES</th>';   
+    document.getElementById("GameDisplay").innerHTML += '<p></p>';
+  }
+
+  //set up team variables to keep track of status
+  for (TeamIdx = 0; TeamIdx <= 1; TeamIdx++) {
+    AtBat = document.getElementById(TeamType[TeamIdx]);	//THE PAGE NODE FOR THE TEAM
+    AtBat.Inning = 1;
+    AtBat.Column = 4;
+    AtBat.AB = 1;
+    AtBat.Index = TeamIdx;
+  }
+
+  //set at-bat team at beginning of game to AWAY
+  AtBat = document.getElementById("away");
+
+  //get the game information
+  GetIt('https://statsapi.mlb.com' + gameLink );
+
+  //game date/time/status
+  GameDate = new Date(data.gameData.datetime.dateTime);
+  document.getElementById("gameDate").innerHTML = GameDate.toLocaleDateString();	
+  document.getElementById("start").innerHTML = GameDate.toLocaleTimeString();
+  document.getElementById("status").innerHTML = data.gameData.status.detailedState;
+
+  //team names
+  document.getElementById("away").innerHTML = data.gameData.teams.away.name;
+  document.getElementById("away").name = data.gameData.teams.away.id;
+  document.getElementById("aCity").innerHTML = data.gameData.teams.away.abbreviation;
+  document.getElementById("awayScore").cells[0].innerHTML = data.gameData.teams.away.teamName;
+  document.getElementById("home").innerHTML = data.gameData.teams.home.name;
+  document.getElementById("home").name = data.gameData.teams.home.id;
+  document.getElementById("hCity").innerHTML = data.gameData.teams.home.abbreviation;
+  document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
+
+  // ... DISPLAY THE LOGOS
+  awayLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/';
+  awayLogo += data.gameData.teams.away.id;
+  awayLogo += '.svg" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
+  document.getElementById("AwayLogo").innerHTML = awayLogo;
+
+  homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
+  homeLogo += data.gameData.teams.home.id;
+  homeLogo += '.svg" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
+  document.getElementById("HomeLogo").innerHTML = homeLogo;
+
+  // LOAD THE PLAYERS
+  LoadPlayers();
+  LoadPitchers();
+
+  if (data.gameData.status.detailedState == "Postponed") { 
+      console.log("Postponed"); 
+      return; 
+  } else if (data.gameData.status.detailedState == "Scheduled") { 
+      console.log("Scheduled"); 
+      return; 
+  } 
+  
+  Now = new Date();
+  if (GameDate < Now) {
+      //LOAD THE PLAYS
+      LastPlay = LoadPlays(0);
+  } else {
+      TO = (GameDate - Now);
+      console.log(TO/60000, "minutes to game time");
+      if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
+      playMonitor = setTimeout("LastPlay=LoadPlays(LastPlay)", TO); //next check 
+  }
+  if (urlParams.get("PlayAll") == 1) {
+      //don't clear the audio queue
+      playSound();
+  } else {
+      AudioQueue.length = 0;  //don't play any audio
+  }
+  document.getElementById("Audio").src = "silence.mp3"; // so that the audio tag will be "ended" and ready for calls
     
-	if (data.gameData.status.statusCode == "F") { 
-	    console.log("Game Over"); 
-	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-	    return; 
-	}    //exit if the game is over
+  if (data.gameData.status.statusCode == "F") { 
+      console.log("Game Over"); 
+      if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
+      return; 
+  }    //exit if the game is over
 
 }
 
@@ -284,6 +274,107 @@ function GetIt(FileName) {
 	} catch(e) {
 		console.log("Error");
 	}
+}
+
+function BroadcastInfo() {
+  GetIt('https://statsapi.mlb.com/api/v1/game/' + gamePk + '/content'); 
+  dateString = "&date=" + data.media.epg[0].items[0].gameDate;
+  Broadcast="";
+  data.media.epg.forEach(
+		function(itm) {
+		    if (itm.title=="MLBTV") {
+		        for (i=0; i < itm.items.length; i++) {
+		            if (itm.items[i].mediaFeedSubType == myTeam) {
+		                Broadcast += ", "+itm.items[i].callLetters; 
+		            }
+		        }
+		    }
+		    if (itm.title=="Audio") {
+		        for (i=0; i < itm.items.length; i++) {
+		            if (itm.items[i].mediaFeedSubType == myTeam) {
+		                Broadcast += ", " + itm.items[i].callLetters + " (" + itm.items[i].language + ")"; 
+		            }
+		        }
+		    }
+		}
+	);
+	document.getElementById("broadcast").innerHTML = Broadcast.substring(2);
+}
+
+function updateOthers() {
+  GameDay = document.getElementById("OtherGames").attributes.date.value;
+  before = 'https://statsapi.mlb.com/api/v1.1/game/'
+  after = '/feed/live?fields=gamePk,gameData,status,statusCode,teams,away,home,id,abbreviation,liveData,plays,currentPlay,about,inning,isTopInning,count,outs,result,awayScore,homeScore,matchup,postOnFirst,postOnSecond,postOnThird'
+
+  arr = document.getElementById("OtherGames").getElementsByTagName("table");
+  for (i=0; i < arr.length; i++) {
+    if(document.getElementById(arr[i].id).tag == "F") {
+      //game over, do nothing
+    } else {
+
+      GetIt(before + arr[i].id + after);
+
+      OOT = 0;
+      AS = "";
+      HS = "";
+      T = "";
+      STAT = "";
+      if (data.liveData.plays.currentPlay) {
+        if (data.liveData.plays.currentPlay.matchup.postOnFirst !== undefined) {
+          OOT += 1;
+        }
+        if (data.liveData.plays.currentPlay.matchup.postOnSecond !== undefined) {
+          OOT += 2;
+        }
+        if (data.liveData.plays.currentPlay.matchup.postOnThird !== undefined) {
+          OOT += 4;
+        }
+        if (data.liveData.plays.currentPlay.count.outs == 1) {
+          OOT += 8;
+        }
+        if (data.liveData.plays.currentPlay.count.outs == 2) {
+          OOT += 16;
+        }
+        AS = data.liveData.plays.currentPlay.result.awayScore;
+        HS = data.liveData.plays.currentPlay.result.homeScore;
+        STAT = data.gameData.status.statusCode;
+        if (STAT == "I") { STAT = data.liveData.plays.currentPlay.about.inning; }
+        T = ""
+        B = ""
+        if(data.gameData.status.statusCode == "P") {
+            //game not started; don't show half of inning
+        } else if (data.liveData.plays.currentPlay.about.isTopInning) {
+          if (data.liveData.plays.currentPlay.count.outs !== 3) {
+            T="&#x25b2;";
+          }
+        } else {
+          if (data.liveData.plays.currentPlay.count.outs !== 3) {
+            B="&#x25bc;";
+          }
+        }
+
+      }
+      A = data.gameData.teams.away.abbreviation;
+      AID = data.gameData.teams.away.id;
+      H = data.gameData.teams.home.abbreviation;
+      HID = data.gameData.teams.home.id;
+      Pk = data.gamePk;
+
+      temp = '<tr><td rowspan="4"><img src="OOT_' + OOT + '.PNG" align="left"></td>'
+      temp += '<td rowspan="2"><a href="index.html?myTeam=' + AID + '&gamePk=' + Pk + '&date='+ GameDay + '">' + A + '</a></td><td rowspan="2">' + AS 
+      temp += '</td><td style="font-size:10px">' + T + '</td></tr>'
+
+      temp += '<tr><td rowspan="2">' + STAT + '</td></tr>';
+      temp += '<tr><td rowspan="2"><a href="index.html?myTeam=' + HID + '&gamePk=' + Pk + '&date='+ GameDay +'">' + H + '</a></td><td rowspan="2">' + HS + '</td></tr>'
+      temp += '<tr><td style="vertical-align:baseline;font-size:10px">' + B + '</td></tr>'
+
+      document.getElementById(arr[i].id).innerHTML = temp;
+      if (STAT == 'F') { document.getElementById(arr[i].id).tag = 'F';}
+    }
+  }
+
+  if (typeof otherMonitor !== 'undefined') { clearTimeout(otherMonitor); }
+  otherMonitor = setTimeout("updateOthers();", 60000); //next check 
 }
 
 function LoadPlayers() {
@@ -574,9 +665,11 @@ function LoadPlays(StartPlay) {
                     break;
                 case "Caught Stealing 2B" :
                 case "Caught Stealing 3B" :
+                case "Caught Stealing Home" :
                 case "Pickoff 2B" :
                 case "Pickoff Caught Stealing 2B" :
                 case "Pickoff Caught Stealing 3B" :
+                case "Pickoff Caught Stealing Home" :
                     Movement(thisPlay.runners, data.liveData.boxscore.teams[AtBat.id].players["ID" + thisPlay.matchup.batter.id].jerseyNumber);
                     getSound("CS 2B");
                     break;
@@ -1049,7 +1142,9 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
 
 	if (IsGameOver()) {
 	    console.log("Game Over"); 
-	    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
+	    const endtime = performance.now();
+	    console.log('It took ' + (endtime - starttime) + ' ms.');
+    if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
 	    return; 
 	}
 	
@@ -1679,6 +1774,9 @@ function IsGameOver() {
             return false;
         }
     }
+    
+    
+
 /*    	
     //if it's the top of the last inning or later and there are less than 3 outs, we're not done yet
     if (thisPlay.about.isTopInning && thisPlay.count.outs < 3) {
@@ -1717,6 +1815,15 @@ function IsGameOver() {
 	return false;
 */
 }
+
+function PlayAudio () { //called by click
+  if (urlParams.get("PlayAll") == 1) {
+    //chose to play all
+  } else {
+    if (AudioQueue.length > 0) {AudioQueue[0]=AudioQueue[AudioQueue.length-1];AudioQueue.length=1;}
+  }
+  document.getElementById('Audio').play();
+}
 </script>
 </head>
 <body onload="initialize();">
@@ -1754,13 +1861,13 @@ function IsGameOver() {
 <td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" 
     style="padding-left: 10px; "></audio></td>
 <td style="border-style: none;"><button style="margin-right:20px;" type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
-<td style="border-style: none;"><button type="button" onclick="if (AudioQueue.length > 0) {AudioQueue[0]=AudioQueue[AudioQueue.length-1];AudioQueue.length=1;}document.getElementById('Audio').play();">Play Audio</button></td>
+<td style="border-style: none;"><button type="button" onclick="PlayAudio()">Play Audio</button></td>
 </tr></table>
 
 <div id="GameDisplay" class="GameDisplay">
 </div>
 <h3>All Games Today:</h3>
-<div id="OtherGames" class="OtherGames" style="height: 500px; line-height: 1.5;">
+<div id="OtherGames" class="container">
 </div>
 <div id="BatterDiv" style="visibility: hidden;">
 <img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>

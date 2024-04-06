@@ -223,3 +223,32 @@ DIV.BoxScore {
  	background-image: url(hout.png);
 }
 #Audio {visibility:hidden;}
+
+.container{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: flex-start; 
+	gap: 0px; 
+	justify-content: space-between;
+	margin-bottom: 20px; 
+	width: 95%;
+}
+.otherGame{
+	flex-grow: 1;
+	width: 100px;
+	padding:5px;
+	border:solid 1px silver;
+	background-color:black;
+	color:white;
+	font-family:Arial;
+	font-weight:bold;
+	font-size:28px;
+}
+.otherGame img {width:60px;}
+.otherGame a:link, .otherGame a:visited { color: white; text-decoration: none; }
+
+DIV {
+	position: absolute; 
+	width: 30px;
+}
