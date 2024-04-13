@@ -111,7 +111,8 @@ console.log(gamePk);
 	}
   )
 
-  updateOthers();
+  if (typeof otherMonitor !== 'undefined') { clearTimeout(otherMonitor); }
+  otherMonitor = setTimeout("updateOthers();", 5000); //next check 
 
   // IF THERE IS NO GAME, WE'RE DONE
   if (gameLink=='') {
