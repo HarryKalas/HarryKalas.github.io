@@ -1226,6 +1226,19 @@ function HitDetail(playData) {
 }
 
 function Movement(Runners, Batter) {
+    RunnerCount = 0;
+    if (thisPlay.matchup.postOnFirst) {
+        RunnerCount += 1;
+    }
+    if (thisPlay.matchup.postOnSecond) {
+        RunnerCount += 2;
+    }
+    if (thisPlay.matchup.postOnThird) {
+        RunnerCount += 4;
+    }
+    if (document.getElementById("Runners").src != RunnerCount + ".png") {
+        document.getElementById("Runners").src = RunnerCount + ".png";
+    }
     for (r = 0; r < Runners.length; r++) {
         RunnerID = Runners[r].details.runner.id;        //the batter ID of this runner
         RunnerBox = document.getElementById(RunnerID);  //the box for this runner
@@ -1864,7 +1877,6 @@ function PlayAudio () { //called by click
 <td style="border-style: none;"><button style="margin-right:20px;" type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
 <td style="border-style: none;"><button type="button" onclick="PlayAudio()">Play Audio</button></td>
 </tr></table>
-
 <div id="GameDisplay" class="GameDisplay">
 </div>
 <h3>All Games Today:</h3>
@@ -1887,6 +1899,7 @@ O: <span id="O"></span><br/>
 <td style="border:transparent;">
 <span id="aCity"></span>: <span id="aScore"></span><br/>
 <span id="hCity"></span>: <span id="hScore"></span><br/>
+<a href="javascript:PlayAudio();">Audio</a>
 </td>
 </tr></table>
 <span id="PitchSpeed" style="line-height: 35px;"></span><br/>
