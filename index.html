@@ -417,7 +417,11 @@ function LoadPitchers() {
 		PitchRow.cells[3].innerHTML = Pitcher.stats.pitching.inningsPitched;
 		PitchRow.cells[4].innerHTML = Pitcher.stats.pitching.balls;
 		PitchRow.cells[5].innerHTML = Pitcher.stats.pitching.strikes;
-		PitchRow.cells[6].innerHTML = Pitcher.stats.pitching.pitchesThrown;
+		if (Pitcher.stats.pitching.pitchesThrown) {
+			PitchRow.cells[6].innerHTML = Pitcher.stats.pitching.pitchesThrown;
+		} else {
+			PitchRow.cells[6].innerHTML = 0;
+		}
 		PitchRow.cells[7].innerHTML = Pitcher.stats.pitching.battersFaced;
 		PitchRow.cells[8].innerHTML = Pitcher.stats.pitching.hits;
 		PitchRow.cells[9].innerHTML = Pitcher.stats.pitching.baseOnBalls;
@@ -429,7 +433,9 @@ function LoadPitchers() {
 		    PitchRow.cells[2].innerHTML = Pitcher.seasonStats.pitching.era
 		}
 		if (data.liveData.plays.currentPlay.about.isTopInning == true) {
-            document.getElementById("Pitches").innerHTML = " (" + Pitcher.stats.pitching.pitchesThrown + ")";
+		    if (Pitcher.stats.pitching.pitchesThrown) {
+		      document.getElementById("Pitches").innerHTML = " (" + Pitcher.stats.pitching.pitchesThrown + ")";
+            }
         }
 	}
 
@@ -454,7 +460,11 @@ function LoadPitchers() {
 		PitchRow.cells[3].innerHTML = Pitcher.stats.pitching.inningsPitched;
 		PitchRow.cells[4].innerHTML = Pitcher.stats.pitching.balls;
 		PitchRow.cells[5].innerHTML = Pitcher.stats.pitching.strikes;
-		PitchRow.cells[6].innerHTML = Pitcher.stats.pitching.pitchesThrown;
+		if (Pitcher.stats.pitching.pitchesThrown) {
+			PitchRow.cells[6].innerHTML = Pitcher.stats.pitching.pitchesThrown;
+		} else {
+			PitchRow.cells[6].innerHTML = 0;
+		}
 		PitchRow.cells[7].innerHTML = Pitcher.stats.pitching.battersFaced;
 		PitchRow.cells[8].innerHTML = Pitcher.stats.pitching.hits;
 		PitchRow.cells[9].innerHTML = Pitcher.stats.pitching.baseOnBalls;
@@ -469,7 +479,9 @@ function LoadPitchers() {
 			PitchRow.cells[14].innerHTML = Pitcher.stats.pitching.note;
 		}
 		if (data.liveData.plays.currentPlay.about.isTopInning == false) {
-            document.getElementById("Pitches").innerHTML = " (" + Pitcher.stats.pitching.pitchesThrown + ")";
+		    if (Pitcher.stats.pitching.pitchesThrown) {
+		        document.getElementById("Pitches").innerHTML = " (" + Pitcher.stats.pitching.pitchesThrown + ")";
+		    }
         }
 	}
 }
