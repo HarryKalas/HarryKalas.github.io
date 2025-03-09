@@ -80,7 +80,7 @@ const starttime = performance.now();
 function initialize() {
 
   if (gamePk > '') {    // if the game is specified, use it to get the date and the broadcast information, date and time
-    BroadcastInfo();
+      BroadcastInfo();
   }
 
   //get all of the game data for Out of Town Scoreboard and current game if unknown
@@ -279,9 +279,10 @@ function GetIt(FileName) {
 
 function BroadcastInfo() {
   GetIt('https://statsapi.mlb.com/api/v1/game/' + gamePk + '/content'); 
-  dateString = "&date=" + data.media.epg[0].items[0].gameDate;
   Broadcast="";
-  data.media.epg.forEach(
+  if(!(data.media.epg == undefined)){
+    dateString = "&date=" + data.media.epg[0].items[0].gameDate;
+    data.media.epg.forEach(
 		function(itm) {
 		    if (itm.title=="MLBTV") {
 		        for (i=0; i < itm.items.length; i++) {
@@ -300,6 +301,7 @@ function BroadcastInfo() {
 		}
 	);
 	document.getElementById("broadcast").innerHTML = Broadcast.substring(2);
+  }
 }
 
 function updateOthers() {
