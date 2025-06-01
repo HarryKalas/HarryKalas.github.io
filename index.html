@@ -14,6 +14,8 @@
 //30 MAR 2024: THIS IS FANTASTIC! IT GETS ME SPECIFIC PIECES QUICKLY AT ONE TIME! I MAY HAVE TO REWRITE IT ALL!
 //https://statsapi.mlb.com/api/v1.1/game/746168/feed/live?fields=liveData,plays,currentPlay,count,outs,result,awayScore,homeScore,about,inning,halfInning,matchup,postOnFirst,postOnSecond,postOnThird,id
 
+//16 MAY 2025: Added old scorebug for P00P
+
 //PITCH CALLS I NEED TO GET AUDIO FOR:
 //  swinging strike blocked (that's a ball in the dirt that they nevertheless swung at)
 
@@ -51,6 +53,7 @@ const starttime = performance.now();
     var I123 = 1;		//inning is initially assumed 123
     LastPlay = 0;
     LastEvent = 0;
+    TimeStamp = '';
 
     //get parameters from URL
     urlParams = new URLSearchParams(location.search);
@@ -71,7 +74,7 @@ const starttime = performance.now();
 	} else {
 	    dateString = "";
 	}
-	
+
 	var f = 0;
 	var TeamType = ['away','home']; //useful for rotating through teams
 	var scheduledInnings; //the number of innings expected to be played; anything higher than that is extra innings
@@ -86,7 +89,6 @@ function initialize() {
   //get all of the game data for Out of Town Scoreboard and current game if unknown
   
   GetIt('https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1' + dateString + '&fields=dates,date,games,gamePk,link,scheduledInnings,teams,away,home,team,id,name'); //schedule
-console.log(gamePk);
   //out of town scoreboard
   OtherGames = "";
   document.getElementById("OtherGames").innerHTML = "";
@@ -111,8 +113,7 @@ console.log(gamePk);
 	}
   )
 
-  if (typeof otherMonitor !== 'undefined') { clearTimeout(otherMonitor); }
-  otherMonitor = setTimeout("updateOthers();", 5000); //next check 
+  updateOthers();
 
   // IF THERE IS NO GAME, WE'RE DONE
   if (gameLink=='') {
@@ -210,11 +211,9 @@ console.log(gamePk);
   //team names
   document.getElementById("away").innerHTML = data.gameData.teams.away.name;
   document.getElementById("away").name = data.gameData.teams.away.id;
-  document.getElementById("aCity").innerHTML = data.gameData.teams.away.abbreviation;
   document.getElementById("awayScore").cells[0].innerHTML = data.gameData.teams.away.teamName;
   document.getElementById("home").innerHTML = data.gameData.teams.home.name;
   document.getElementById("home").name = data.gameData.teams.home.id;
-  document.getElementById("hCity").innerHTML = data.gameData.teams.home.abbreviation;
   document.getElementById("homeScore").cells[0].innerHTML = data.gameData.teams.home.teamName;
 
   // ... DISPLAY THE LOGOS
@@ -222,11 +221,21 @@ console.log(gamePk);
   awayLogo += data.gameData.teams.away.id;
   awayLogo += '.svg" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
   document.getElementById("AwayLogo").innerHTML = awayLogo;
+  awayLogo = '<img width="18" align="top" src="https://www.mlbstatic.com/team-logos/';
+  awayLogo += data.gameData.teams.away.id;
+  awayLogo += '.svg" />';
+  document.getElementById("aLogo").innerHTML = awayLogo;
+  document.getElementById("aLogo").className = data.gameData.teams.away.abbreviation;
 
   homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
   homeLogo += data.gameData.teams.home.id;
   homeLogo += '.svg" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
   document.getElementById("HomeLogo").innerHTML = homeLogo;
+  homeLogo = '<img width="18" align="top" src="https://www.mlbstatic.com/team-logos/'
+  homeLogo += data.gameData.teams.home.id;
+  homeLogo += '.svg" />';
+  document.getElementById("hLogo").innerHTML = homeLogo;
+  document.getElementById("hLogo").className = data.gameData.teams.home.abbreviation;
 
   // LOAD THE PLAYERS
   LoadPlayers();
@@ -246,9 +255,9 @@ console.log(gamePk);
       LastPlay = LoadPlays(0);
   } else {
       TO = (GameDate - Now);
-      console.log(TO/60000, "minutes to game time");
+      console.log(Math.floor(TO/60000), "minutes to game time");
       if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-      playMonitor = setTimeout("LastPlay=LoadPlays(LastPlay)", TO); //next check 
+      playMonitor = setTimeout("GetTime()", TO); //next check 
   }
   if (urlParams.get("PlayAll") == 1) {
       //don't clear the audio queue
@@ -263,7 +272,7 @@ console.log(gamePk);
       if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
       return; 
   }    //exit if the game is over
-
+console.log(performance.now() - starttime);
 }
 
 function GetIt(FileName) {
@@ -305,9 +314,10 @@ function BroadcastInfo() {
 }
 
 function updateOthers() {
+upd = performance.now();
   GameDay = document.getElementById("OtherGames").attributes.date.value;
   before = 'https://statsapi.mlb.com/api/v1.1/game/'
-  after = '/feed/live?fields=gamePk,gameData,status,statusCode,teams,away,home,id,abbreviation,liveData,plays,currentPlay,about,inning,isTopInning,count,outs,result,awayScore,homeScore,matchup,postOnFirst,postOnSecond,postOnThird'
+  after = '/feed/live?fields=gamePk,gameData,datetime,dateTime,status,statusCode,teams,away,home,id,abbreviation,liveData,plays,currentPlay,about,inning,isTopInning,count,outs,result,awayScore,homeScore,matchup,postOnFirst,postOnSecond,postOnThird'
 
   arr = document.getElementById("OtherGames").getElementsByTagName("table");
   for (i=0; i < arr.length; i++) {
@@ -363,6 +373,9 @@ function updateOthers() {
       HID = data.gameData.teams.home.id;
       Pk = data.gamePk;
 
+      GameDate = new Date(data.gameData.datetime.dateTime);
+      Start = GameDate.toLocaleTimeString();
+
       temp = '<tr><td rowspan="4"><img src="OOT_' + OOT + '.png" align="left"></td>'
       temp += '<td rowspan="2"><a href="index.html?myTeam=' + AID + '&gamePk=' + Pk + '&date='+ GameDay + '">' + A + '</a></td><td rowspan="2">' + AS 
       temp += '</td><td style="font-size:10px">' + T + '</td></tr>'
@@ -370,12 +383,12 @@ function updateOthers() {
       temp += '<tr><td rowspan="2">' + STAT + '</td></tr>';
       temp += '<tr><td rowspan="2"><a href="index.html?myTeam=' + HID + '&gamePk=' + Pk + '&date='+ GameDay +'">' + H + '</a></td><td rowspan="2">' + HS + '</td></tr>'
       temp += '<tr><td style="vertical-align:baseline;font-size:10px">' + B + '</td></tr>'
+      temp += '<tr><td></td><td style="vertical-align:baseline;font-size:10px">' + Start + '</td></tr>'
 
       document.getElementById(arr[i].id).innerHTML = temp;
       if (STAT == 'F') { document.getElementById(arr[i].id).tag = 'F';}
     }
   }
-
   if (typeof otherMonitor !== 'undefined') { clearTimeout(otherMonitor); }
   otherMonitor = setTimeout("updateOthers();", 60000); //next check 
 }
@@ -1116,7 +1129,7 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
         TO = 120000 - (Now - PlayTime);
         if (TO < 0) { TO = 5000; } else { console.log("End of Inning", TO); }
         if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-        playMonitor = setTimeout("console.log('Waiting for Inning...');LastPlay=LoadPlays(LastPlay)", TO); //next check 2 minutes 30 seconds
+        playMonitor = setTimeout("console.log('Waiting for Inning...');GetTime()", TO); //next check 2 minutes 30 seconds
         if (TO > 60000) {
             // PLAY A COMMERCIAL if more than 60 seconds to wait
             spnsr = Math.floor(Math.random() * Commercials.length);
@@ -1127,31 +1140,31 @@ if (data.liveData.plays.currentPlay.playEvents.length > 0) {
         TO = 20000 - (Now - PlayTime);
         if (TO < 0) { TO = 3000; } else { console.log(TO); }
         if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-        playMonitor = setTimeout("console.log('Waiting for batter');LastPlay=LoadPlays(LastPlay)", TO); //next check 2 minutes 30 seconds
+        playMonitor = setTimeout("console.log('Waiting for batter');GetTime()", TO); //next check 2 minutes 30 seconds
     } else if (thisPlay.playEvents.length > 0) {
         if (thisPlay.playEvents[thisPlay.playEvents.length-1].event == "Pitching Substitution") {
             // pitching change; lots of time 
             TO = 30000 - (Now - PlayTime);
             if (TO < 0) { TO = 10000; } else { console.log(TO); }
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            playMonitor = setTimeout("console.log('Waiting for pitching change');LastPlay=LoadPlays(LastPlay)", TO); //next check 2 minutes 30 seconds
+            playMonitor = setTimeout("console.log('Waiting for pitching change');GetTime()", TO); //next check 2 minutes 30 seconds
         } else if (thisPlay.playEvents[thisPlay.playEvents.length-1].details.isInPlay == true && thisPlay.about.isComplete == false) {
             //checking for play after ball in play        
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            playMonitor = setTimeout("console.log('In Play');LastPlay=LoadPlays(LastPlay)", 2000); //next check 2 seconds
+            playMonitor = setTimeout("console.log('In Play');GetTime()", 2000); //next check 2 seconds
         } else {
             //time to next pitch
             TO = 20000 - (Now - PlayTime);
             if (TO < 0) { TO = 3000; } else { console.log('Event complete',TO); }
             if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-            playMonitor = setTimeout("console.log('Waiting for pitch...');LastPlay=LoadPlays(LastPlay)", TO); //next check 30 seconds
+            playMonitor = setTimeout("console.log('Waiting for pitch...');GetTime()", TO); //next check 30 seconds
         }
     } else {
         //time to next pitch
         TO = 20000 - (Now - PlayTime);
-        if (TO < 0) { TO = 3000; } else { console.log(TO); }
+        if (TO < 0) { TO = 3000; }
         if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
-        playMonitor = setTimeout("console.log('Waiting for pitch...');LastPlay=LoadPlays(LastPlay)", TO); //next check 20 seconds
+        playMonitor = setTimeout("console.log('Waiting for pitch...');GetTime()", TO); //next check 20 seconds
     }
     if (thisPlay.about.isComplete == true) {
         LastEvent = 0;
@@ -1857,6 +1870,18 @@ function PlayAudio () { //called by click
   }
   document.getElementById('Audio').play();
 }
+
+function GetTime() {
+  GetIt('https://statsapi.mlb.com' + gameLink + '/timestamps');
+  if (data.pop() > TimeStamp) {
+    TimeStamp = data.pop();
+    console.log(TimeStamp);
+    LastPlay = LoadPlays(LastPlay)
+  } else {
+      if (typeof playMonitor !== 'undefined') { clearTimeout(playMonitor); }
+      playMonitor = setTimeout("GetTime()", TO); //next check 
+  }
+}
 </script>
 </head>
 <body onload="initialize();">
@@ -1893,7 +1918,7 @@ function PlayAudio () { //called by click
 <table style="border-style: none;"><tr>
 <td style="border-style: none; padding-right:100px;"><audio id="Audio" autoplay="" onended="playSound();" controls="" 
     style="padding-left: 10px; "></audio></td>
-<td style="border-style: none;"><button style="margin-right:20px;" type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
+<td style="border:0;"><button style="margin-right:20px;" type="button" onclick="LoadPlays(LastPlay);document.getElementById('Audio').play();">Refresh Plays</button></td>
 <td style="border-style: none;"><button type="button" onclick="PlayAudio()">Play Audio</button></td>
 </tr></table>
 <div id="GameDisplay" class="GameDisplay">
@@ -1903,6 +1928,12 @@ function PlayAudio () { //called by click
 </div>
 <div id="BatterDiv" style="visibility: hidden;">
 <img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
+<table style="margin-bottom:10px;"><tr>
+<td id="aLogo" style="height:24pt;width:18pt;text-align:center;border:0;"></td>
+<td id="aScore" style="font-size:24px;width:24px;text-align:center;"></td>
+<td id="hScore" style="font-size:24px;width:24px;text-align:center;"></td>
+<td id="hLogo" style="height:24pt;width:18pt;text-align:center;border:0;"></td>
+</tr></table>
 <table>
 <tr><td colspan="3" style="border:transparent;"><span id="BatterName"></span></td></tr>
 <tr><td colspan="3" style="border:transparent;">Avg: <span id="BatterAvg"></span></td></tr>
@@ -1916,9 +1947,7 @@ O: <span id="O"></span><br/>
 <img id="Runners" src="7.png" alt="Runners">
 </td>
 <td style="border:transparent;">
-<span id="aCity"></span>: <span id="aScore"></span><br/>
-<span id="hCity"></span>: <span id="hScore"></span><br/>
-<a href="javascript:PlayAudio();">Audio</a>
+    <a href="javascript:PlayAudio();">Audio</a>
 </td>
 </tr></table>
 <span id="PitchSpeed" style="line-height: 35px;"></span><br/>

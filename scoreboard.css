@@ -194,33 +194,43 @@ DIV.BoxScore {
 }
 .At1B {
  	background-image: url(1b.png);
+ 	background-repeat: no-repeat;
 }
 .At2B {
  	background-image: url(2b.png);
+ 	background-repeat: no-repeat;
 }
 .At3B {
  	background-image: url(3b.png);
+ 	background-repeat: no-repeat;
 }
 .Atscore {
  	background-image: url(home.png);
+ 	background-repeat: no-repeat;
 }
 .HR {
  	background-image: url(hr.png);
+ 	background-repeat: no-repeat;
 }
 .GS {
  	background-image: url(gs.png);
+ 	background-repeat: no-repeat;
 }
 .OutAt1B {
  	background-image: url(1out.png);
+ 	background-repeat: no-repeat;
 }
 .OutAt2B {
  	background-image: url(2out.png);
+ 	background-repeat: no-repeat;
 }
 .OutAt3B {
  	background-image: url(3out.png);
+ 	background-repeat: no-repeat;
 }
 .OutAt4B {
  	background-image: url(hout.png);
+ 	background-repeat: no-repeat;
 }
 #Audio {visibility:hidden;}
 
@@ -252,3 +262,16 @@ DIV {
 	position: absolute; 
 	width: 30px;
 }
+.ATL {background-color:#EAAA00}
+.ATH {background-color:#EFB21E;}
+.BAL {background-color:white;}
+.BOS {background-color:#0C2340;}
+.CHC {background-color:white;}
+.CIN {background-color:}
+.COL {background-color:#9999FF;}
+.LAD {background-color:white;}
+.MIA {background-color:white;}
+.MIL {background-color:#ffc52f}
+.NYM {background-color:#002D72;}
+.PHI {background-color:#002d72;}
+.PIT {background-color:black;}
