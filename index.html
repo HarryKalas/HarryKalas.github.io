@@ -221,21 +221,23 @@ function initialize() {
   awayLogo += data.gameData.teams.away.id;
   awayLogo += '.svg" /><br/>(' + data.gameData.teams.away.record.wins + "-" + data.gameData.teams.away.record.losses + ")";
   document.getElementById("AwayLogo").innerHTML = awayLogo;
-  awayLogo = '<img width="18" align="top" src="https://www.mlbstatic.com/team-logos/';
+  awayLogo = '<img width="36" align="top" src="https://midfield.mlbstatic.com/v1/team/';
   awayLogo += data.gameData.teams.away.id;
-  awayLogo += '.svg" />';
+  awayLogo += '/spots/72" />';
   document.getElementById("aLogo").innerHTML = awayLogo;
   document.getElementById("aLogo").className = data.gameData.teams.away.abbreviation;
+  document.getElementById("aScore").className = data.gameData.teams.away.abbreviation;
 
-  homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/'
+  homeLogo = '<img width="62" align="top" src="https://www.mlbstatic.com/team-logos/';
   homeLogo += data.gameData.teams.home.id;
   homeLogo += '.svg" /><br/>(' + data.gameData.teams.home.record.wins + "-" + data.gameData.teams.home.record.losses + ")";
   document.getElementById("HomeLogo").innerHTML = homeLogo;
-  homeLogo = '<img width="18" align="top" src="https://www.mlbstatic.com/team-logos/'
+  homeLogo = '<img width="36" align="top" src="https://midfield.mlbstatic.com/v1/team/';
   homeLogo += data.gameData.teams.home.id;
-  homeLogo += '.svg" />';
+  homeLogo += '/spots/72" />';
   document.getElementById("hLogo").innerHTML = homeLogo;
   document.getElementById("hLogo").className = data.gameData.teams.home.abbreviation;
+  document.getElementById("hScore").className = data.gameData.teams.home.abbreviation;
 
   // LOAD THE PLAYERS
   LoadPlayers();
@@ -314,10 +316,9 @@ function BroadcastInfo() {
 }
 
 function updateOthers() {
-upd = performance.now();
   GameDay = document.getElementById("OtherGames").attributes.date.value;
   before = 'https://statsapi.mlb.com/api/v1.1/game/'
-  after = '/feed/live?fields=gamePk,gameData,datetime,dateTime,status,statusCode,teams,away,home,id,abbreviation,liveData,plays,currentPlay,about,inning,isTopInning,count,outs,result,awayScore,homeScore,matchup,postOnFirst,postOnSecond,postOnThird'
+  after = '/feed/live?fields=gamePk,gameData,datetime,dateTime,status,detailedState,statusCode,teams,away,home,id,abbreviation,liveData,plays,currentPlay,about,inning,isTopInning,count,outs,result,awayScore,homeScore,matchup,postOnFirst,postOnSecond,postOnThird'
 
   arr = document.getElementById("OtherGames").getElementsByTagName("table");
   for (i=0; i < arr.length; i++) {
@@ -351,6 +352,7 @@ upd = performance.now();
         AS = data.liveData.plays.currentPlay.result.awayScore;
         HS = data.liveData.plays.currentPlay.result.homeScore;
         STAT = data.gameData.status.statusCode;
+        STATTEXT = ""
         if (STAT == "I") { STAT = data.liveData.plays.currentPlay.about.inning; }
         T = ""
         B = ""
@@ -380,10 +382,10 @@ upd = performance.now();
       temp += '<td rowspan="2"><a href="index.html?myTeam=' + AID + '&gamePk=' + Pk + '&date='+ GameDay + '">' + A + '</a></td><td rowspan="2">' + AS 
       temp += '</td><td style="font-size:10px">' + T + '</td></tr>'
 
-      temp += '<tr><td rowspan="2">' + STAT + '</td></tr>';
+      temp += '<tr><td rowspan="2" title="' + data.gameData.status.detailedState + '">' + STAT + '</td></tr>';
       temp += '<tr><td rowspan="2"><a href="index.html?myTeam=' + HID + '&gamePk=' + Pk + '&date='+ GameDay +'">' + H + '</a></td><td rowspan="2">' + HS + '</td></tr>'
       temp += '<tr><td style="vertical-align:baseline;font-size:10px">' + B + '</td></tr>'
-      temp += '<tr><td></td><td style="vertical-align:baseline;font-size:10px">' + Start + '</td></tr>'
+      temp += '<tr><td></td><td colspan="2" style="vertical-align:baseline;font-size:10px">' + Start + '</td></tr>'
 
       document.getElementById(arr[i].id).innerHTML = temp;
       if (STAT == 'F') { document.getElementById(arr[i].id).tag = 'F';}
@@ -895,6 +897,7 @@ function LoadPlays(StartPlay) {
 		case "Pickoff Caught Stealing 2B" :
 		case "Pickoff Caught Stealing 3B" :
 		case "Stolen Base 2B" :
+		case "Stolen Base 3B" :
 		    //not the batter's play; this will be handled in the movement at the end
 		    break;
 		case "Double" :
@@ -1930,8 +1933,8 @@ function GetTime() {
 <img id="BatterPic" src="spacer.png" alt="Batter" onclick="document.getElementById('BatterDiv').scrollIntoView(false)"/>
 <table style="margin-bottom:10px;"><tr>
 <td id="aLogo" style="height:24pt;width:18pt;text-align:center;border:0;"></td>
-<td id="aScore" style="font-size:24px;width:24px;text-align:center;"></td>
-<td id="hScore" style="font-size:24px;width:24px;text-align:center;"></td>
+<td id="aScore" style="font-size:24px;width:24px;text-align:center;border:0;"></td>
+<td id="hScore" style="font-size:24px;width:24px;text-align:center;border:0;"></td>
 <td id="hLogo" style="height:24pt;width:18pt;text-align:center;border:0;"></td>
 </tr></table>
 <table>
