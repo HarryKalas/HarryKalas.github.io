@@ -592,6 +592,8 @@ function LoadPlays(StartPlay) {
             if (data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats !== 'undefined') {
                 BatterStats = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].seasonStats.batting;
                 document.getElementById("BatterAvg").innerHTML = BatterStats.avg;
+                Summary = data.liveData.boxscore.teams[AtBat.id].players["ID"+Batter].stats.batting.summary.split(" | ")[0].replace('-',' for ');
+                document.getElementById("Summary").innerHTML = Summary;
                 getSound("Average/" + BatterStats.avg);
             }
             
@@ -1957,7 +1959,7 @@ function GetTime() {
 </table>
 <table>
 <tr><td colspan="3" style="border:transparent;"><span id="BatterName"></span></td></tr>
-<tr><td colspan="3" style="border:transparent;">Avg: <span id="BatterAvg"></span></td></tr>
+<tr><td colspan="3" style="border:transparent;">Avg: <span id="BatterAvg"></span>&nbsp; &nbsp;<span id="Summary"></span></td></tr>
 <tr>
 <td style="border:transparent;padding-right:20px;">
 <!--B: <span id="B"></span><br/>
