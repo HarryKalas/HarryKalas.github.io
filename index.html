@@ -504,7 +504,7 @@ function LoadPlays(StartPlay) {
 	    clearTimeout(playMonitor);
 	    clearTimeout(otherMonitor);
 	    document.getElementById("GameAlert").innerHTML = "REVIEW IN PROGRESS<br/>" + data.gameData.status.detailedState;
-	    playMonitor = setTimeout("LoadPLays(0)", 30000); //next check 
+	    playMonitor = setTimeout("LoadPlays(0)", 30000); //next check 
 	    return;
 	} else if (document.getElementById("GameAlert").innerHTML.includes("REVIEW IN PROGRESS")) {
 	    location.reload();
